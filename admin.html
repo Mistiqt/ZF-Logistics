@@ -267,21 +267,38 @@
 
         // --- UPRAVLJANJE KORISNICIMA PREKO SUPABASE BAZE ---
         async function renderUserList() {
-            const { data: users, error } = await _supabase.from('zf_users').select('*').order('username');
+            const { data: users, error } = await _supabase
+                .from('zf_users')
+                .select('*')
+                .order('username', { ascending: true });
+
+            if (error) {
+                console.error("Greška pri čitanju:", error.message);
+                return;
+            }
+
             const tbody = document.getElementById('user-list-body');
-            tbody.innerHTML = '';
-            if(users) {
+            tbody.innerHTML = ''; 
+
+            if (users && users.length > 0) {
                 users.forEach(u => {
                     const config = roleConfig[u.role] || { label: u.role, class: "role-admin" };
-                    tbody.innerHTML += `<tr>
-                        <td style="font-weight:600;">${u.username}</td>
-                        <td><span class="badge ${config.class}">${config.label}</span></td>
-                        <td style="text-align:right;">
-                            <button class="action-btn btn-edit" onclick="openUserModal('${u.id}', '${u.username}', '${u.password}', '${u.role}')"><i class="fas fa-edit"></i></button>
-                            <button class="action-btn btn-delete" onclick="confirmDelete('${u.id}')"><i class="fas fa-trash-alt"></i></button>
-                        </td>
-                    </tr>`;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="font-weight:600;">${u.username}</td>
+                            <td><span class="badge ${config.class}">${config.label}</span></td>
+                            <td style="text-align:right;">
+                                <button class="action-btn btn-edit" onclick="openUserModal('${u.id}', '${u.username}', '${u.password}', '${u.role}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn btn-delete" onclick="confirmDelete('${u.id}')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>`;
                 });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#64748b;">Nema kreiranih naloga.</td></tr>';
             }
         }
 
@@ -315,7 +332,7 @@
                 role: document.getElementById('new-access').value
             };
 
-            if(id) {
+            if(id && id !== '' && id !== 'undefined') {
                 await _supabase.from('zf_users').update(userData).eq('id', id);
             } else {
                 await _supabase.from('zf_users').insert([userData]);
