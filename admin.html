@@ -14,29 +14,44 @@
             --excel-green: #10b981; --excel-green-hover: #059669; --logout-red: #be123c;
             --stats-purple: #8b5cf6;
         }
+
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; color: var(--text-main); -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+
         header { background: white; border-bottom: 1px solid var(--border); height: 90px; display: flex; justify-content: center; width: 100%; position: sticky; top: 0; z-index: 100; }
         .header-content { width: var(--container-width); padding: 0 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
         .header-left { display: flex; align-items: center; gap: 15px; }
         .zf-logo-square { background: var(--zf-blue); color: white; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border-radius: 4px; font-size: 22px; }
         .header-title-wrapper h1 { margin: 0; font-size: 22px; text-transform: uppercase; font-weight: 800; color: var(--zf-dark); line-height: 1; letter-spacing: -0.02em; }
         .page-description { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+
+        .filter-row { display: flex; gap: 15px; margin-top: 15px; padding: 15px; background: #f1f5f9; border-radius: 6px; align-items: flex-end; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .filter-group input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; font-family: inherit; outline: none; }
+        
+        .btn-zf-style { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 20px; border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer; transition: all 0.2s; white-space: nowrap; text-transform: uppercase; border: none; font-family: 'Inter', sans-serif; }
+        .btn-primary { background: var(--zf-blue); color: white; }
+        .btn-export { background-color: var(--excel-green); color: white; }
+        .btn-logout { background: white; border: 1px solid var(--border); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--logout-red); }
+
         .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; width: 100%; max-width: var(--container-width); margin: 30px auto; padding: 0 20px; box-sizing: border-box; }
         .kpi-card { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .kpi-card .number { font-size: 26px; font-weight: 800; margin: 8px 0; color: var(--zf-dark); }
+
         .main-card { background: white; width: 100%; max-width: var(--container-width); margin: 0 auto 20px; border-radius: 8px; border: 1px solid var(--border); padding: 20px; box-sizing: border-box; }
         .table-scroll-wrapper { max-height: 500px; overflow: auto; margin-top: 10px; border: 1px solid #f1f5f9; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th { text-align: left; padding: 12px; background: #f8fafc; font-size: 10px; color: var(--text-muted); text-transform: uppercase; border-bottom: 2px solid var(--border); position: sticky; top: 0; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
+        
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
         .status-waiting { background: #fff3e0; color: #e65100; }
         .status-ramp { background: #dcfce7; color: #15803d; }
         .status-unloaded { background: #e0f2fe; color: #0369a1; }
         .status-exited { background: #f1f5f9; color: #475569; }
-        .btn-zf-style { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 20px; border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer; border: none; text-transform: uppercase; }
-        .btn-primary { background: var(--zf-blue); color: white; }
-        .btn-export { background-color: var(--excel-green); color: white; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 90%; max-width: 400px; }
     </style>
 </head>
 <body>
@@ -46,26 +61,35 @@
                 <div class="zf-logo-square"><i class="fas fa-chart-line"></i></div>
                 <div class="header-title-wrapper">
                     <h1>LOGISTIČKI MONITORING</h1>
-                    <div class="page-description">Administrator Panel (Live Supabase)</div>
+                    <div class="page-description">Administrator Panel (Supabase Live)</div>
                 </div>
             </div>
-            <button class="btn-zf-style btn-primary" onclick="alert('Funkcija u pripremi')">KREIRAJ NALOG</button>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <button class="btn-zf-style btn-primary" onclick="openUserModal()"><i class="fas fa-user-plus"></i> KREIRAJ NALOG</button>
+                <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Odjava</button>
+            </div>
         </div>
     </header>
 
     <div class="kpi-container">
         <div class="kpi-card"><h3>UKUPNO</h3><div class="number" id="count-total">0</div></div>
-        <div class="kpi-card" style="border-top: 5px solid #f97316;"><h3>NA ČEKANJU</h3><div class="number" id="count-waiting">0</div></div>
-        <div class="kpi-card" style="border-top: 5px solid #10b981;"><h3>NA RAMPI</h3><div class="number" id="count-ramp">0</div></div>
-        <div class="kpi-card" style="border-top: 5px solid #3b82f6;"><h3>ISTOVARENO</h3><div class="number" id="count-unloaded">0</div></div>
+        <div class="kpi-card" style="border-top: 5px solid #f97316;"><h3>NA ČEKANJU</h3><div class="number" id="count-waiting" style="color:#f97316">0</div></div>
+        <div class="kpi-card" style="border-top: 5px solid #10b981;"><h3>NA RAMPI</h3><div class="number" id="count-ramp" style="color:#10b981">0</div></div>
+        <div class="kpi-card" style="border-top: 5px solid #3b82f6;"><h3>ISTOVARENO</h3><div class="number" id="count-unloaded" style="color:#3b82f6">0</div></div>
         <div class="kpi-card" style="border-top: 5px solid #94a3b8;"><h3>ZAVRŠENO</h3><div class="number" id="count-exited">0</div></div>
     </div>
 
     <div class="main-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h2 style="font-size: 16px; font-weight: 800;"><i class="fas fa-database"></i> ARHIVA ZAPISA</h2>
+            <h2 style="font-size: 16px; font-weight: 800; margin: 0;"><i class="fas fa-database" style="color:var(--zf-blue)"></i> ARHIVA ZAPISA</h2>
             <button class="btn-zf-style btn-export" onclick="exportData()"><i class="fas fa-file-excel"></i> EXPORT CSV</button>
         </div>
+
+        <div class="filter-row">
+            <div class="filter-group"><label>Pretraga Tablica</label><input type="text" id="filter-plate" placeholder="Pretraži..." oninput="loadAdminData()"></div>
+            <div class="filter-group"><label>Datum</label><input type="date" id="filter-date" onchange="loadAdminData()"></div>
+        </div>
+
         <div class="table-scroll-wrapper">
             <table>
                 <thead>
@@ -79,24 +103,36 @@
     </div>
 
     <script>
-        // ISPRAVLJENI PODACI SA VAŠIH SLIKA
-        const SUPABASE_URL = "https://ttsesuskphqawnceuftm.supabase.co"; 
-        const SUPABASE_KEY = "sb_publishable_jeu7nFFmSa-mxNC4-Z3gkw_jkciHN94"; 
-        
-        // Inicijalizacija klijenta (Proverite da li je supabase varijabla dostupna)
+        // PODACI SA VAŠE SLIKE
+        const SUPABASE_URL = "https://ttsesuskphqawnceuftm.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_jeu7nFFmSa-mxNC4-Z3gkw_jkciHN94";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function loadData() {
-            // Dohvatanje iz tabele 'trucks' (naziv koji se vidi na vašim snimcima)
-            const { data, error } = await _supabase.from('trucks').select('*').order('created_at', { ascending: false });
-            
-            if (error) { console.error("Greška:", error); return; }
+        async function loadAdminData() {
+            const plateFilter = document.getElementById('filter-plate').value.toUpperCase();
+            const dateFilter = document.getElementById('filter-date').value;
+
+            // Čitanje direktno iz baze podataka
+            let { data: trucks, error } = await _supabase
+                .from('trucks')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) { console.error(error); return; }
 
             const tbody = document.getElementById('admin-table-body');
             tbody.innerHTML = '';
 
-            data.forEach(t => {
-                let sCls = t.status === 'NA ČEKANJU' ? 'status-waiting' : t.status === 'NA RAMPI' ? 'status-ramp' : t.status === 'ISTOVAREN' ? 'status-unloaded' : 'status-exited';
+            const filtered = trucks.filter(t => {
+                return t.plate.toUpperCase().includes(plateFilter) && 
+                       (!dateFilter || t.date === dateFilter);
+            });
+
+            filtered.forEach(t => {
+                let sCls = t.status === 'NA ČEKANJU' ? 'status-waiting' : 
+                           t.status === 'NA RAMPI' ? 'status-ramp' : 
+                           t.status === 'ISTOVAREN' ? 'status-unloaded' : 'status-exited';
+
                 tbody.innerHTML += `<tr>
                     <td style="font-weight:800; color:var(--zf-blue);">${t.plate}</td>
                     <td>${t.company}</td>
@@ -110,21 +146,18 @@
                 </tr>`;
             });
 
-            // Update KPI brojeva
-            document.getElementById('count-total').innerText = data.length;
-            document.getElementById('count-waiting').innerText = data.filter(x => x.status === 'NA ČEKANJU').length;
-            document.getElementById('count-ramp').innerText = data.filter(x => x.status === 'NA RAMPI').length;
-            document.getElementById('count-unloaded').innerText = data.filter(x => x.status === 'ISTOVAREN').length;
-            document.getElementById('count-exited').innerText = data.filter(x => x.status === 'IZAŠAO').length;
+            // Update KPI
+            document.getElementById('count-total').innerText = filtered.length;
+            document.getElementById('count-waiting').innerText = filtered.filter(x => x.status === 'NA ČEKANJU').length;
+            document.getElementById('count-ramp').innerText = filtered.filter(x => x.status === 'NA RAMPI').length;
+            document.getElementById('count-unloaded').innerText = filtered.filter(x => x.status === 'ISTOVAREN').length;
+            document.getElementById('count-exited').innerText = filtered.filter(x => x.status === 'IZAŠAO').length;
         }
 
-        function exportData() {
-            alert("Generisanje izveštaja...");
-            // Logika za export ostaje ista kao u vašem originalnom kodu
-        }
-
-        window.onload = loadData;
-        setInterval(loadData, 5000); // Automatsko osvežavanje svakih 5 sekundi
+        function logout() { window.location.href = 'login.html'; }
+        
+        window.onload = loadAdminData;
+        setInterval(loadAdminData, 5000); // Osvežava na 5 sekundi
     </script>
 </body>
 </html>
