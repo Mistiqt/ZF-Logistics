@@ -10,7 +10,7 @@
         :root {
             --zf-blue: #00549f; --zf-dark: #002e5d; --border: #e2e8f0; --bg: #f8fafc;
             --text-main: #1e293b; --text-muted: #64748b; --container-width: 1250px;
-            --excel-green: #10b981; --excel-green-hover: #059669; --logout-red: #be123c;
+            --excel-green: #10 b981; --excel-green-hover: #059669; --logout-red: #be123c;
             --stats-purple: #8b5cf6;
         }
 
@@ -227,10 +227,10 @@
             <div class="form-group">
                 <label>Pristup stranici</label>
                 <select id="new-access">
-                    <option value="gate.html">Ulazna Kapija</option>
-                    <option value="warehouse.html">Magacin</option>
-                    <option value="exit-gate.html">Izlazna Kapija</option>
-                    <option value="admin.html">Administrator Panel</option>
+                    <option value="gate">Ulazna Kapija</option>
+                    <option value="warehouse">Magacin</option>
+                    <option value="exit">Izlazna Kapija</option>
+                    <option value="admin">Administrator Panel</option>
                 </select>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -256,11 +256,12 @@
         const ADMIN_PASS = "Ninica1122!";
         const DB_KEY = 'zf_trucks';
 
+        // Mapa za prikaz u tabeli (role: { label, class })
         const roleConfig = {
-            "gate.html": { label: "Ulazna Kapija", class: "role-gate" },
-            "warehouse.html": { label: "Magacin", class: "role-warehouse" },
-            "exit-gate.html": { label: "Izlazna Kapija", class: "role-exit" },
-            "admin.html": { label: "Administrator", class: "role-admin" }
+            "gate": { label: "Ulazna Kapija", class: "role-gate" },
+            "warehouse": { label: "Magacin", class: "role-warehouse" },
+            "exit": { label: "Izlazna Kapija", class: "role-exit" },
+            "admin": { label: "Administrator", class: "role-admin" }
         };
 
         function formatToNumericDate(dateObj) {
@@ -461,8 +462,10 @@
             let users = JSON.parse(localStorage.getItem('zf_users')) || [];
             const now = new Date();
             const ts = formatToNumericDate(now) + " " + now.toLocaleTimeString('sr-RS', {hour:'2-digit', minute:'2-digit'});
+            
             if(index === "") users.push({username:user, password:pass, role:role, createdAt: ts});
             else users[index] = {username:user, password:pass, role:role, createdAt: users[index].createdAt || ts};
+            
             localStorage.setItem('zf_users', JSON.stringify(users));
             closeUserModal(); renderUserList();
         }
