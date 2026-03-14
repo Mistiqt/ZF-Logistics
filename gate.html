@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ulazna Kapija - ZF Logistics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --zf-blue: #00549f;
+            --zf-dark: #002e5d;
+            --border: #e2e8f0;
+            --bg: #f8fafc;
+            --container-width: 1250px;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            background: white;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            border-bottom: 1px solid var(--border);
+            min-height: 90px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            width: 100%;
+            max-width: var(--container-width);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .zf-logo-square {
+            background: var(--zf-blue);
+            color: white;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 4px;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .header-title-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-title-wrapper h1 { 
+            margin: 0; 
+            font-size: 22px; 
+            text-transform: uppercase; 
+            font-weight: 800; 
+            color: var(--zf-dark);
+            line-height: 1.2;
+        }
+
+        .user-info {
+            font-size: 14px; 
+            color: var(--text-muted);
+            margin-top: 5px;
+            font-weight: 400;
+        }
+
+        .btn-logout {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #be123c;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-logout:hover { 
+            background-color: #fff1f2; 
+            border-color: #fda4af; 
+        }
+
+        .main-layout {
+            width: 100%;
+            max-width: var(--container-width);
+            margin: 30px 0;
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 30px;
+            padding: 0 20px;
+            box-sizing: border-box;
+            align-items: start;
+            flex: 1;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 25px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            height: 655px; 
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--zf-blue);
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+            flex-shrink: 0;
+        }
+
+        .card h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--zf-dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #gateTruckList {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        #gateTruckList::-webkit-scrollbar { width: 6px; }
+        #gateTruckList::-webkit-scrollbar-track { background: transparent; }
+        #gateTruckList::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .refresh-btn { 
+            cursor: pointer; 
+            font-size: 20px; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            border: none; 
+            background: none; 
+            padding: 5px; 
+            outline: none; 
+        }
+        .refresh-btn i { color: #94a3b8; transition: color 0.2s ease; }
+        .refresh-btn:hover i, .refresh-btn.active i { color: var(--zf-blue); }
+        .refresh-btn.active i { animation: spin 0.8s linear; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .input-group { margin-bottom: 22px; }
+        .input-group label { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            font-size: 13px;
+            font-weight: 700; 
+            color: #475569; 
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .input-group label i { color: var(--zf-blue); font-size: 15px; width: 18px; text-align: center; }
+        
+        .input-group input, .input-group select {
+            width: 100%; 
+            padding: 14px;
+            border: 1px solid var(--border); 
+            border-radius: 6px; 
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+        }
+
+        .btn-announce {
+            background-color: var(--zf-dark);
+            color: white;
+            width: 100%; 
+            border: none;                    
+            padding: 18px; 
+            border-radius: 6px; 
+            font-size: 16px; 
+            font-weight: 700;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-announce:disabled {
+            background-color: #cbd5e1 !important;
+            cursor: not-allowed;
+            color: #94a3b8;
+        }
+
+        .truck-item {
+            padding: 20px 0; 
+            border-bottom: 1px solid var(--border); 
+            display: flex;
+            justify-content: space-between; 
+            align-items: flex-start;
+        }
+
+        .plate-box { font-size: 19px; font-weight: 800; color: var(--zf-dark); }
+        .company-name-text { font-weight: 600; font-size: 16px; display: block; margin-top: 4px; color: #334155; }
+        
+        .tag {
+            font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 4px;
+            text-transform: uppercase; margin-left: 10px;
+        }
+        .status-announced { background: #fff3e0; color: #e65100; }
+        .status-ramp { background: #dcfce7; color: #15803d; }
+        .status-exit { background: #fee2e2; color: #991b1b; }
+        .status-exited-final { background: #1e293b; color: white; }
+
+        .item-right-content {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .timestamp-box {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .action-btns { display: flex; gap: 6px; }
+
+        .btn-action-small {
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .btn-edit:hover { color: #00549f; border-color: #00549f; }
+        .btn-delete:hover { color: #be123c; border-color: #be123c; }
+
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 12px;
+            color: var(--text-muted);
+            border-top: 1px solid #f1f5f9;
+            background: white;
+            margin-top: auto;
+        }
+
+        footer strong {
+            color: var(--zf-blue);
+            font-weight: 700;
+        }
+
+        @media (max-width: 1000px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .card { height: auto; max-height: 655px; }
+        }
+
+        @media (max-width: 600px) {
+            .header-content { padding: 10px 15px; }
+            .header-title-wrapper h1 { font-size: 18px; }
+            .user-info { font-size: 12px; }
+            .btn-logout { padding: 6px 12px; font-size: 12px; }
+            .truck-item { flex-direction: column; gap: 15px; }
+            .item-right-content { text-align: left; align-items: flex-start; width: 100%; border-top: 1px dashed #e2e8f0; padding-top: 10px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <div class="zf-logo-square"><i class="fas fa-truck"></i></div>
+                <div class="header-title-wrapper">
+                    <h1>ULAZNA KAPIJA</h1>
+                    <div class="user-info">Operativni panel za najavu</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn-logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Odjava</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-layout">
+        <section class="card">
+            <div class="card-header">
+                <h2 id="formTitle"><i class="fas fa-plus-circle"></i> NAJAVI KAMION</h2>
+            </div>
+            <form id="announceForm">
+                <input type="hidden" id="editId">
+                <div class="input-group">
+                    <label><i class="fas fa-building"></i> NAZIV KOMPANIJE</label>
+                    <input type="text" id="companyName" placeholder="Unesite naziv kompanije" required>
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-id-card"></i> REGISTARSKA OZNAKA</label>
+                    <input type="text" id="plateNumber" placeholder="AA-1234-BB" required>
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-truck"></i> TIP VOZILA</label>
+                    <select id="vehicleType" required>
+                        <option value="" disabled selected>Izaberite tip vozila</option>
+                        <option value="Kamion">Kamion</option>
+                        <option value="Šleper">Šleper</option>
+                        <option value="Kombi">Kombi</option>
+                        <option value="Kontejner">Kontejner</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-boxes"></i> TIP ROBE</label>
+                    <select id="goodsType" required>
+                        <option value="" disabled selected>Izaberite tip robe</option>
+                        <option value="Auto delovi">Auto delovi</option>
+                        <option value="Sirovine">Sirovine</option>
+                        <option value="Gotovi proizvodi">Gotovi proizvodi</option>
+                        <option value="Ambalaža">Ambalaža</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-phone"></i> TELEFON VOZAČA</label>
+                    <input type="tel" id="driverPhone" placeholder="+381... (opciono)">
+                </div>
+                
+                <button type="submit" id="submitBtn" class="btn-announce" disabled>
+                    <i class="fas fa-plus-circle"></i> NAJAVI DOLAZAK
+                </button>
+                <button type="button" id="cancelBtn" onclick="resetForm()" style="display:none; width:100%; background:none; border:none; color:#64748b; margin-top:10px; cursor:pointer; font-weight:600; font-family:'Inter';">Odustani od izmene</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <div class="card-header">
+                <h2><i class="far fa-clock"></i> NAJAVLJENI KAMIONI</h2>
+                <button class="refresh-btn" onclick="manualRefresh(this)" title="Osveži listu">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div id="gateTruckList"></div>
+        </section>
+    </main>
+
+    <footer>
+        Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.1
+    </footer>
+
+    <script>
+        const DB_KEY = 'zf_trucks';
+        
+        // SINTETIČKI BIP ZVUK (Ne zavisi od spoljnih fajlova)
+        function playNotification() {
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, context.currentTime); 
+                
+                gainNode.gain.setValueAtTime(0.1, context.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+
+                oscillator.start();
+                oscillator.stop(context.currentTime + 0.2);
+            } catch (e) {
+                console.log("Audio API not supported or blocked");
+            }
+        }
+
+        function getNumericDate() {
+            const now = new Date();
+            const dan = String(now.getDate()).padStart(2, '0');
+            const mesec = String(now.getMonth() + 1).padStart(2, '0');
+            const godina = now.getFullYear();
+            return `${dan}.${mesec}.${godina}.`;
+        }
+
+        // ČIŠĆENJE U 00:00 (Briše sve osim statusa 'NA ČEKANJU')
+        function checkDailyCleanup() {
+            const lastCleanup = localStorage.getItem('zf_last_cleanup_date');
+            const today = getNumericDate();
+            
+            if (lastCleanup && lastCleanup !== today) {
+                let trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+                // Čuvamo samo kamione koji su još uvek na statusu 'NA ČEKANJU'
+                const filteredTrucks = trucks.filter(t => t.status === 'NA ČEKANJU');
+                localStorage.setItem(DB_KEY, JSON.stringify(filteredTrucks));
+            }
+            localStorage.setItem('zf_last_cleanup_date', today);
+        }
+
+        const form = document.getElementById('announceForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const requiredInputs = ['companyName', 'plateNumber', 'vehicleType', 'goodsType'];
+
+        function checkFormValidity() {
+            const allFilled = requiredInputs.every(id => document.getElementById(id).value.trim() !== "");
+            submitBtn.disabled = !allFilled;
+        }
+
+        requiredInputs.forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', checkFormValidity);
+            el.addEventListener('change', checkFormValidity);
+        });
+
+        function renderGateList() {
+            const trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+            const gateList = document.getElementById('gateTruckList');
+            if(!gateList) return;
+            gateList.innerHTML = '';
+            [...trucks].reverse().forEach((t) => {
+                let statusTag = `<span class="tag status-announced">Na čekanju</span>`;
+                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Na rampi : ${t.ramp || ''}</span>`;
+                else if (t.status === 'ISTOVAREN') statusTag = `<span class="tag status-exit">Spreman za izlaz</span>`;
+                else if (t.status === 'IZAŠAO') statusTag = `<span class="tag status-exited-final">Izašao</span>`;
+                
+                const item = document.createElement('div');
+                item.className = 'truck-item';
+                const showActions = (t.status === 'NA ČEKANJU');
+
+                let displayDate = t.date;
+                item.innerHTML = `
+                    <div>
+                        <span class="plate-box">${t.plate}</span> ${statusTag}
+                        <span class="company-name-text">${t.company}</span>
+                        <small style="color:#64748b; display: block; margin-top: 6px;">${t.vehicle} • ${t.goods}<br><i class="fas fa-phone-alt"></i> ${t.phone || 'Nije unet'}</small>
+                    </div>
+                    <div class="item-right-content">
+                        <div class="timestamp-box">${displayDate || ''}<br>${t.time}</div>
+                        ${showActions ? `<div class="action-btns"><button class="btn-action-small btn-edit" onclick="editTruck(${t.id})"><i class="fas fa-pen"></i></button><button class="btn-action-small btn-delete" onclick="deleteTruck(${t.id})"><i class="fas fa-trash"></i></button></div>` : ''}
+                    </div>`;
+                gateList.appendChild(item);
+            });
+        }
+
+        function editTruck(id) {
+            const trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+            const truck = trucks.find(t => t.id === id);
+            if(truck) {
+                document.getElementById('editId').value = truck.id;
+                document.getElementById('companyName').value = truck.company;
+                document.getElementById('plateNumber').value = truck.plate;
+                document.getElementById('vehicleType').value = truck.vehicle;
+                document.getElementById('goodsType').value = truck.goods;
+                document.getElementById('driverPhone').value = truck.phone;
+                document.getElementById('formTitle').innerHTML = '<i class="fas fa-pen"></i> IZMENI NAJAVU';
+                document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> SAČUVAJ IZMENE';
+                document.getElementById('cancelBtn').style.display = 'block';
+                checkFormValidity();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function deleteTruck(id) { 
+            if(confirm("Obrisati najavu?")) { 
+                let trucks = JSON.parse(localStorage.getItem(DB_KEY)) || []; 
+                trucks = trucks.filter(t => t.id !== id); 
+                localStorage.setItem(DB_KEY, JSON.stringify(trucks)); 
+                renderGateList(); 
+            } 
+        }
+
+        function resetForm() { 
+            form.reset(); 
+            document.getElementById('editId').value = ''; 
+            document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle"></i> NAJAVI KAMION'; 
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-plus-circle"></i> NAJAVI DOLAZAK'; 
+            document.getElementById('cancelBtn').style.display = 'none'; 
+            checkFormValidity(); 
+        }
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            let masterList = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+            const editId = document.getElementById('editId').value;
+            const truckData = { 
+                company: document.getElementById('companyName').value, 
+                plate: document.getElementById('plateNumber').value.toUpperCase(), 
+                vehicle: document.getElementById('vehicleType').value, 
+                goods: document.getElementById('goodsType').value, 
+                phone: document.getElementById('driverPhone').value 
+            };
+
+            if(editId) { 
+                const index = masterList.findIndex(t => t.id == editId); 
+                masterList[index] = { ...masterList[index], ...truckData }; 
+            } else { 
+                const now = new Date();
+                masterList.push({ 
+                    id: Date.now(), 
+                    ...truckData, 
+                    status: 'NA ČEKANJU', 
+                    date: getNumericDate(), 
+                    time: now.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) 
+                }); 
+                playNotification(); // Zvuk pri svakoj novoj najavi
+            }
+            localStorage.setItem(DB_KEY, JSON.stringify(masterList));
+            resetForm(); renderGateList();
+        };
+
+        function manualRefresh(btn) { 
+            btn.classList.add('active'); 
+            renderGateList(); 
+            setTimeout(() => { btn.classList.remove('active'); }, 800); 
+        }
+
+        function handleLogout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
+        
+        checkDailyCleanup(); 
+        renderGateList(); 
+        checkFormValidity(); 
+        setInterval(renderGateList, 3000); 
+        setInterval(checkDailyCleanup, 3600000); 
+    </script>
+</body>
+</html>
