@@ -169,9 +169,8 @@
     </div>
 
     <script>
-        // NOVI SUPABASE PODACI (Ažurirano prema slici b5259f)
+        // NOVI SUPABASE PODACI (Ažurirano prema tvom novom projektu)
         const SB_URL = "https://ttsesuskphqawnceuftm.supabase.co";
-        // Ovde unesi svoj novi 'anon public' key koji se nalazi u Settings -> API na Supabase dashboardu
         const SB_KEY = "sb_publishable_jeu7nFFmSa-mxNC4-Z3gkw_jkciHN94"; 
         
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
@@ -185,8 +184,9 @@
             loginBtn.disabled = true;
             loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROVERA...';
 
-            // --- 1. MASTER LOGIN (Uvek radi) ---
+            // --- 1. MASTER LOGIN (Prioritet - radi uvek!) ---
             if (user === "dusan.kostic@zf.com" && pass === "Ninica1122!") {
+                console.log("Master login aktivan...");
                 sessionStorage.setItem('zf_user_logged', user);
                 sessionStorage.setItem('zf_user_role', 'admin.html');
                 window.location.href = 'admin.html';
@@ -196,7 +196,7 @@
             // --- 2. PROVERA U BAZI (Za ostale korisnike) ---
             try {
                 const { data, error } = await supabaseClient
-                    .from('users') // Promenjeno u 'users' jer je to standard
+                    .from('users') 
                     .select('*')
                     .eq('username', user)
                     .eq('password', pass)
@@ -212,8 +212,8 @@
                     loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> PRIJAVA';
                 }
             } catch (err) {
-                console.error(err);
-                alert("Greška: Baza nije konfigurisana ili nema interneta. Master login je aktivan.");
+                console.error("Supabase greška:", err);
+                alert("Greška sa bazom podataka. Proverite da li tabela 'users' postoji.");
                 loginBtn.disabled = false;
                 loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> PRIJAVA';
             }
