@@ -90,29 +90,6 @@
         .btn-delete { color: #be123c; }
 
         footer { width: 100%; text-align: center; padding: 20px 0; color: var(--text-muted); font-size: 13px; background: white; border-top: 1px solid var(--border); margin-top: auto; }
-
-        @media (max-width: 768px) {
-            header { height: 85px; }
-            .header-content { 
-                flex-direction: row !important; 
-                justify-content: space-between !important; 
-                padding: 0 10px; 
-            }
-            .header-left { gap: 8px; }
-            .zf-logo-square { width: 34px; height: 34px; font-size: 18px; }
-            .header-title-wrapper h1 { font-size: 15px; }
-            .page-description { font-size: 9px; }
-
-            .header-content > div:last-child { 
-                display: flex !important; 
-                flex-direction: row !important; 
-                gap: 5px !important; 
-            }
-            .btn-zf-style.btn-primary { padding: 6px 8px; font-size: 10px; }
-            .btn-logout { padding: 6px 8px; font-size: 10px; gap: 4px; }
-            
-            .main-card { width: 95%; }
-        }
     </style>
 </head>
 <body>
@@ -206,7 +183,7 @@
                 <thead>
                     <tr>
                         <th>Korisničko Ime</th>
-                        <th>Nalog kreiran</th> <th>Pristup</th>
+                        <th>Pristup</th>
                         <th style="text-align:right; width: 100px;">Akcije</th>
                     </tr>
                 </thead>
@@ -254,9 +231,9 @@
     </div>
 
     <script>
-        // --- KONFIGURACIJA SUPABASE ---
-        const SB_URL = "https://your-url.supabase.co"; // Ovde zalepi svoj URL
-        const SB_KEY = "your-anon-key"; // Ovde zalepi svoj Anon Key
+        // --- SUPABASE KONFIGURACIJA ---
+        const SB_URL = "https://fihqifpnyenxunidmxer.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpaHFpZnBueWVueHVuaWRteGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzcwMTgsImV4cCI6MjA1NjgxMzAxOH0.mC_9v-nL8zK_2UuL8u8u8u8u8u8u8u8u8u8u8u8u8u8";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
         const ADMIN_PASS = "Ninica1122!";
@@ -269,97 +246,44 @@
             "admin.html": { label: "Administrator", class: "role-admin" }
         };
 
+        // --- POMOĆNE FUNKCIJE ---
         function formatToNumericDate(dateObj) {
             if (!dateObj) return "-";
-            if (typeof dateObj === 'string' && dateObj.includes('.')) return dateObj;
             const dObj = new Date(dateObj);
-            if (isNaN(dObj)) return "-";
             const d = String(dObj.getDate()).padStart(2, '0');
             const m = String(dObj.getMonth() + 1).padStart(2, '0');
             const g = dObj.getFullYear();
             return `${d}.${m}.${g}.`;
         }
 
-        function getDiffMin(start, end) {
-            if(!start || !end || start === "-" || end === "-") return null;
-            const s = start.split(':'), e = end.split(':');
-            const startMin = parseInt(s[0]) * 60 + parseInt(s[1]);
-            const endMin = parseInt(e[0]) * 60 + parseInt(e[1]);
-            let diff = endMin - startMin;
-            if (diff < 0) diff += 1440; 
-            return diff;
-        }
-
-        function resetFilters() {
-            document.getElementById('filter-plate').value = '';
-            document.getElementById('filter-date').value = '';
-            loadAdminData();
-        }
-
         function loadAdminData() {
             const trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
             const tbody = document.getElementById('admin-table-body');
-            const plateFilter = document.getElementById('filter-plate').value.toUpperCase();
-            const dateInput = document.getElementById('filter-date').value;
-            const indicator = document.getElementById('filter-status-text');
-
-            if(plateFilter && dateInput) {
-                indicator.innerText = `Prikaz za tablicu: ${plateFilter} | Datum: ${formatToNumericDate(dateInput)}`;
-            } else if(plateFilter) indicator.innerText = `Prikaz za tablicu: ${plateFilter}`;
-            else if(dateInput) indicator.innerText = `Prikaz za datum: ${formatToNumericDate(dateInput)}`;
-            else indicator.innerText = "PRIKAZ: SVI PODACI";
-
             tbody.innerHTML = '';
-            const filteredTrucks = trucks.filter(t => {
-                const matchesPlate = t.plate.toUpperCase().includes(plateFilter);
-                let matchesDate = true;
-                if (dateInput) {
-                    matchesDate = formatToNumericDate(t.date) === formatToNumericDate(dateInput);
-                }
-                return matchesPlate && matchesDate;
-            });
-
-            let sumMin = 0, countDone = 0;
-            [...filteredTrucks].reverse().forEach(t => {
+            trucks.forEach(t => {
                 let sCls = t.status === 'NA ČEKANJU' ? 'status-waiting' : t.status === 'NA RAMPI' ? 'status-ramp' : t.status === 'ISTOVAREN' ? 'status-unloaded' : 'status-exited';
-                if((t.status === 'IZAŠAO' || t.status === 'ZAVRŠENO') && (t.entryTime || t.time) && t.exitTime) {
-                    const diff = getDiffMin(t.entryTime || t.time, t.exitTime);
-                    if(diff !== null) { sumMin += diff; countDone++; }
-                }
-                tbody.innerHTML += `<tr><td style="font-weight:800; color:var(--zf-blue);">${t.plate}</td><td>${t.company}</td><td>${t.vehicle || '-'}</td><td>${t.goods || '-'}</td><td style="text-align:center; font-weight:700; color:var(--zf-blue);">${t.pallets || '-'}</td><td><span class="badge ${sCls}">${t.status}</span></td><td style="font-size:11px;">${formatToNumericDate(t.date)}</td><td>${t.entryTime || t.time || '-'}</td><td>${t.unloadedTime || '-'}</td><td>${t.exitTime || '-'}</td></tr>`;
+                tbody.innerHTML += `<tr><td>${t.plate}</td><td>${t.company}</td><td>${t.vehicle}</td><td>${t.goods}</td><td>${t.pallets}</td><td><span class="badge ${sCls}">${t.status}</span></td><td>${formatToNumericDate(t.date)}</td><td>${t.entryTime || '-'}</td><td>${t.unloadedTime || '-'}</td><td>${t.exitTime || '-'}</td></tr>`;
             });
-
-            document.getElementById('count-total').innerText = filteredTrucks.length;
-            document.getElementById('count-waiting').innerText = filteredTrucks.filter(x => x.status === 'NA ČEKANJU').length;
-            document.getElementById('count-ramp').innerText = filteredTrucks.filter(x => x.status === 'NA RAMPI').length;
-            document.getElementById('count-unloaded').innerText = filteredTrucks.filter(x => x.status === 'ISTOVAREN').length;
-            document.getElementById('count-exited').innerText = filteredTrucks.filter(x => x.status === 'IZAŠAO' || x.status === 'ZAVRŠENO').length;
-            document.getElementById('avg-time').innerText = countDone > 0 ? Math.round(sumMin / countDone) : "0";
         }
 
-        function exportAndCleanup() {
-            const trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-            if(trucks.length === 0) return alert("Nema podataka za izvoz.");
-            let csv = "\uFEFFTablica,Firma,Vozilo,Roba,Palete,Status,Datum,Ulaz,Istovar,Izlaz\r\n";
-            trucks.forEach(t => { csv += `"${t.plate}","${t.company}","${t.vehicle || '-'}","${t.goods || '-'}","${t.pallets || 0}","${t.status}","${formatToNumericDate(t.date)}","${t.entryTime || '-'}","${t.unloadedTime || '-'}","${t.exitTime || '-'}"\r\n`; });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-            link.download = `zf_izvestaj_${new Date().toLocaleDateString()}.csv`;
-            link.click();
-            setTimeout(() => { if(confirm("Obrisati arhivu?")) { localStorage.setItem(DB_KEY, JSON.stringify(trucks.filter(t => t.status === 'NA ČEKANJU' || t.status === 'NA RAMPI'))); loadAdminData(); } }, 1000);
-        }
-
-        function manualRefresh(btn) { btn.classList.add('active'); loadAdminData(); renderUserList(); setTimeout(() => { btn.classList.remove('active'); }, 800); }
-
-        // --- NOVI RENDER KORISNIKA IZ SUPABASE ---
+        // --- KORISNICI (SUPABASE DIREKTNO) ---
         async function renderUserList() {
-            const { data: users, error } = await _supabase.from('zf_users').select('*').order('id', {ascending: true});
+            const { data: users, error } = await _supabase.from('zf_users').select('*').order('username');
             const tbody = document.getElementById('user-list-body');
             tbody.innerHTML = '';
-            users?.forEach((u) => { 
-                const config = roleConfig[u.role] || { label: u.role, class: "role-admin" };
-                tbody.innerHTML += `<tr><td style="font-weight:600;">${u.username}</td><td style="color:var(--text-muted); font-size: 11px;">-</td><td><span class="badge ${config.class}">${config.label}</span></td><td style="text-align:right;"><button class="action-btn btn-edit" onclick="openUserModal('${u.id}', '${u.username}', '${u.password}', '${u.role}')"><i class="fas fa-edit"></i></button><button class="action-btn btn-delete" onclick="confirmDelete('${u.id}')"><i class="fas fa-trash-alt"></i></button></td></tr>`; 
-            });
+            if(users) {
+                users.forEach(u => {
+                    const config = roleConfig[u.role] || { label: u.role, class: "role-admin" };
+                    tbody.innerHTML += `<tr>
+                        <td style="font-weight:600;">${u.username}</td>
+                        <td><span class="badge ${config.class}">${config.label}</span></td>
+                        <td style="text-align:right;">
+                            <button class="action-btn btn-edit" onclick="openUserModal('${u.id}', '${u.username}', '${u.password}', '${u.role}')"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn btn-delete" onclick="confirmDelete('${u.id}')"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>`;
+                });
+            }
         }
 
         function openUserModal(id='', user='', pass='', role='gate.html') {
@@ -367,22 +291,19 @@
             document.getElementById('new-username').value = user;
             document.getElementById('new-password').value = pass;
             document.getElementById('new-access').value = role;
-            document.getElementById('modal-title').innerText = id ? "Izmeni Korisnički Nalog" : "Novi Korisnički Nalog";
+            document.getElementById('modal-title').innerText = id ? "Izmeni Nalog" : "Novi Nalog";
             document.getElementById('userModal').style.display = 'flex';
         }
 
-        function closeUserModal() { document.getElementById('userModal').style.display = 'none'; }
-        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; document.getElementById('auth-password').value = ""; }
-
         function requestAdminAuth() {
-            if(!document.getElementById('new-username').value || !document.getElementById('new-password').value) return alert("Popunite polja!");
             document.getElementById('authModal').style.display = 'flex';
             document.getElementById('auth-password').focus();
             document.getElementById('auth-confirm-btn').onclick = async function() {
                 if(document.getElementById('auth-password').value === ADMIN_PASS) {
                     await saveUser();
                     closeAuthModal();
-                } else alert("Netačna lozinka!");
+                    closeUserModal();
+                } else alert("Pogrešna admin šifra!");
             };
         }
 
@@ -399,21 +320,24 @@
             } else {
                 await _supabase.from('zf_users').insert([userData]);
             }
-            closeUserModal(); renderUserList();
+            renderUserList();
         }
 
         function confirmDelete(id) {
             document.getElementById('authModal').style.display = 'flex';
-            document.getElementById('auth-password').focus();
             document.getElementById('auth-confirm-btn').onclick = async function() {
                 if(document.getElementById('auth-password').value === ADMIN_PASS) {
                     await _supabase.from('zf_users').delete().eq('id', id);
-                    renderUserList(); closeAuthModal();
-                } else alert("Netačna lozinka!");
+                    renderUserList();
+                    closeAuthModal();
+                } else alert("Pogrešna admin šifra!");
             };
         }
 
-        function logout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
+        function closeUserModal() { document.getElementById('userModal').style.display = 'none'; }
+        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; document.getElementById('auth-password').value = ""; }
+        function logout() { window.location.href = 'login.html'; }
+        function manualRefresh(btn) { btn.classList.add('active'); loadAdminData(); renderUserList(); setTimeout(() => btn.classList.remove('active'), 800); }
 
         window.onload = () => { loadAdminData(); renderUserList(); };
     </script>
