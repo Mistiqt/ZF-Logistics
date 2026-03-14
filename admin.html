@@ -37,16 +37,16 @@
         th { background: #f8fafc; padding: 12px; text-align: left; border-bottom: 2px solid var(--border); position: sticky; top: 0; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
 
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
         .status-WAITING { background: #fff3e0; color: #e65100; }
         .status-RAMP { background: #dcfce7; color: #15803d; }
+        .status-UNLOADED { background: #e0f2fe; color: #0369a1; }
         .status-EXITED { background: #f1f5f9; color: #475569; }
 
         .btn-zf { padding: 10px 20px; border-radius: 6px; border: none; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 11px; }
         .btn-primary { background: var(--zf-blue); color: white; }
         .btn-export { background: var(--excel-green); color: white; }
 
-        /* Modal */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 350px; }
         .form-group { margin-bottom: 15px; }
@@ -75,8 +75,9 @@
 
     <div class="kpi-container">
         <div class="kpi-card"><h3>UKUPNO</h3><div class="number" id="kpi-total">0</div><label>Vozila danas</label></div>
-        <div class="kpi-card"><h3>PROSEK</h3><div class="number" id="kpi-avg">0</div><label>Minuta u krugu</label></div>
-        <div class="kpi-card"><h3>ZAVRŠENO</h3><div class="number" id="kpi-done">0</div><label>Odjavljenih vozila</label></div>
+        <div class="kpi-card"><h3>PROSEK</h3><div class="number" id="kpi-avg">0</div><label>Minuta zadržavanja</label></div>
+        <div class="kpi-card"><h3>NA RAMPI</h3><div class="number" id="kpi-ramp">0</div><label>Trenutno istovar</label></div>
+        <div class="kpi-card"><h3>ZAVRŠENO</h3><div class="number" id="kpi-done">0</div><label>Izašla vozila</label></div>
     </div>
 
     <div class="main-card">
@@ -85,7 +86,7 @@
                 <label>Pretraga tablica</label>
                 <input type="text" id="searchPlate" placeholder="BG-123..." oninput="fetchAdminData()">
             </div>
-            <button class="btn-zf btn-export" style="margin-left: auto;" onclick="exportToCSV()"><i class="fas fa-file-csv"></i> EXPORT PODATAKA</button>
+            <button class="btn-zf btn-export" style="margin-left: auto;" onclick="exportAndCleanup()"><i class="fas fa-file-excel"></i> EXPORT (CSV) & CLEANUP</button>
         </div>
 
         <div class="table-wrapper">
@@ -96,7 +97,7 @@
                         <th>Firma</th>
                         <th>Status</th>
                         <th>Ulaz</th>
-                        <th>Magacin</th>
+                        <th>Istovaren</th>
                         <th>Izlaz</th>
                         <th>Zadržavanje</th>
                         <th>Palete</th>
@@ -135,38 +136,48 @@
         const SB_KEY = "sb_publishable_jeu7nFFmSa-mxNC4-Z3gkw_jkciHN94";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
+        // Globalna promenljiva za čuvanje podataka za export
+        let currentTrucks = [];
+
         async function fetchAdminData() {
             let { data: trucks, error } = await supabaseClient.from('trucks').select('*').order('created_at', { ascending: false });
             if (error) return;
 
+            currentTrucks = trucks;
             const searchTerm = document.getElementById('searchPlate').value.toUpperCase();
-            if(searchTerm) trucks = trucks.filter(t => t.plate.includes(searchTerm));
+            let filtered = trucks;
+            if(searchTerm) filtered = trucks.filter(t => t.plate.includes(searchTerm));
 
-            renderTable(trucks);
+            renderTable(filtered);
             calculateKPIs(trucks);
         }
 
         function calculateDiff(t1, t2) {
-            if(!t1 || !t2) return null;
-            const [h1, m1] = t1.split(':').map(Number);
-            const [h2, m2] = t2.split(':').map(Number);
-            return (h2 * 60 + m2) - (h1 * 60 + m1);
+            if(!t1 || !t2 || t1 === '-' || t2 === '-') return null;
+            try {
+                const [h1, m1] = t1.split(':').map(Number);
+                const [h2, m2] = t2.split(':').map(Number);
+                let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
+                if (diff < 0) diff += 1440; 
+                return diff;
+            } catch(e) { return null; }
         }
 
         function renderTable(data) {
             const tbody = document.getElementById('adminTableBody');
             tbody.innerHTML = data.map(t => {
                 const diff = calculateDiff(t.time_in, t.time_out);
+                const statusClass = t.status ? t.status.replace(' ', '') : 'WAITING';
                 return `
                     <tr>
-                        <td style="font-weight:700">${t.plate}</td>
+                        <td style="font-weight:700; color:var(--zf-blue)">${t.plate}</td>
                         <td>${t.company}</td>
-                        <td><span class="badge status-${t.status.replace(' ','')}">${t.status}</span></td>
+                        <td><span class="badge status-${statusClass}">${t.status || 'NA ČEKANJU'}</span></td>
                         <td>${t.time_in || '-'}</td>
                         <td>${t.time_unloaded || '-'}</td>
                         <td>${t.time_out || '-'}</td>
-                        <td>${diff ? diff + ' min' : '-'}</td>
-                        <td style="font-weight:700; color:var(--zf-blue)">${t.pallets || '-'}</td>
+                        <td style="font-weight:600">${diff ? diff + ' min' : '-'}</td>
+                        <td style="font-weight:700; text-align:center">${t.pallets || 0}</td>
                     </tr>
                 `;
             }).join('');
@@ -174,36 +185,67 @@
 
         function calculateKPIs(data) {
             document.getElementById('kpi-total').textContent = data.length;
-            const completed = data.filter(t => t.time_out);
+            document.getElementById('kpi-ramp').textContent = data.filter(t => t.status === 'NA RAMPI').length;
+            
+            const completed = data.filter(t => t.time_out && t.time_out !== '-');
             document.getElementById('kpi-done').textContent = completed.length;
 
             let totalMinutes = 0;
-            completed.forEach(t => { totalMinutes += calculateDiff(t.time_in, t.time_out) || 0; });
-            const avg = completed.length > 0 ? Math.round(totalMinutes / completed.length) : 0;
+            let count = 0;
+            completed.forEach(t => { 
+                const d = calculateDiff(t.time_in, t.time_out);
+                if(d !== null) { totalMinutes += d; count++; }
+            });
+            const avg = count > 0 ? Math.round(totalMinutes / count) : 0;
             document.getElementById('kpi-avg').textContent = avg;
         }
 
         async function saveUser() {
-            const u = document.getElementById('newUsername').value;
-            const p = document.getElementById('newPassword').value;
+            const u = document.getElementById('newUsername').value.trim();
+            const p = document.getElementById('newPassword').value.trim();
             const r = document.getElementById('newRole').value;
 
+            if(!u || !p) return alert("Popunite sva polja!");
+
             const { error } = await supabaseClient.from('users').insert([{ username: u, password: p, role: r }]);
-            if (error) alert("Greška!");
-            else { closeModal(); alert("Korisnik kreiran!"); }
+            if (error) alert("Greška pri čuvanju!");
+            else { closeModal(); alert("Korisnik uspešno kreiran!"); }
         }
 
-        function exportToCSV() {
-            let csv = "Tablica,Firma,Status,Ulaz,Izlaz,Palete\n";
-            const rows = document.querySelectorAll("table tr");
-            // Jednostavna logika za export vidljivih podataka
-            alert("Generisanje CSV izveštaja...");
-            // Ovde se može dodati puna Blob logika kao u prethodnim primerima
+        async function exportAndCleanup() {
+            if(currentTrucks.length === 0) return alert("Nema podataka za izvoz.");
+            
+            // 1. Generisanje CSV
+            let csv = "\uFEFFTablica,Firma,Status,Ulaz,Istovar,Izlaz,Palete\n";
+            currentTrucks.forEach(t => {
+                csv += `"${t.plate}","${t.company}","${t.status}","${t.time_in}","${t.time_unloaded}","${t.time_out}","${t.pallets}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const date = new Date().toLocaleDateString('sr-RS').replace(/\//g, '-');
+            link.href = URL.createObjectURL(blob);
+            link.download = `zf_report_${date}.csv`;
+            link.click();
+
+            // 2. Brisanje (Samo ISTOVARENI i IZAŠLI)
+            setTimeout(async () => {
+                if(confirm("Izveštaj je skinut. Želite li da obrišete ARHIVU? (Kamioni koji su ISTOVARENI ili su IZAŠLI će biti uklonjeni iz baze)")) {
+                    const { error } = await supabaseClient
+                        .from('trucks')
+                        .delete()
+                        .or('status.eq.ISTOVAREN,status.eq.IZAŠAO');
+                    
+                    if(error) alert("Greška pri brisanju!");
+                    else fetchAdminData();
+                }
+            }, 1000);
         }
 
         function openModal() { document.getElementById('userModal').style.display = 'flex'; }
         function closeModal() { document.getElementById('userModal').style.display = 'none'; }
 
+        // Inicijalno učitavanje
         fetchAdminData();
         setInterval(fetchAdminData, 10000);
     </script>
