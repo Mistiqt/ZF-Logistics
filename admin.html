@@ -24,24 +24,48 @@
         .header-title-wrapper h1 { margin: 0; font-size: 22px; text-transform: uppercase; font-weight: 800; color: var(--zf-dark); line-height: 1; letter-spacing: -0.02em; }
         .page-description { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
 
-        .filter-row { display: flex; gap: 15px; margin-top: 15px; padding: 15px; background: #f1f5f9; border-radius: 6px; align-items: flex-end; flex-wrap: wrap; }
+        .filter-row {
+            display: flex; gap: 15px; margin-top: 15px; padding: 15px;
+            background: #f1f5f9; border-radius: 6px; align-items: flex-end; flex-wrap: wrap;
+        }
         .filter-group { display: flex; flex-direction: column; gap: 5px; }
         .filter-group label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-        .filter-group input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; font-family: inherit; outline: none; }
-        
+        .filter-group input { 
+            padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; 
+            font-size: 13px; font-family: inherit; outline: none;
+        }
+        .filter-group input:focus { border-color: var(--zf-blue); box-shadow: 0 0 0 2px rgba(0,84,159,0.1); }
+        .btn-reset { 
+            padding: 9px 15px; font-size: 12px; background: white; border: 1px solid var(--border); 
+            border-radius: 4px; cursor: pointer; color: var(--text-muted); font-weight: 600;
+        }
+        .btn-reset:hover { background: #f8fafc; color: var(--zf-blue); }
+
         .btn-zf-style { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 20px; border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer; transition: all 0.2s; white-space: nowrap; text-transform: uppercase; border: none; font-family: 'Inter', sans-serif; }
         .btn-primary { background: var(--zf-blue); color: white; }
+        .btn-primary:hover { background: var(--zf-dark); }
         .btn-export { background-color: var(--excel-green); color: white; }
-        .btn-logout { background: white; border: 1px solid var(--border); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--logout-red); }
+        .btn-export:hover { background-color: var(--excel-green-hover); }
+        .btn-logout { background: white; border: 1px solid var(--border); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--logout-red); transition: all 0.2s; }
+        .btn-logout:hover { background-color: #fff1f2; border-color: #fda4af; }
 
+        .refresh-btn { cursor: pointer; font-size: 20px; display: inline-flex; align-items: center; justify-content: center; border: none; background: none; padding: 5px; outline: none; }
+        .refresh-btn i { color: #94a3b8; transition: color 0.2s ease; }
+        .refresh-btn:hover i, .refresh-btn.active i { color: var(--zf-blue); }
+        .refresh-btn.active i { animation: spin 0.8s linear; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .filter-indicator { width: 100%; max-width: var(--container-width); margin: 25px auto -20px; padding: 0 20px; box-sizing: border-box; font-size: 12px; font-weight: 700; color: var(--zf-blue); text-transform: uppercase; letter-spacing: 0.5px; }
         .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; width: 100%; max-width: var(--container-width); margin: 30px auto; padding: 0 20px; box-sizing: border-box; }
         .kpi-card { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .kpi-card h3 { font-size: 10px; margin: 0; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
         .kpi-card .number { font-size: 26px; font-weight: 800; margin: 8px 0; color: var(--zf-dark); }
 
         .main-card { background: white; width: 100%; max-width: var(--container-width); margin: 0 auto 20px; border-radius: 8px; border: 1px solid var(--border); padding: 20px; box-sizing: border-box; }
-        .table-scroll-wrapper { max-height: 500px; overflow: auto; margin-top: 10px; border: 1px solid #f1f5f9; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .table-scroll-wrapper { max-height: 500px; overflow-x: auto; overflow-y: auto; margin-top: 10px; border: 1px solid #f1f5f9; border-radius: 4px; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th { text-align: left; padding: 12px; background: #f8fafc; font-size: 10px; color: var(--text-muted); text-transform: uppercase; border-bottom: 2px solid var(--border); position: sticky; top: 0; }
+        th { text-align: left; padding: 12px; background: #f8fafc; font-size: 10px; color: var(--text-muted); text-transform: uppercase; border-bottom: 2px solid var(--border); font-weight: 800; position: sticky; top: 0; z-index: 5; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
         
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
@@ -49,9 +73,36 @@
         .status-ramp { background: #dcfce7; color: #15803d; }
         .status-unloaded { background: #e0f2fe; color: #0369a1; }
         .status-exited { background: #f1f5f9; color: #475569; }
-        
+
+        .role-gate { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; } 
+        .role-warehouse { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; } 
+        .role-exit { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; } 
+        .role-admin { background: #f1f5f9; color: #1e293b; border: 1px solid #e2e8f0; } 
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 30px; border-radius: 8px; width: 90%; max-width: 400px; }
+        .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 12px; font-weight: 700; color: var(--text-muted); }
+        .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 14px; }
+        .action-btn { background: none; border: none; cursor: pointer; font-size: 14px; margin-left: 10px; padding: 5px; transition: opacity 0.2s; }
+        .action-btn:hover { opacity: 0.7; }
+        .btn-edit { color: var(--zf-blue); }
+        .btn-delete { color: #be123c; }
+
+        footer { width: 100%; text-align: center; padding: 20px 0; color: var(--text-muted); font-size: 13px; background: white; border-top: 1px solid var(--border); margin-top: auto; }
+
+        @media (max-width: 768px) {
+            header { height: 85px; }
+            .header-content { flex-direction: row !important; justify-content: space-between !important; padding: 0 10px; }
+            .header-left { gap: 8px; }
+            .zf-logo-square { width: 34px; height: 34px; font-size: 18px; }
+            .header-title-wrapper h1 { font-size: 15px; }
+            .page-description { font-size: 9px; }
+            .header-content > div:last-child { display: flex !important; flex-direction: row !important; gap: 5px !important; }
+            .btn-zf-style.btn-primary { padding: 6px 8px; font-size: 10px; }
+            .btn-logout { padding: 6px 8px; font-size: 10px; gap: 4px; }
+            .main-card { width: 95%; }
+        }
     </style>
 </head>
 <body>
@@ -61,15 +112,21 @@
                 <div class="zf-logo-square"><i class="fas fa-chart-line"></i></div>
                 <div class="header-title-wrapper">
                     <h1>LOGISTIČKI MONITORING</h1>
-                    <div class="page-description">Administrator Panel (Supabase Live)</div>
+                    <div class="page-description">Administrator Panel</div>
                 </div>
             </div>
             <div style="display: flex; gap: 15px; align-items: center;">
-                <button class="btn-zf-style btn-primary" onclick="openUserModal()"><i class="fas fa-user-plus"></i> KREIRAJ NALOG</button>
-                <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Odjava</button>
+                <button class="btn-zf-style btn-primary" onclick="openUserModal()">
+                    <i class="fas fa-user-plus"></i> KREIRAJ NALOG
+                </button>
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Odjava
+                </button>
             </div>
         </div>
     </header>
+
+    <div class="filter-indicator" id="filter-status-text">PRIKAZ: SVI PODACI</div>
 
     <div class="kpi-container">
         <div class="kpi-card"><h3>UKUPNO</h3><div class="number" id="count-total">0</div></div>
@@ -77,24 +134,52 @@
         <div class="kpi-card" style="border-top: 5px solid #10b981;"><h3>NA RAMPI</h3><div class="number" id="count-ramp" style="color:#10b981">0</div></div>
         <div class="kpi-card" style="border-top: 5px solid #3b82f6;"><h3>ISTOVARENO</h3><div class="number" id="count-unloaded" style="color:#3b82f6">0</div></div>
         <div class="kpi-card" style="border-top: 5px solid #94a3b8;"><h3>ZAVRŠENO</h3><div class="number" id="count-exited">0</div></div>
+        <div class="kpi-card" style="border-top: 5px solid var(--stats-purple);">
+            <h3>PROS. ZADRŽAVANJE</h3>
+            <div class="number" id="avg-time" style="color:var(--stats-purple)">0</div>
+            <div style="font-size:10px; color:var(--text-muted); font-weight:700; text-transform:uppercase">minuta</div>
+        </div>
     </div>
 
     <div class="main-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h2 style="font-size: 16px; font-weight: 800; margin: 0;"><i class="fas fa-database" style="color:var(--zf-blue)"></i> ARHIVA ZAPISA</h2>
-            <button class="btn-zf-style btn-export" onclick="exportData()"><i class="fas fa-file-excel"></i> EXPORT CSV</button>
+        <div class="table-header">
+            <h2 style="font-size: 16px; font-weight: 800; margin: 0;"><i class="fas fa-database" style="color:var(--zf-blue)"></i> ARHIVA ZAPISA (KPI)</h2>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <button class="refresh-btn" onclick="manualRefresh(this)" title="Osveži">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="btn-zf-style btn-export" onclick="exportAndCleanup()">
+                    <i class="fas fa-file-excel"></i> EXPORT (CSV)
+                </button>
+            </div>
         </div>
 
         <div class="filter-row">
-            <div class="filter-group"><label>Pretraga Tablica</label><input type="text" id="filter-plate" placeholder="Pretraži..." oninput="loadAdminData()"></div>
-            <div class="filter-group"><label>Datum</label><input type="date" id="filter-date" onchange="loadAdminData()"></div>
+            <div class="filter-group">
+                <label><i class="fas fa-search"></i> Pretraga Tablica</label>
+                <input type="text" id="filter-plate" placeholder="npr. BG-123..." oninput="loadAdminData()">
+            </div>
+            <div class="filter-group">
+                <label><i class="far fa-calendar-alt"></i> Datum Ulaza</label>
+                <input type="date" id="filter-date" onchange="loadAdminData()">
+            </div>
+            <button class="btn-reset" onclick="resetFilters()">PONIŠTI FILTERE</button>
         </div>
 
         <div class="table-scroll-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th>Tablica</th><th>Firma</th><th>Vozilo</th><th>Roba</th><th>Palete</th><th>Status</th><th>Datum</th><th>Ulaz</th><th>Izlaz</th>
+                        <th style="width:100px;">Tablica</th>
+                        <th style="width:140px;">Firma</th>
+                        <th style="width:100px;">Vozilo</th>
+                        <th style="width:100px;">Roba</th>
+                        <th style="width:60px; text-align:center;">Palete</th>
+                        <th style="width:110px;">Status</th>
+                        <th style="width:100px;">Datum</th>
+                        <th style="width:70px;">Ulaz</th>
+                        <th style="width:70px;">Istovar</th>
+                        <th style="width:70px;">Izlaz</th>
                     </tr>
                 </thead>
                 <tbody id="admin-table-body"></tbody>
@@ -102,62 +187,279 @@
         </div>
     </div>
 
-    <script>
-        // PODACI SA VAŠE SLIKE
-        const SUPABASE_URL = "https://ttsesuskphqawnceuftm.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_jeu7nFFmSa-mxNC4-Z3gkw_jkciHN94";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <div class="main-card">
+        <div class="table-header">
+            <h2 style="font-size: 16px; font-weight: 800; margin: 0;"><i class="fas fa-users-cog" style="color:var(--zf-blue)"></i> KORISNIČKI NALOZI</h2>
+        </div>
+        <div class="table-scroll-wrapper" style="max-height: 300px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Korisničko Ime</th>
+                        <th>Nalog kreiran</th> <th>Pristup</th>
+                        <th style="text-align:right; width: 100px;">Akcije</th>
+                    </tr>
+                </thead>
+                <tbody id="user-list-body"></tbody>
+            </table>
+        </div>
+    </div>
 
+    <footer>
+        Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.2
+    </footer>
+
+    <div class="modal-overlay" id="userModal">
+        <div class="modal-content">
+            <h2 id="modal-title" style="margin-top:0;">Novi Korisnički Nalog</h2>
+            <input type="hidden" id="edit-id">
+            <div class="form-group"><label>Korisničko ime</label><input type="text" id="new-username"></div>
+            <div class="form-group"><label>Lozinka</label><input type="password" id="new-password"></div>
+            <div class="form-group">
+                <label>Pristup stranici</label>
+                <select id="new-access">
+                    <option value="gate.html">Ulazna Kapija</option>
+                    <option value="warehouse.html">Magacin</option>
+                    <option value="exit-gate.html">Izlazna Kapija</option>
+                    <option value="admin.html">Administrator Panel</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-zf-style btn-primary" style="flex: 1;" onclick="requestAdminAuth()">SAČUVAJ</button>
+                <button class="btn-zf-style" style="flex: 1; background: #f1f5f9; color: #64748b;" onclick="closeUserModal()">ODUSTANI</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-content" style="width: 320px; text-align: center;">
+            <i class="fas fa-shield-alt" style="font-size: 32px; color: var(--zf-blue); margin-bottom: 15px;"></i>
+            <h3>Potvrda Admina</h3>
+            <div class="form-group"><input type="password" id="auth-password" placeholder="Admin Lozinka" style="text-align: center;"></div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button id="auth-confirm-btn" class="btn-zf-style btn-primary" style="flex: 1;">POTVRDI</button>
+                <button class="btn-zf-style" style="flex: 1; background: #f1f5f9; color: #64748b;" onclick="closeAuthModal()">NAZAD</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- KONFIGURACIJA ---
+        const SB_URL = "TVOJ_SUPABASE_URL";
+        const SB_KEY = "TVOJ_SUPABASE_ANON_KEY";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+        const ADMIN_PASS = "Ninica1122!";
+
+        const roleConfig = {
+            "gate.html": { label: "Ulazna Kapija", class: "role-gate" },
+            "warehouse.html": { label: "Magacin", class: "role-warehouse" },
+            "exit-gate.html": { label: "Izlazna Kapija", class: "role-exit" },
+            "admin.html": { label: "Administrator", class: "role-admin" }
+        };
+
+        // --- POMOĆNE FUNKCIJE ---
+        function formatToNumericDate(dateStr) {
+            if (!dateStr) return "-";
+            const date = new Date(dateStr);
+            if (isNaN(date)) return dateStr;
+            const d = String(date.getDate()).padStart(2, '0');
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const g = date.getFullYear();
+            return `${d}.${m}.${g}.`;
+        }
+
+        function getDiffMin(start, end) {
+            if(!start || !end || start === "-" || end === "-") return null;
+            const s = start.split(':');
+            const e = end.split(':');
+            const startMin = parseInt(s[0]) * 60 + parseInt(s[1]);
+            const endMin = parseInt(e[0]) * 60 + parseInt(e[1]);
+            let diff = endMin - startMin;
+            if (diff < 0) diff += 1440; 
+            return diff;
+        }
+
+        // --- GLAVNE FUNKCIJE ZA PODATKE ---
         async function loadAdminData() {
             const plateFilter = document.getElementById('filter-plate').value.toUpperCase();
-            const dateFilter = document.getElementById('filter-date').value;
+            const dateInput = document.getElementById('filter-date').value;
+            const indicator = document.getElementById('filter-status-text');
 
-            // Čitanje direktno iz baze podataka
-            let { data: trucks, error } = await _supabase
-                .from('trucks')
-                .select('*')
-                .order('created_at', { ascending: false });
+            // Filtriranje kroz Supabase query
+            let query = _supabase.from('zf_trucks').select('*');
+            
+            if (plateFilter) query = query.ilike('plate', `%${plateFilter}%`);
+            if (dateInput) query = query.eq('date', dateInput);
+            
+            const { data: trucks, error } = await query.order('id', { ascending: false });
 
-            if (error) { console.error(error); return; }
+            if (error) return console.error(error);
+
+            // UI Indikator
+            if(plateFilter && dateInput) indicator.innerText = `Prikaz za tablicu: ${plateFilter} | Datum: ${formatToNumericDate(dateInput)}`;
+            else if(plateFilter) indicator.innerText = `Prikaz za tablicu: ${plateFilter}`;
+            else if(dateInput) indicator.innerText = `Prikaz za datum: ${formatToNumericDate(dateInput)}`;
+            else indicator.innerText = "PRIKAZ: SVI PODACI";
 
             const tbody = document.getElementById('admin-table-body');
             tbody.innerHTML = '';
+            
+            let sumMin = 0, countDone = 0;
+            let counts = { waiting: 0, ramp: 0, unloaded: 0, exited: 0 };
 
-            const filtered = trucks.filter(t => {
-                return t.plate.toUpperCase().includes(plateFilter) && 
-                       (!dateFilter || t.date === dateFilter);
-            });
-
-            filtered.forEach(t => {
+            trucks.forEach(t => {
                 let sCls = t.status === 'NA ČEKANJU' ? 'status-waiting' : 
                            t.status === 'NA RAMPI' ? 'status-ramp' : 
                            t.status === 'ISTOVAREN' ? 'status-unloaded' : 'status-exited';
+                
+                // KPI Logika
+                if (t.status === 'NA ČEKANJU') counts.waiting++;
+                if (t.status === 'NA RAMPI') counts.ramp++;
+                if (t.status === 'ISTOVAREN') counts.unloaded++;
+                if (t.status === 'IZAŠAO' || t.status === 'ZAVRŠENO') {
+                    counts.exited++;
+                    const diff = getDiffMin(t.entryTime || t.time, t.exitTime);
+                    if(diff !== null) { sumMin += diff; countDone++; }
+                }
 
                 tbody.innerHTML += `<tr>
                     <td style="font-weight:800; color:var(--zf-blue);">${t.plate}</td>
                     <td>${t.company}</td>
                     <td>${t.vehicle || '-'}</td>
                     <td>${t.goods || '-'}</td>
-                    <td>${t.pallets || 0}</td>
+                    <td style="text-align:center; font-weight:700; color:var(--zf-blue);">${t.pallets || '-'}</td>
                     <td><span class="badge ${sCls}">${t.status}</span></td>
-                    <td>${t.date}</td>
-                    <td>${t.entry_time || '-'}</td>
-                    <td>${t.exit_time || '-'}</td>
+                    <td style="font-size:11px;">${formatToNumericDate(t.date)}</td>
+                    <td>${t.entryTime || t.time || '-'}</td>
+                    <td>${t.unloadedTime || '-'}</td>
+                    <td>${t.exitTime || '-'}</td>
                 </tr>`;
             });
 
             // Update KPI
-            document.getElementById('count-total').innerText = filtered.length;
-            document.getElementById('count-waiting').innerText = filtered.filter(x => x.status === 'NA ČEKANJU').length;
-            document.getElementById('count-ramp').innerText = filtered.filter(x => x.status === 'NA RAMPI').length;
-            document.getElementById('count-unloaded').innerText = filtered.filter(x => x.status === 'ISTOVAREN').length;
-            document.getElementById('count-exited').innerText = filtered.filter(x => x.status === 'IZAŠAO').length;
+            document.getElementById('count-total').innerText = trucks.length;
+            document.getElementById('count-waiting').innerText = counts.waiting;
+            document.getElementById('count-ramp').innerText = counts.ramp;
+            document.getElementById('count-unloaded').innerText = counts.unloaded;
+            document.getElementById('count-exited').innerText = counts.exited;
+            document.getElementById('avg-time').innerText = countDone > 0 ? Math.round(sumMin / countDone) : "0";
         }
 
-        function logout() { window.location.href = 'login.html'; }
-        
-        window.onload = loadAdminData;
-        setInterval(loadAdminData, 5000); // Osvežava na 5 sekundi
+        async function exportAndCleanup() {
+            const { data: trucks } = await _supabase.from('zf_trucks').select('*');
+            if(!trucks || trucks.length === 0) return alert("Nema podataka za izvoz.");
+            
+            const sad = new Date();
+            const fileName = `zf_izvestaj_${String(sad.getMonth()+1).padStart(2,'0')}_${String(sad.getDate()).padStart(2,'0')}_${sad.getFullYear()}.csv`;
+            
+            let csv = "\uFEFFTablica,Firma,Vozilo,Roba,Palete,Status,Datum,Ulaz,Istovar,Izlaz\r\n";
+            trucks.forEach(t => { 
+                csv += `"${t.plate}","${t.company}","${t.vehicle || '-'}","${t.goods || '-'}","${t.pallets || 0}","${t.status}","${formatToNumericDate(t.date)}","${t.entryTime || '-'}","${t.unloadedTime || '-'}","${t.exitTime || '-'}"\r\n`; 
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+
+            setTimeout(async () => { 
+                if(confirm("Izveštaj je generisan. Želite li da obrišete ARHIVU (Istovarene i Završene kamione)?")) { 
+                    const { error } = await _supabase.from('zf_trucks')
+                        .delete()
+                        .in('status', ['ISTOVAREN', 'IZAŠAO', 'ZAVRŠENO']);
+                    
+                    if(!error) loadAdminData();
+                    else alert("Greška pri brisanju.");
+                } 
+            }, 1000);
+        }
+
+        // --- KORISNICI ---
+        async function renderUserList() {
+            const { data: users } = await _supabase.from('zf_users').select('*').order('id', {ascending: true});
+            const tbody = document.getElementById('user-list-body');
+            tbody.innerHTML = '';
+            users?.forEach((u) => { 
+                const config = roleConfig[u.role] || { label: u.role, class: "role-admin" };
+                tbody.innerHTML += `<tr>
+                    <td style="font-weight:600;">${u.username}</td>
+                    <td style="color:var(--text-muted); font-size: 11px;">${u.created_at ? new Date(u.created_at).toLocaleString('sr-RS') : "-"}</td>
+                    <td><span class="badge ${config.class}">${config.label}</span></td>
+                    <td style="text-align:right;">
+                        <button class="action-btn btn-edit" onclick="openUserModal('${u.id}', '${u.username}', '${u.password}', '${u.role}')"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn btn-delete" onclick="confirmDelete('${u.id}')"><i class="fas fa-trash-alt"></i></button>
+                    </td></tr>`; 
+            });
+        }
+
+        function openUserModal(id = '', user = '', pass = '', role = 'gate.html') {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('new-username').value = user;
+            document.getElementById('new-password').value = pass;
+            document.getElementById('new-access').value = role;
+            document.getElementById('modal-title').innerText = id ? "Izmeni Korisnički Nalog" : "Novi Korisnički Nalog";
+            document.getElementById('new-password').type = id ? "text" : "password";
+            document.getElementById('userModal').style.display = 'flex';
+        }
+
+        async function saveUser() {
+            const id = document.getElementById('edit-id').value;
+            const userData = {
+                username: document.getElementById('new-username').value.trim(),
+                password: document.getElementById('new-password').value.trim(),
+                role: document.getElementById('new-access').value
+            };
+
+            let result;
+            if (id) {
+                result = await _supabase.from('zf_users').update(userData).eq('id', id);
+            } else {
+                result = await _supabase.from('zf_users').insert([userData]);
+            }
+
+            if (!result.error) {
+                closeUserModal();
+                renderUserList();
+            } else {
+                alert("Greška pri čuvanju korisnika.");
+            }
+        }
+
+        function confirmDelete(id) {
+            document.getElementById('authModal').style.display = 'flex';
+            document.getElementById('auth-confirm-btn').onclick = async function() {
+                if(document.getElementById('auth-password').value === ADMIN_PASS) {
+                    await _supabase.from('zf_users').delete().eq('id', id);
+                    renderUserList(); closeAuthModal();
+                } else alert("Netačna lozinka!");
+            };
+        }
+
+        // --- OSTALO ---
+        function requestAdminAuth() {
+            if(!document.getElementById('new-username').value || !document.getElementById('new-password').value) return alert("Popunite polja!");
+            document.getElementById('authModal').style.display = 'flex';
+            document.getElementById('auth-password').focus();
+            document.getElementById('auth-confirm-btn').onclick = function() {
+                if(document.getElementById('auth-password').value === ADMIN_PASS) { saveUser(); closeAuthModal(); }
+                else alert("Netačna lozinka!");
+            };
+        }
+
+        function closeUserModal() { document.getElementById('userModal').style.display = 'none'; }
+        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; document.getElementById('auth-password').value = ""; }
+        function resetFilters() { document.getElementById('filter-plate').value = ''; document.getElementById('filter-date').value = ''; loadAdminData(); }
+        function manualRefresh(btn) { btn.classList.add('active'); loadAdminData(); setTimeout(() => { btn.classList.remove('active'); }, 800); }
+        function logout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
+
+        window.onload = () => { 
+            loadAdminData(); 
+            renderUserList(); 
+            setInterval(() => {
+                if (document.activeElement.tagName !== 'INPUT') loadAdminData();
+            }, 10000); 
+        };
     </script>
 </body>
 </html>
