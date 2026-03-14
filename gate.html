@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ulazna Kapija - ZF Logistics</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -211,7 +212,7 @@
             background-color: var(--zf-dark);
             color: white;
             width: 100%; 
-            border: none;                    
+            border: none;                     
             padding: 18px; 
             border-radius: 6px; 
             font-size: 16px; 
@@ -393,55 +394,30 @@
     </main>
 
     <footer>
-        Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.1
+        Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.2
     </footer>
 
     <script>
-        const DB_KEY = 'zf_trucks';
-        
-        // SINTETIČKI BIP ZVUK (Ne zavisi od spoljnih fajlova)
+        // --- SUPABASE KONFIGURACIJA ---
+        const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
+        const SB_KEY = "sb_publishable_jeu7nFFmSa-mxNC4-Z3gkw_jkciHN94";
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        // SINTETIČKI BIP ZVUK
         function playNotification() {
             try {
                 const context = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = context.createOscillator();
                 const gainNode = context.createGain();
-
                 oscillator.type = 'sine';
                 oscillator.frequency.setValueAtTime(880, context.currentTime); 
-                
                 gainNode.gain.setValueAtTime(0.1, context.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
-
                 oscillator.connect(gainNode);
                 gainNode.connect(context.destination);
-
                 oscillator.start();
                 oscillator.stop(context.currentTime + 0.2);
-            } catch (e) {
-                console.log("Audio API not supported or blocked");
-            }
-        }
-
-        function getNumericDate() {
-            const now = new Date();
-            const dan = String(now.getDate()).padStart(2, '0');
-            const mesec = String(now.getMonth() + 1).padStart(2, '0');
-            const godina = now.getFullYear();
-            return `${dan}.${mesec}.${godina}.`;
-        }
-
-        // ČIŠĆENJE U 00:00 (Briše sve osim statusa 'NA ČEKANJU')
-        function checkDailyCleanup() {
-            const lastCleanup = localStorage.getItem('zf_last_cleanup_date');
-            const today = getNumericDate();
-            
-            if (lastCleanup && lastCleanup !== today) {
-                let trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-                // Čuvamo samo kamione koji su još uvek na statusu 'NA ČEKANJU'
-                const filteredTrucks = trucks.filter(t => t.status === 'NA ČEKANJU');
-                localStorage.setItem(DB_KEY, JSON.stringify(filteredTrucks));
-            }
-            localStorage.setItem('zf_last_cleanup_date', today);
+            } catch (e) { console.log("Audio error"); }
         }
 
         const form = document.getElementById('announceForm');
@@ -459,14 +435,22 @@
             el.addEventListener('change', checkFormValidity);
         });
 
-        function renderGateList() {
-            const trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+        // --- RENDER LISTE IZ SUPABASE-A ---
+        async function renderGateList() {
+            const { data: trucks, error } = await supabaseClient
+                .from('trucks')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) { console.error(error); return; }
+
             const gateList = document.getElementById('gateTruckList');
             if(!gateList) return;
             gateList.innerHTML = '';
-            [...trucks].reverse().forEach((t) => {
+
+            trucks.forEach((t) => {
                 let statusTag = `<span class="tag status-announced">Na čekanju</span>`;
-                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Na rampi : ${t.ramp || ''}</span>`;
+                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Na rampi : ${t.gate || ''}</span>`;
                 else if (t.status === 'ISTOVAREN') statusTag = `<span class="tag status-exit">Spreman za izlaz</span>`;
                 else if (t.status === 'IZAŠAO') statusTag = `<span class="tag status-exited-final">Izašao</span>`;
                 
@@ -474,45 +458,30 @@
                 item.className = 'truck-item';
                 const showActions = (t.status === 'NA ČEKANJU');
 
-                let displayDate = t.date;
+                // Formatiranje vremena iz baze
+                const dateObj = new Date(t.created_at);
+                const displayDate = dateObj.toLocaleDateString('sr-RS');
+                const displayTime = dateObj.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' });
+
                 item.innerHTML = `
                     <div>
                         <span class="plate-box">${t.plate}</span> ${statusTag}
                         <span class="company-name-text">${t.company}</span>
-                        <small style="color:#64748b; display: block; margin-top: 6px;">${t.vehicle} • ${t.goods}<br><i class="fas fa-phone-alt"></i> ${t.phone || 'Nije unet'}</small>
+                        <small style="color:#64748b; display: block; margin-top: 6px;">Status: ${t.status}<br><i class="fas fa-phone-alt"></i> ${t.phone || 'Nije unet'}</small>
                     </div>
                     <div class="item-right-content">
-                        <div class="timestamp-box">${displayDate || ''}<br>${t.time}</div>
-                        ${showActions ? `<div class="action-btns"><button class="btn-action-small btn-edit" onclick="editTruck(${t.id})"><i class="fas fa-pen"></i></button><button class="btn-action-small btn-delete" onclick="deleteTruck(${t.id})"><i class="fas fa-trash"></i></button></div>` : ''}
+                        <div class="timestamp-box">${displayDate}<br>${displayTime}</div>
+                        ${showActions ? `<div class="action-btns"><button class="btn-action-small btn-delete" onclick="deleteTruck('${t.id}')"><i class="fas fa-trash"></i></button></div>` : ''}
                     </div>`;
                 gateList.appendChild(item);
             });
         }
 
-        function editTruck(id) {
-            const trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-            const truck = trucks.find(t => t.id === id);
-            if(truck) {
-                document.getElementById('editId').value = truck.id;
-                document.getElementById('companyName').value = truck.company;
-                document.getElementById('plateNumber').value = truck.plate;
-                document.getElementById('vehicleType').value = truck.vehicle;
-                document.getElementById('goodsType').value = truck.goods;
-                document.getElementById('driverPhone').value = truck.phone;
-                document.getElementById('formTitle').innerHTML = '<i class="fas fa-pen"></i> IZMENI NAJAVU';
-                document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> SAČUVAJ IZMENE';
-                document.getElementById('cancelBtn').style.display = 'block';
-                checkFormValidity();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        }
-
-        function deleteTruck(id) { 
+        // --- BRISANJE IZ SUPABASE-A ---
+        async function deleteTruck(id) { 
             if(confirm("Obrisati najavu?")) { 
-                let trucks = JSON.parse(localStorage.getItem(DB_KEY)) || []; 
-                trucks = trucks.filter(t => t.id !== id); 
-                localStorage.setItem(DB_KEY, JSON.stringify(trucks)); 
-                renderGateList(); 
+                const { error } = await supabaseClient.from('trucks').delete().eq('id', id);
+                if(!error) renderGateList();
             } 
         }
 
@@ -525,34 +494,25 @@
             checkFormValidity(); 
         }
 
-        form.onsubmit = (e) => {
+        // --- SLANJE U SUPABASE ---
+        form.onsubmit = async (e) => {
             e.preventDefault();
-            let masterList = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-            const editId = document.getElementById('editId').value;
             const truckData = { 
                 company: document.getElementById('companyName').value, 
                 plate: document.getElementById('plateNumber').value.toUpperCase(), 
-                vehicle: document.getElementById('vehicleType').value, 
-                goods: document.getElementById('goodsType').value, 
+                status: 'NA ČEKANJU',
                 phone: document.getElementById('driverPhone').value 
             };
 
-            if(editId) { 
-                const index = masterList.findIndex(t => t.id == editId); 
-                masterList[index] = { ...masterList[index], ...truckData }; 
-            } else { 
-                const now = new Date();
-                masterList.push({ 
-                    id: Date.now(), 
-                    ...truckData, 
-                    status: 'NA ČEKANJU', 
-                    date: getNumericDate(), 
-                    time: now.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) 
-                }); 
-                playNotification(); // Zvuk pri svakoj novoj najavi
+            const { error } = await supabaseClient.from('trucks').insert([truckData]);
+
+            if(!error) {
+                playNotification();
+                resetForm(); 
+                renderGateList();
+            } else {
+                alert("Greška pri čuvanju!");
             }
-            localStorage.setItem(DB_KEY, JSON.stringify(masterList));
-            resetForm(); renderGateList();
         };
 
         function manualRefresh(btn) { 
@@ -563,11 +523,9 @@
 
         function handleLogout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
         
-        checkDailyCleanup(); 
         renderGateList(); 
         checkFormValidity(); 
-        setInterval(renderGateList, 3000); 
-        setInterval(checkDailyCleanup, 3600000); 
+        setInterval(renderGateList, 5000); // Automatsko osvežavanje na 5 sekundi
     </script>
 </body>
 </html>
