@@ -235,7 +235,9 @@
         <div class="modal-content" style="width: 320px; text-align: center;">
             <i class="fas fa-shield-alt" style="font-size: 32px; color: var(--zf-blue); margin-bottom: 15px;"></i>
             <h3>Potvrda Admina</h3>
-            <div class="form-group"><input type="password" id="auth-password" placeholder="Admin Lozinka" style="text-align: center;"></div>
+            <div class="form-group">
+                <input type="password" id="auth-password" placeholder="Admin Lozinka" style="text-align: center;">
+            </div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button id="auth-confirm-btn" class="btn-zf-style btn-primary" style="flex: 1;">POTVRDI</button>
                 <button class="btn-zf-style" style="flex: 1; background: #f1f5f9; color: #64748b;" onclick="closeAuthModal()">NAZAD</button>
@@ -244,10 +246,12 @@
     </div>
 
     <script>
-        // --- KONFIGURACIJA ---
+        // --- SUPABASE KONFIGURACIJA ---
         const SB_URL = "TVOJ_SUPABASE_URL";
         const SB_KEY = "TVOJ_SUPABASE_ANON_KEY";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
+        
+        // FIKSNA ADMIN LOZINKA
         const ADMIN_PASS = "Ninica1122!";
 
         const roleConfig = {
@@ -279,23 +283,19 @@
             return diff;
         }
 
-        // --- GLAVNE FUNKCIJE ZA PODATKE ---
+        // --- RAD SA PODACIMA KAMIONA ---
         async function loadAdminData() {
             const plateFilter = document.getElementById('filter-plate').value.toUpperCase();
             const dateInput = document.getElementById('filter-date').value;
             const indicator = document.getElementById('filter-status-text');
 
-            // Filtriranje kroz Supabase query
             let query = _supabase.from('zf_trucks').select('*');
-            
             if (plateFilter) query = query.ilike('plate', `%${plateFilter}%`);
             if (dateInput) query = query.eq('date', dateInput);
             
             const { data: trucks, error } = await query.order('id', { ascending: false });
-
             if (error) return console.error(error);
 
-            // UI Indikator
             if(plateFilter && dateInput) indicator.innerText = `Prikaz za tablicu: ${plateFilter} | Datum: ${formatToNumericDate(dateInput)}`;
             else if(plateFilter) indicator.innerText = `Prikaz za tablicu: ${plateFilter}`;
             else if(dateInput) indicator.innerText = `Prikaz za datum: ${formatToNumericDate(dateInput)}`;
@@ -312,7 +312,6 @@
                            t.status === 'NA RAMPI' ? 'status-ramp' : 
                            t.status === 'ISTOVAREN' ? 'status-unloaded' : 'status-exited';
                 
-                // KPI Logika
                 if (t.status === 'NA ČEKANJU') counts.waiting++;
                 if (t.status === 'NA RAMPI') counts.ramp++;
                 if (t.status === 'ISTOVAREN') counts.unloaded++;
@@ -336,7 +335,6 @@
                 </tr>`;
             });
 
-            // Update KPI
             document.getElementById('count-total').innerText = trucks.length;
             document.getElementById('count-waiting').innerText = counts.waiting;
             document.getElementById('count-ramp').innerText = counts.ramp;
@@ -345,37 +343,7 @@
             document.getElementById('avg-time').innerText = countDone > 0 ? Math.round(sumMin / countDone) : "0";
         }
 
-        async function exportAndCleanup() {
-            const { data: trucks } = await _supabase.from('zf_trucks').select('*');
-            if(!trucks || trucks.length === 0) return alert("Nema podataka za izvoz.");
-            
-            const sad = new Date();
-            const fileName = `zf_izvestaj_${String(sad.getMonth()+1).padStart(2,'0')}_${String(sad.getDate()).padStart(2,'0')}_${sad.getFullYear()}.csv`;
-            
-            let csv = "\uFEFFTablica,Firma,Vozilo,Roba,Palete,Status,Datum,Ulaz,Istovar,Izlaz\r\n";
-            trucks.forEach(t => { 
-                csv += `"${t.plate}","${t.company}","${t.vehicle || '-'}","${t.goods || '-'}","${t.pallets || 0}","${t.status}","${formatToNumericDate(t.date)}","${t.entryTime || '-'}","${t.unloadedTime || '-'}","${t.exitTime || '-'}"\r\n`; 
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = fileName;
-            link.click();
-
-            setTimeout(async () => { 
-                if(confirm("Izveštaj je generisan. Želite li da obrišete ARHIVU (Istovarene i Završene kamione)?")) { 
-                    const { error } = await _supabase.from('zf_trucks')
-                        .delete()
-                        .in('status', ['ISTOVAREN', 'IZAŠAO', 'ZAVRŠENO']);
-                    
-                    if(!error) loadAdminData();
-                    else alert("Greška pri brisanju.");
-                } 
-            }, 1000);
-        }
-
-        // --- KORISNICI ---
+        // --- UPRAVLJANJE KORISNICIMA ---
         async function renderUserList() {
             const { data: users } = await _supabase.from('zf_users').select('*').order('id', {ascending: true});
             const tbody = document.getElementById('user-list-body');
@@ -399,10 +367,10 @@
             document.getElementById('new-password').value = pass;
             document.getElementById('new-access').value = role;
             document.getElementById('modal-title').innerText = id ? "Izmeni Korisnički Nalog" : "Novi Korisnički Nalog";
-            document.getElementById('new-password').type = id ? "text" : "password";
             document.getElementById('userModal').style.display = 'flex';
         }
 
+        // FUNKCIJA KOJA SE POZIVA NAKON USPEŠNE ADMIN POTVRDE
         async function saveUser() {
             const id = document.getElementById('edit-id').value;
             const userData = {
@@ -411,44 +379,100 @@
                 role: document.getElementById('new-access').value
             };
 
-            let result;
+            let error;
             if (id) {
-                result = await _supabase.from('zf_users').update(userData).eq('id', id);
+                const res = await _supabase.from('zf_users').update(userData).eq('id', id);
+                error = res.error;
             } else {
-                result = await _supabase.from('zf_users').insert([userData]);
+                const res = await _supabase.from('zf_users').insert([userData]);
+                error = res.error;
             }
 
-            if (!result.error) {
+            if (!error) {
                 closeUserModal();
                 renderUserList();
             } else {
-                alert("Greška pri čuvanju korisnika.");
+                alert("Greška pri čuvanju u bazu!");
             }
         }
 
+        // PROVERA ADMIN LOZINKE PRI KREIRANJU/IZMENI
+        function requestAdminAuth() {
+            const user = document.getElementById('new-username').value;
+            const pass = document.getElementById('new-password').value;
+            if(!user || !pass) return alert("Popunite polja za korisnika!");
+
+            // Otvori modal za potvrdu admina
+            document.getElementById('authModal').style.display = 'flex';
+            document.getElementById('auth-password').value = "";
+            document.getElementById('auth-password').focus();
+
+            // Podesi šta dugme "Potvrdi" radi u ovom kontekstu
+            document.getElementById('auth-confirm-btn').onclick = function() {
+                const inputPass = document.getElementById('auth-password').value;
+                if(inputPass === ADMIN_PASS) {
+                    saveUser(); // Lozinka tačna, snimi u Supabase
+                    closeAuthModal();
+                } else {
+                    alert("Netačna admin lozinka!");
+                }
+            };
+        }
+
+        // BRISANJE KORISNIKA
         function confirmDelete(id) {
             document.getElementById('authModal').style.display = 'flex';
-            document.getElementById('auth-confirm-btn').onclick = async function() {
-                if(document.getElementById('auth-password').value === ADMIN_PASS) {
-                    await _supabase.from('zf_users').delete().eq('id', id);
-                    renderUserList(); closeAuthModal();
-                } else alert("Netačna lozinka!");
-            };
-        }
-
-        // --- OSTALO ---
-        function requestAdminAuth() {
-            if(!document.getElementById('new-username').value || !document.getElementById('new-password').value) return alert("Popunite polja!");
-            document.getElementById('authModal').style.display = 'flex';
+            document.getElementById('auth-password').value = "";
             document.getElementById('auth-password').focus();
-            document.getElementById('auth-confirm-btn').onclick = function() {
-                if(document.getElementById('auth-password').value === ADMIN_PASS) { saveUser(); closeAuthModal(); }
-                else alert("Netačna lozinka!");
+
+            document.getElementById('auth-confirm-btn').onclick = async function() {
+                const inputPass = document.getElementById('auth-password').value;
+                if(inputPass === ADMIN_PASS) {
+                    const { error } = await _supabase.from('zf_users').delete().eq('id', id);
+                    if(!error) {
+                        renderUserList(); 
+                        closeAuthModal();
+                    } else {
+                        alert("Greška pri brisanju!");
+                    }
+                } else {
+                    alert("Netačna admin lozinka!");
+                }
             };
         }
 
+        // --- EXPORT I ČIŠĆENJE ---
+        async function exportAndCleanup() {
+            const { data: trucks } = await _supabase.from('zf_trucks').select('*');
+            if(!trucks || trucks.length === 0) return alert("Nema podataka za izvoz.");
+            
+            const sad = new Date();
+            const fileName = `zf_izvestaj_${String(sad.getMonth()+1).padStart(2,'0')}_${String(sad.getDate()).padStart(2,'0')}_${sad.getFullYear()}.csv`;
+            
+            let csv = "\uFEFFTablica,Firma,Vozilo,Roba,Palete,Status,Datum,Ulaz,Istovar,Izlaz\r\n";
+            trucks.forEach(t => { 
+                csv += `"${t.plate}","${t.company}","${t.vehicle || '-'}","${t.goods || '-'}","${t.pallets || 0}","${t.status}","${formatToNumericDate(t.date)}","${t.entryTime || '-'}","${t.unloadedTime || '-'}","${t.exitTime || '-'}"\r\n`; 
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+
+            setTimeout(async () => { 
+                if(confirm("Izveštaj je generisan. Želite li da obrišete ARHIVU (Istovarene i Završene kamione)?")) { 
+                    const { error } = await _supabase.from('zf_trucks')
+                        .delete()
+                        .in('status', ['ISTOVAREN', 'IZAŠAO', 'ZAVRŠENO']);
+                    if(!error) loadAdminData();
+                } 
+            }, 1000);
+        }
+
+        // --- POMOĆNE UI FUNKCIJE ---
         function closeUserModal() { document.getElementById('userModal').style.display = 'none'; }
-        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; document.getElementById('auth-password').value = ""; }
+        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; }
         function resetFilters() { document.getElementById('filter-plate').value = ''; document.getElementById('filter-date').value = ''; loadAdminData(); }
         function manualRefresh(btn) { btn.classList.add('active'); loadAdminData(); setTimeout(() => { btn.classList.remove('active'); }, 800); }
         function logout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
