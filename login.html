@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZF Logistics - Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -27,7 +28,7 @@
             display: flex;
             min-height: 100vh;
             width: 100vw;
-            flex-direction: row; /* Desktop: strana pored strane */
+            flex-direction: row;
         }
 
         /* LEVA STRANA - SA SLIKOM */
@@ -200,7 +201,6 @@
             text-align: center;
         }
 
-        /* SRPSKI FOOTER STIL */
         footer {
             width: 100%;
             text-align: center;
@@ -215,22 +215,20 @@
             font-weight: 700;
         }
 
-        /* RESPONSIVE PODEŠAVANJA */
         @media (max-width: 1024px) {
             .brand-side { padding: 40px; }
             .brand-content h1 { font-size: 48px; }
         }
 
-        
         @media (max-width: 900px) {
-            .login-container { flex-direction: column; } /* Slaganje vertikalno */
+            .login-container { flex-direction: column; }
             .brand-side { 
                 flex: none; 
                 padding: 40px 20px; 
                 text-align: center; 
                 align-items: center;
             }
-            .system-list { display: none; } /* Sakrivamo dugačku listu na mobilnom da skratimo skrolovanje */
+            .system-list { display: none; }
             .brand-content h1 { font-size: 36px; }
             .brand-content p.subtitle { font-size: 18px; margin-bottom: 0; }
             .form-side { padding: 20px; }
@@ -265,7 +263,7 @@
                     <form id="loginForm">
                         <div class="input-group">
                             <label>Korisničko ime</label>
-                            <input type="text" id="username" class="input-field" placeholder="korisnicko@zf.com" required>
+                            <input type="text" id="username" class="input-field" placeholder="korisnik@zf.com" required>
                         </div>
 
                         <div class="input-group">
@@ -273,7 +271,7 @@
                             <input type="password" id="password" class="input-field" placeholder="••••••••" required>
                         </div>
 
-                        <button type="submit" class="btn-login">
+                        <button type="submit" class="btn-login" id="loginBtn">
                              <i class="fas fa-sign-in-alt"></i> PRIJAVA
                         </button>
                     </form>
@@ -285,37 +283,53 @@
             </div>
 
             <footer>
-                Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.0
+                Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.2
             </footer>
         </div>
     </div>
 
     <script>
-        document.getElementById('loginForm').onsubmit = function(e) {
+        // SUPABASE KONFIGURACIJA
+        const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
+        const SB_KEY = "sb_publishable_jeu7nFFmSa-mxNC4-Z3gkw_jkciHN94";
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        document.getElementById('loginForm').onsubmit = async function(e) {
             e.preventDefault();
-            const user = document.getElementById('username').value.trim().toLowerCase();
+            const loginBtn = document.getElementById('loginBtn');
+            const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
 
-            let targetPage = "";
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROVERA...';
 
-            if (user === 'dusan.kostic@zf.com' && pass === 'Ninica1122!') targetPage = 'admin.html';
-            else if (user === 'kapija@zf.com' && pass === '123') targetPage = 'gate.html';
-            else if (user === 'magacin1@zf.com' && pass === '123') targetPage = 'warehouse.html';
-            else if (user === 'kapijaizlaz@zf.com' && pass === '123') targetPage = 'exit-gate.html';
-            
-            if (targetPage === "") {
-                const storedUsers = JSON.parse(localStorage.getItem('zf_users')) || [];
-                const foundUser = storedUsers.find(u => u.username.toLowerCase() === user && u.password === pass);
-                if (foundUser) {
-                    targetPage = foundUser.role; 
+            try {
+                // Provera u Supabase tabeli 'profiles'
+                const { data, error } = await supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('username', user)
+                    .eq('password', pass)
+                    .single();
+
+                if (data) {
+                    // Ako korisnik postoji, sačuvaj info i preusmeri
+                    sessionStorage.setItem('zf_user_logged', data.username);
+                    sessionStorage.setItem('zf_user_role', data.role);
+                    
+                    // Preusmeravanje na osnovu uloge (role) u bazi
+                    // Uloga u bazi treba da bude npr: gate.html, warehouse.html, admin.html
+                    window.location.href = data.role; 
+                } else {
+                    alert("Neispravno korisničko ime ili lozinka!");
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> PRIJAVA';
                 }
-            }
-
-            if (targetPage !== "") {
-                sessionStorage.setItem('zf_user_logged', user);
-                window.location.href = targetPage;
-            } else {
-                alert("Neispravni podaci! Proverite korisničko ime i lozinku.");
+            } catch (err) {
+                console.error(err);
+                alert("Došlo je do greške pri povezivanju sa bazom.");
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> PRIJAVA';
             }
         };
     </script>
