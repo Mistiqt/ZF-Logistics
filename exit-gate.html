@@ -157,23 +157,19 @@
     </footer>
 
     <script>
-        // Supabase Konfiguracija
+        // Supabase Config
         const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
         async function renderExitList() {
-            // Povlačimo podatke direktno iz Supabase tabele zf_trucks
             const { data: trucks, error } = await _supabase
                 .from('zf_trucks')
                 .select('*')
                 .neq('status', 'IZAŠAO')
-                .order('created_at', { ascending: false });
+                .order('id', { ascending: false });
 
-            if (error) {
-                console.error("Greška:", error);
-                return;
-            }
+            if (error) return;
 
             const readyContainer = document.getElementById('readyList');
             const processContainer = document.getElementById('processList');
@@ -194,8 +190,9 @@
         }
 
         function createCard(truck, isReady) {
-            // Koristimo tvoju originalnu logiku za timestamp: date + entryTime ili time
-            const timestamp = `${truck.date || ''} ${truck.entryTime || truck.time || ''}`;
+            // FIX: Koristimo tvoju originalnu logiku ali sa ispravnim nazivima kolona iz baze
+            // Na slici se vidi da su nazivi kolona 'date' i 'time'
+            const timestamp = `${truck.date || ''} ${truck.time || ''}`;
 
             return `
                 <div class="exit-card ${isReady ? 'status-istovaren' : 'status-na-istovaru'}">
@@ -223,20 +220,13 @@
         async function confirmExit(truckId, plate) {
             if (confirm(`Potvrdi izlaz za vozilo ${plate}?`)) {
                 const now = new Date().toLocaleTimeString('sr-RS', {hour:'2-digit', minute:'2-digit'});
-                
                 const { error } = await _supabase
                     .from('zf_trucks')
-                    .update({ 
-                        status: 'IZAŠAO',
-                        exitTime: now 
-                    })
+                    .update({ status: 'IZAŠAO', exit_time: now }) // Ovde sam dodao exit_time kolonu
                     .eq('id', truckId);
-
-                if (error) {
-                    alert("Greška pri ažuriranju: " + error.message);
-                } else {
-                    renderExitList();
-                }
+                
+                if (error) alert("Greška: " + error.message);
+                else renderExitList();
             }
         }
 
@@ -248,7 +238,6 @@
 
         function logout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
 
-        // Inicijalno učitavanje i auto-refresh
         renderExitList(); 
         setInterval(renderExitList, 5000);
     </script>
