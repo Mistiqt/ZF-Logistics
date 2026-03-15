@@ -157,11 +157,13 @@
     </footer>
 
     <script>
+        // Supabase Konfiguracija
         const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
         async function renderExitList() {
+            // Povlačimo podatke direktno iz Supabase tabele zf_trucks
             const { data: trucks, error } = await _supabase
                 .from('zf_trucks')
                 .select('*')
@@ -169,7 +171,7 @@
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error("Greška pri čitanju:", error);
+                console.error("Greška:", error);
                 return;
             }
 
@@ -192,18 +194,8 @@
         }
 
         function createCard(truck, isReady) {
-            const timeLabel = isReady ? 'Istovaren' : 'Ulaz';
-            
-            let displayTime = "-";
-            
-            // FOKUSIRANA LOGIKA PREMA TVOJOJ TABELI:
-            if (isReady) {
-                // Ako je završen, tražimo ramp_start_time (gde aplikacija upisuje kraj) ili bar osnovni time
-                displayTime = truck.ramp_start_time || truck.time || "-";
-            } else {
-                // Ako je još na rampi/prijavi, pokazujemo osnovno vreme ulaza
-                displayTime = truck.time || "-";
-            }
+            // Koristimo tvoju originalnu logiku za timestamp: date + entryTime ili time
+            const timestamp = `${truck.date || ''} ${truck.entryTime || truck.time || ''}`;
 
             return `
                 <div class="exit-card ${isReady ? 'status-istovaren' : 'status-na-istovaru'}">
@@ -218,7 +210,7 @@
                             <div class="detail-item"><i class="fas fa-warehouse"></i><span>Rampa: <b>${truck.ramp || '-'}</b></span></div>
                             <div class="detail-item">
                                 <i class="far fa-clock"></i>
-                                <span>${timeLabel}: <b>${displayTime}</b></span>
+                                <span>Ulaz: <b>${timestamp}</b></span>
                             </div>
                         </div>
                     </div>
@@ -230,13 +222,18 @@
 
         async function confirmExit(truckId, plate) {
             if (confirm(`Potvrdi izlaz za vozilo ${plate}?`)) {
+                const now = new Date().toLocaleTimeString('sr-RS', {hour:'2-digit', minute:'2-digit'});
+                
                 const { error } = await _supabase
                     .from('zf_trucks')
-                    .update({ status: 'IZAŠAO' })
+                    .update({ 
+                        status: 'IZAŠAO',
+                        exitTime: now 
+                    })
                     .eq('id', truckId);
 
                 if (error) {
-                    alert("Greška pri upisu u bazu: " + error.message);
+                    alert("Greška pri ažuriranju: " + error.message);
                 } else {
                     renderExitList();
                 }
@@ -251,6 +248,7 @@
 
         function logout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
 
+        // Inicijalno učitavanje i auto-refresh
         renderExitList(); 
         setInterval(renderExitList, 5000);
     </script>
