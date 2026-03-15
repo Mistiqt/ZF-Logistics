@@ -295,7 +295,6 @@
                            t.status === 'NA RAMPI' ? 'status-ramp' : 
                            t.status === 'ISTOVAREN' ? 'status-unloaded' : 'status-exited';
 
-                // Računanje proseka
                 if (t.entry_time && t.exit_time) {
                     const start = t.entry_time.split(':');
                     const end = t.exit_time.split(':');
@@ -327,27 +326,31 @@
         }
 
         async function renderUserList() {
-            const { data: users, error } = await _supabase.from('users').select('*');
+            const { data: users, error } = await _supabase.from('users').select('*').order('created_at', { ascending: false });
             if (error) return;
             
             const tbody = document.getElementById('user-list-body');
             tbody.innerHTML = '';
+            
             users.forEach((u) => { 
                 const config = roleConfig[u.role] || { label: u.role, class: "role-admin" };
-                tbody.innerHTML += `<tr>
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
                     <td style="font-weight:600;">${u.username}</td>
                     <td style="color:var(--text-muted); font-size: 11px;">${new Date(u.created_at).toLocaleDateString()}</td>
                     <td><span class="badge ${config.class}">${config.label}</span></td>
                     <td style="text-align:right;">
-                        <button class="action-btn btn-edit" onclick='openUserModal(${JSON.stringify(u)})'><i class="fas fa-edit"></i></button>
+                        <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
                         <button class="action-btn btn-delete" onclick="confirmDelete('${u.id}')"><i class="fas fa-trash-alt"></i></button>
                     </td>
-                </tr>`; 
+                `;
+                tbody.appendChild(tr);
+                tr.querySelector('.btn-edit').onclick = () => openUserModal(u);
             });
         }
 
         function openUserModal(user = null) {
-            if(user && typeof user === 'object') {
+            if(user && typeof user === 'object' && user.id) {
                 document.getElementById('edit-id').value = user.id;
                 document.getElementById('new-username').value = user.username;
                 document.getElementById('new-password').value = user.password;
@@ -367,6 +370,7 @@
 
         function requestAdminAuth() {
             document.getElementById('authModal').style.display = 'flex';
+            document.getElementById('auth-password').value = "";
             document.getElementById('auth-password').focus();
             document.getElementById('auth-confirm-btn').onclick = async function() {
                 if(document.getElementById('auth-password').value === ADMIN_PASS) {
@@ -384,20 +388,32 @@
                 role: document.getElementById('new-access').value
             };
 
+            if(!userData.username || !userData.password) return alert("Popunite sva polja!");
+
+            let error;
             if (id) {
-                await _supabase.from('users').update(userData).eq('id', id);
+                const { error: err } = await _supabase.from('users').update(userData).eq('id', id);
+                error = err;
             } else {
-                await _supabase.from('users').insert([userData]);
+                const { error: err } = await _supabase.from('users').insert([userData]);
+                error = err;
             }
-            closeUserModal(); renderUserList();
+
+            if(error) alert("Greška: " + error.message);
+            else {
+                closeUserModal();
+                renderUserList();
+            }
         }
 
         function confirmDelete(id) {
             document.getElementById('authModal').style.display = 'flex';
+            document.getElementById('auth-password').value = "";
             document.getElementById('auth-confirm-btn').onclick = async function() {
                 if(document.getElementById('auth-password').value === ADMIN_PASS) {
                     await _supabase.from('users').delete().eq('id', id);
-                    renderUserList(); closeAuthModal();
+                    renderUserList(); 
+                    closeAuthModal();
                 } else alert("Netačna lozinka!");
             };
         }
