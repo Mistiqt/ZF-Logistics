@@ -281,7 +281,6 @@
 
             indicator.innerText = plateFilter || dateInput ? "PRIMENJEN FILTER" : "PRIKAZ: SVI PODACI";
 
-            // IZMENA: zamenjeno sa 'trucks'
             let { data: trucks, error } = await _supabase.from('trucks').select('*').order('id', { ascending: false });
             if (error) return console.error(error);
 
@@ -327,8 +326,8 @@
         }
 
         async function renderUserList() {
-            // IZMENA: zamenjeno sa 'profiles'
-            let { data: users, error } = await _supabase.from('profiles').select('*').order('created_at', { ascending: false });
+            // IZMENA: zamenjeno sa 'zf_users'
+            let { data: users, error } = await _supabase.from('zf_users').select('*').order('created_at', { ascending: false });
             if (error) return console.error(error);
 
             const tbody = document.getElementById('user-list-body');
@@ -378,11 +377,11 @@
                 role: document.getElementById('new-access').value
             };
 
-            // IZMENA: zamenjeno sa 'profiles'
+            // IZMENA: zamenjeno sa 'zf_users'
             if (id) {
-                await _supabase.from('profiles').update(userData).eq('id', id);
+                await _supabase.from('zf_users').update(userData).eq('id', id);
             } else {
-                await _supabase.from('profiles').insert([userData]);
+                await _supabase.from('zf_users').insert([userData]);
             }
             closeUserModal(); renderUserList();
         }
@@ -391,15 +390,14 @@
             document.getElementById('authModal').style.display = 'flex';
             document.getElementById('auth-confirm-btn').onclick = async function() {
                 if(document.getElementById('auth-password').value === ADMIN_PASS) {
-                    // IZMENA: zamenjeno sa 'profiles'
-                    await _supabase.from('profiles').delete().eq('id', id);
+                    // IZMENA: zamenjeno sa 'zf_users'
+                    await _supabase.from('zf_users').delete().eq('id', id);
                     renderUserList(); closeAuthModal();
                 } else alert("Netačna lozinka!");
             };
         }
 
         async function exportAndCleanup() {
-            // IZMENA: zamenjeno sa 'trucks'
             let { data: trucks } = await _supabase.from('trucks').select('*');
             if(!trucks || trucks.length === 0) return alert("Nema podataka.");
 
@@ -415,7 +413,6 @@
 
             setTimeout(async () => {
                 if(confirm("Obriši ARHIVU (Istovarene i Završene)?")) {
-                    // IZMENA: zamenjeno sa 'trucks'
                     await _supabase.from('trucks').delete().in('status', ['ISTOVAREN', 'IZAŠAO', 'ZAVRŠENO']);
                     loadAdminData();
                 }
