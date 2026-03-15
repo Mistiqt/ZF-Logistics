@@ -492,16 +492,21 @@
         window.finalizeUnload = async () => {
             const palletsCount = document.getElementById('palletInput').value;
             const now = new Date();
-            // ISPRAVLJENI NAZIVI KOLONA: pallets i unloadedTime
+            
+            // KLJUČNA IZMENA: Status se menja u 'ZA IZLAZ' da bi se video na portirnici
             const { error } = await _supabase.from('zf_trucks').update({
-                status: 'ISTOVAREN',
+                status: 'ZA IZLAZ',
                 pallets: palletsCount,
                 unloadedTime: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             }).eq('id', currentTruckId);
             
-            if(error) console.error(error);
-            closeModals();
-            fetchTrucks();
+            if(error) {
+                alert("Greška pri čuvanju podataka!");
+                console.error(error);
+            } else {
+                closeModals();
+                fetchTrucks();
+            }
         };
 
         window.closeModals = () => { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); };
