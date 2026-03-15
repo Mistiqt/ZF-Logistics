@@ -417,7 +417,6 @@
                 if (t.status === 'NA ČEKANJU') {
                     currentWaitingCount++;
                     
-                    // TIMESTAMP LOGIKA: Ako nema arrival_date/time, koristi created_at iz baze
                     const dTime = t.arrival_time || (t.created_at ? new Date(t.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '/');
                     const dDate = t.arrival_date || (t.created_at ? new Date(t.created_at).toLocaleDateString('sr-RS') : '');
 
@@ -491,11 +490,12 @@
         };
 
         window.finalizeUnload = async () => {
-            const pallets = document.getElementById('palletInput').value;
+            const palletsCount = document.getElementById('palletInput').value;
             const now = new Date();
+            // ISPRAVLJENI NAZIVI KOLONA: pallets i unloadedTime
             const { error } = await _supabase.from('zf_trucks').update({
                 status: 'ISTOVAREN',
-                pallets: pallets,
+                pallets: palletsCount,
                 unloadedTime: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             }).eq('id', currentTruckId);
             
