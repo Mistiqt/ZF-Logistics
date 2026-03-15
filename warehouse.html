@@ -6,7 +6,6 @@
     <title>Magacin - ZF Logistics</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --zf-blue: #00549f;
@@ -184,6 +183,7 @@
         .info-item i { width: 22px; color: var(--zf-blue); font-size: 13px; margin-right: 6px; text-align: center; }
         .info-value { color: var(--text-main); font-weight: 600; }
 
+        /* IZMENA: Okvir, fiksna visina i skrolovanje za listu čekanja */
         #waitingContainer {
             height: 500px;
             overflow-y: auto;
@@ -338,16 +338,12 @@
     </div>
 
     <footer class="footer">
-        <p>Aplikaciju razvio <b>Dušan Kostić</b> © 2026. Ver 1.4 (Supabase)</p>
+        <p>Aplikaciju razvio <b>Dušan Kostić</b> © 2026. Ver 1.2</p>
     </footer>
 
     <script>
-        // --- KONFIGURACIJA ---
-        const SB_URL = "https://lbqiavcibdlgmkkytkv.supabase.co";
-        const SB_KEY = "sb_publishable_jeu7nFFmSa-mxNC4-Z3gkw_jkciHN94";
-        const _supabase = supabase.createClient(SB_URL, SB_KEY);
-
-        let currentTruckId = null;
+        const DB_KEY = 'zf_trucks';
+        let currentTruckIdx = null;
         let lastWaitingCount = -1; 
         const rampList = ["RAMPA 1", "RAMPA 2", "RAMPA 3", "RAMPA 4", "TEHNIČKA RAMPA", "ROLO RAMPA"];
 
@@ -367,44 +363,59 @@
             } catch (e) { console.log("Audio blocked"); }
         }
 
-        async function handleRefresh(btn) {
+        function getNumericDate() {
+            const now = new Date();
+            return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}.`;
+        }
+
+        function checkDailyCleanup() {
+            const lastCleanup = localStorage.getItem('zf_last_cleanup_date');
+            const today = getNumericDate();
+            if (lastCleanup && lastCleanup !== today) {
+                let trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+                const filtered = trucks.filter(t => t.status === 'NA ČEKANJU');
+                localStorage.setItem(DB_KEY, JSON.stringify(filtered));
+            }
+            localStorage.setItem('zf_last_cleanup_date', today);
+        }
+
+        function handleRefresh(btn) {
             btn.classList.add('active');
-            await render();
+            render();
             setTimeout(() => { btn.classList.remove('active'); }, 800);
         }
 
-        async function render() {
-            const { data: trucks, error } = await _supabase.from('zf_trucks').select('*').order('created_at', { ascending: true });
-            if (error) { console.error(error); return; }
-
+        function render() {
+            const trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
             const rContainer = document.getElementById('rampsContainer');
             const wContainer = document.getElementById('waitingContainer');
+            
             rContainer.innerHTML = ''; 
             wContainer.innerHTML = '';
             let currentWaitingCount = 0;
 
-            // STATUS RAMPI
             rampList.forEach(name => {
-                const t = trucks.find(tr => tr.status === 'NA RAMPI' && tr.ramp === name);
+                const truck = trucks.find(t => t.status === 'NA RAMPI' && t.ramp === name);
                 const card = document.createElement('div');
-                card.className = `ramp-card ${t ? 'occupied' : ''}`;
+                card.className = `ramp-card ${truck ? 'occupied' : ''}`;
                 
-                if (t) {
+                if (truck) {
+                    const realIdx = trucks.indexOf(truck);
                     card.innerHTML = `
                         <div class="ramp-top"><span>${name}</span><span style="color:var(--success-green)">ZAUZETO</span></div>
                         <div class="info-container">
-                            <span class="company-name">${t.company}</span>
-                            <span class="plate-number">${t.plate}</span>
+                            <span class="company-name">${truck.company}</span>
+                            <span class="plate-number">${truck.plate}</span>
                             <div class="info-list">
-                                <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${t.vehicle || '/'}</span></div>
-                                <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${t.goods || '/'}</span></div>
-                                <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${t.phone || '/'}</span></div>
+                                <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${truck.vehicle || '/'}</span></div>
+                                <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${truck.goods || '/'}</span></div>
+                                <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${truck.phone || '/'}</span></div>
                                 <div class="info-item" style="margin-top:3px;">
-                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Na rampi od:</b> ${t.rampStartTime || '/'}</span>
+                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Na rampi od:</b> ${truck.rampStartDate || ''} ${truck.rampStartTime || '/'}</span>
                                 </div>
                             </div>
                         </div>
-                        <button class="btn-unload" onclick="openPalletModal('${t.id}')"><i class="fas fa-check"></i> ISTOVAR ZAVRŠEN</button>`;
+                        <button class="btn-unload" onclick="openPalletModal(${realIdx})"><i class="fas fa-check"></i> ISTOVAR ZAVRŠEN</button>`;
                 } else {
                     card.innerHTML = `<div class="ramp-top">${name} <span style="color:var(--text-muted); font-weight:500">SLOBODNO</span></div>
                                       <div style="margin:auto; color:#cbd5e1; text-align:center; font-size: 13px; font-weight:500;">Dostupno za dodelu</div>`;
@@ -412,67 +423,68 @@
                 rContainer.appendChild(card);
             });
 
-            // KAMIONI NA ČEKANJU
-            trucks.filter(t => t.status === 'NA ČEKANJU').forEach(t => {
-                currentWaitingCount++;
-                const card = document.createElement('div');
-                card.className = 'waiting-card';
-                card.innerHTML = `
-                    <div class="info-container" style="margin:0;">
-                        <span class="company-name">${t.company}</span>
-                        <span class="plate-number">${t.plate}</span>
-                        <div class="info-list">
-                            <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${t.vehicle || '/'}</span></div>
-                            <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${t.goods || '/'}</span></div>
-                            <div class="info-item" style="margin-top:3px;">
-                                <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Najavljen:</b> ${t.date || ''} ${t.time || ''}</span>
+            trucks.forEach((t, i) => {
+                if (t.status === 'NA ČEKANJU') {
+                    currentWaitingCount++;
+                    const card = document.createElement('div');
+                    card.className = 'waiting-card';
+                    card.innerHTML = `
+                        <div class="info-container" style="margin:0;">
+                            <span class="company-name">${t.company}</span>
+                            <span class="plate-number">${t.plate}</span>
+                            <div class="info-list">
+                                <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${t.vehicle || '/'}</span></div>
+                                <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${t.goods || '/'}</span></div>
+                                <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${t.phone || '/'}</span></div>
+                                <div class="info-item" style="margin-top:3px;">
+                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Najavljen:</b> ${t.date || ''} ${t.time || ''}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <button class="btn-assign" onclick="openRampModal('${t.id}')">DODELI RAMPU</button>`;
-                wContainer.appendChild(card);
+                        <button class="btn-assign" onclick="openRampModal(${i})">DODELI RAMPU</button>`;
+                    wContainer.appendChild(card);
+                }
             });
 
-            if (lastWaitingCount !== -1 && currentWaitingCount > lastWaitingCount) playNotification();
+            if (lastWaitingCount !== -1 && currentWaitingCount > lastWaitingCount) {
+                playNotification();
+            }
             lastWaitingCount = currentWaitingCount;
             document.getElementById('waitingCount').textContent = currentWaitingCount;
         }
 
-        // --- MODALI ---
-        window.openRampModal = async (id) => {
-            currentTruckId = id;
-            const { data: busy } = await _supabase.from('zf_trucks').select('ramp').eq('status', 'NA RAMPI');
+        window.openRampModal = (i) => {
+            currentTruckIdx = i;
+            const trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
             const grid = document.getElementById('modalRampGrid');
             grid.innerHTML = ''; 
-
-            rampList.forEach(r => {
-                const isBusy = busy.some(b => b.ramp === r);
+            rampList.forEach(rampName => {
+                const isOccupied = trucks.some(t => t.ramp === rampName && t.status === 'NA RAMPI');
                 const btn = document.createElement('button');
-                btn.className = 'ramp-btn';
-                btn.innerHTML = r;
-                if (!isBusy) {
-                    btn.onclick = async () => {
+                btn.className = isOccupied ? 'ramp-btn occupied-btn' : 'ramp-btn';
+                btn.innerHTML = rampName;
+                if (!isOccupied) {
+                    btn.onclick = () => {
+                        let allTrucks = JSON.parse(localStorage.getItem(DB_KEY));
                         const now = new Date();
-                        await _supabase.from('zf_trucks').update({
-                            status: 'NA RAMPI',
-                            ramp: r,
-                            rampStartTime: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                        }).eq('id', currentTruckId);
+                        allTrucks[currentTruckIdx].status = 'NA RAMPI';
+                        allTrucks[currentTruckIdx].ramp = rampName;
+                        allTrucks[currentTruckIdx].rampStartDate = getNumericDate();
+                        allTrucks[currentTruckIdx].rampStartTime = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        localStorage.setItem(DB_KEY, JSON.stringify(allTrucks));
                         closeModals(); render();
                     };
-                } else { 
-                    btn.disabled = true; 
-                    btn.style.background = "#e2e8f0"; btn.style.color = "#94a3b8"; btn.style.cursor = "not-allowed";
-                }
+                } else { btn.disabled = true; btn.style.background = "#e2e8f0"; btn.style.color = "#94a3b8"; }
                 grid.appendChild(btn);
             });
             document.getElementById('rampModal').style.display = 'flex';
         };
 
-        window.openPalletModal = async (id) => {
-            currentTruckId = id;
-            const { data: t } = await _supabase.from('zf_trucks').select('*').eq('id', id).single();
-            document.getElementById('palletTruckInfo').textContent = `${t.plate} | ${t.company}`;
+        window.openPalletModal = (idx) => {
+            currentTruckIdx = idx;
+            const trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+            const truck = trucks[idx];
+            document.getElementById('palletTruckInfo').textContent = `${truck.plate} | ${truck.company}`;
             document.getElementById('palletInput').value = '';
             document.getElementById('palletModal').style.display = 'flex';
         };
@@ -482,22 +494,21 @@
             document.getElementById('finalizeBtn').disabled = (isNaN(val) || val <= 0);
         };
 
-        window.finalizeUnload = async () => {
-            const p = document.getElementById('palletInput').value;
-            await _supabase.from('zf_trucks').update({
-                status: 'ISTOVAREN',
-                pallets: p,
-                unloadedTime: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-            }).eq('id', currentTruckId);
+        window.finalizeUnload = () => {
+            let trucks = JSON.parse(localStorage.getItem(DB_KEY));
+            trucks[currentTruckIdx].status = 'ISTOVAREN';
+            trucks[currentTruckIdx].pallets = document.getElementById('palletInput').value;
+            trucks[currentTruckIdx].unloadedTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            localStorage.setItem(DB_KEY, JSON.stringify(trucks));
             closeModals(); render();
         };
 
         window.closeModals = () => { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); };
-
-        // REALTIME OSVEŽAVANJE
-        _supabase.channel('zf_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'zf_trucks' }, render).subscribe();
-
+        
+        checkDailyCleanup();
         render();
+        setInterval(render, 3000); 
+        setInterval(checkDailyCleanup, 3600000);
     </script>
 </body>
 </html>
