@@ -25,9 +25,9 @@
 
         .brand-side {
             flex: 1;
-            background: #00549f; /* Ako slika ne učita, plava pozadina */
-            background: linear-gradient(rgba(0, 84, 159, 0.88), rgba(0, 84, 159, 0.88)), url('pictures/images_enhanced.jpg') no-repeat center center;
+            background: url('pictures/images_enhanced.jpg') no-repeat center center;
             background-size: cover;
+            position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -36,6 +36,15 @@
             box-sizing: border-box;
         }
 
+        .brand-side::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 84, 159, 0.88);
+            z-index: 1;
+        }
+
+        .brand-content { position: relative; z-index: 2; }
         .brand-content h1 { font-size: 64px; font-weight: 900; margin: 0; letter-spacing: -2px; }
         .brand-content p.subtitle { font-size: 24px; opacity: 0.95; margin-top: 15px; max-width: 600px; line-height: 1.4; font-weight: 500; }
 
@@ -54,26 +63,37 @@
             box-sizing: border-box;
         }
 
+        .login-form-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
         .login-card-boxed { width: 100%; max-width: 440px; background: white; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.06); padding: 40px; box-sizing: border-box; }
         .login-header-boxed { margin-bottom: 35px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; }
         .login-header-boxed h2 { font-size: 24px; font-weight: 800; color: var(--zf-dark); margin: 0; text-transform: uppercase; }
+        .login-header-boxed p { color: var(--text-gray); font-size: 14px; margin-top: 5px; }
 
         .input-group { margin-bottom: 22px; }
         .input-group label { display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 10px; text-transform: uppercase; }
-        .input-field { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; box-sizing: border-box; background: #f8fafc; }
+        .input-field { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; box-sizing: border-box; background: #f8fafc; transition: all 0.2s; }
+        .input-field:focus { outline: none; border-color: var(--zf-blue); background: white; box-shadow: 0 0 0 4px rgba(0, 84, 159, 0.1); }
 
         .btn-login {
             width: 100%; padding: 16px; background: var(--zf-blue); color: white; border: none;
             border-radius: 6px; font-size: 16px; font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 12px;
+            transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 12px;
         }
-        .btn-login:disabled { background: #94a3b8; }
+        .btn-login:hover { background: var(--zf-dark); }
+        .btn-login:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        .contact-admin { margin-top: 35px; font-size: 12px; color: var(--text-gray); text-align: center; }
 
         footer { width: 100%; text-align: center; padding: 20px 0; font-size: 12px; color: var(--text-gray); border-top: 1px solid #f1f5f9; }
+        footer strong { color: var(--zf-blue); font-weight: 700; }
 
         @media (max-width: 900px) {
             .login-container { flex-direction: column; }
-            .brand-side { display: none; }
+            .brand-side { flex: none; padding: 40px 20px; text-align: center; align-items: center; }
+            .system-list { display: none; }
+            .brand-content h1 { font-size: 36px; }
+            .form-side { padding: 20px; }
+            .login-card-boxed { padding: 30px 20px; border: none; box-shadow: none; }
         }
     </style>
 </head>
@@ -85,9 +105,10 @@
                 <h1>ZF LOGISTICS</h1>
                 <p class="subtitle">Sistem za najavu transporta i upravljanje rampama</p>
                 <ul class="system-list">
-                    <li><i class="fas fa-truck"></i> Ulazna kapija - Najava</li>
-                    <li><i class="fas fa-warehouse"></i> Magacin - Rampe</li>
-                    <li><i class="fas fa-door-open"></i> Izlazna kapija - Odlazak</li>
+                    <li><i class="fas fa-truck"></i> Ulazna kapija - Najava kamiona</li>
+                    <li><i class="fas fa-warehouse"></i> Magacin - Upravljanje rampama</li>
+                    <li><i class="fas fa-door-open"></i> Izlazna kapija - Potvrda odlaska</li>
+                    <li><i class="fas fa-user-lock"></i> Administrator - Kontrola sistema</li>
                 </ul>
             </div>
         </div>
@@ -97,13 +118,13 @@
                 <div class="login-card-boxed">
                     <div class="login-header-boxed">
                         <h2>PRIJAVA</h2>
-                        <p>Portal za upravljanje logistikom</p>
+                        <p>Unesite kredencijale za pristup portalu</p>
                     </div>
 
                     <form id="loginForm">
                         <div class="input-group">
                             <label>Korisničko ime</label>
-                            <input type="text" id="username" class="input-field" placeholder="korisnik@zf.com" required>
+                            <input type="text" id="username" class="input-field" placeholder="korisnicko@zf.com" required>
                         </div>
 
                         <div class="input-group">
@@ -115,11 +136,15 @@
                              <i class="fas fa-sign-in-alt"></i> <span id="btnText">PRIJAVA</span>
                         </button>
                     </form>
+
+                    <div class="contact-admin">
+                        Kontaktirajte administratora za pristup sistemu
+                    </div>
                 </div>
             </div>
 
             <footer>
-                Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.2 (Supabase)
+                Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.2 (Supabase Optimized)
             </footer>
         </div>
     </div>
@@ -127,7 +152,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // TVOJI PODACI (Ažurirano sa ključem koji si poslao)
+        // TVOJA SUPABASE KONFIGURACIJA
         const SUPABASE_URL = 'https://ljbqiavcibdlgmkkytkv.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE';
         
@@ -147,11 +172,11 @@
 
             let targetPage = "";
 
-            // 1. HARDKODIRANI KORISNICI (Ovo uvek radi)
+            // 1. HARDKODIRANI KORISNICI (Uvek rade)
             if (user === 'dusan.kostic@zf.com' && pass === 'Ninica1122!') targetPage = 'admin.html';
             else if (user === 'kapija@zf.com' && pass === '123') targetPage = 'gate.html';
 
-            // 2. SUPABASE PROVERA
+            // 2. SUPABASE PROVERA (Za ostale korisnike iz tabele 'users')
             if (targetPage === "") {
                 try {
                     const { data, error } = await _supabase
@@ -173,11 +198,13 @@
 
             // REDIREKCIJA
             if (targetPage !== "") {
+                // Automatsko dodavanje .html ako fali u bazi
                 if (!targetPage.endsWith('.html')) targetPage += '.html';
+                
                 sessionStorage.setItem('zf_user_logged', user);
                 window.location.href = targetPage;
             } else {
-                alert("Neispravno korisničko ime ili lozinka!");
+                alert("Neispravni podaci! Proverite korisničko ime i lozinku.");
                 btn.disabled = false;
                 btnText.innerText = "PRIJAVA";
             }
