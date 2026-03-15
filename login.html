@@ -6,7 +6,6 @@
     <title>ZF Logistics - Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --zf-blue: #00549f;
@@ -26,73 +25,114 @@
 
         .brand-side {
             flex: 1;
-            background: url('pictures/images_enhanced.jpg') no-repeat center center;
-            background-size: cover;
-            position: relative;
+            background: linear-gradient(135deg, var(--zf-dark) 0%, var(--zf-blue) 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 80px;
+            align-items: center;
             color: white;
-            box-sizing: border-box;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
         }
 
         .brand-side::before {
-            content: "";
+            content: '';
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 84, 159, 0.88);
-            z-index: 1;
+            top: -10%; right: -10%;
+            width: 400px; height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
         }
 
-        .brand-content { position: relative; z-index: 2; }
-        .brand-content h1 { font-size: 64px; font-weight: 900; margin: 0; letter-spacing: -2px; }
-        .brand-content p.subtitle { font-size: 24px; opacity: 0.95; margin-top: 15px; max-width: 600px; line-height: 1.4; font-weight: 500; }
+        .zf-logo-large {
+            font-size: 80px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+            position: relative;
+        }
 
-        .system-list { margin-top: 60px; list-style: none; padding: 0; }
-        .system-list li { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; font-size: 20px; font-weight: 600; }
-        .system-list i { font-size: 28px; width: 40px; text-align: center; }
+        .brand-tagline { font-size: 18px; font-weight: 300; opacity: 0.9; letter-spacing: 1px; }
 
         .form-side {
-            flex: 1;
-            background: #ffffff;
+            width: 450px;
+            background: white;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 40px;
+            justify-content: center;
+            padding: 60px;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+        }
+
+        .login-header h2 { font-size: 28px; font-weight: 800; color: var(--zf-dark); margin: 0 0 10px 0; }
+        .login-header p { color: var(--text-gray); margin-bottom: 40px; font-size: 15px; }
+
+        .input-group { margin-bottom: 25px; position: relative; }
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 38px;
+            color: var(--text-gray);
+            font-size: 16px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 14px 14px 45px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
             box-sizing: border-box;
         }
 
-        .login-form-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
-        .login-card-boxed { width: 100%; max-width: 440px; background: white; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.06); padding: 40px; box-sizing: border-box; }
-        .login-header-boxed { margin-bottom: 35px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; }
-        .login-header-boxed h2 { font-size: 24px; font-weight: 800; color: var(--zf-dark); margin: 0; text-transform: uppercase; }
-        .login-header-boxed p { color: var(--text-gray); font-size: 14px; margin-top: 5px; }
-
-        .input-group { margin-bottom: 22px; }
-        .input-group label { display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 10px; text-transform: uppercase; }
-        .input-field { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; box-sizing: border-box; background: #f8fafc; transition: all 0.2s; }
-        .input-field:focus { outline: none; border-color: var(--zf-blue); background: white; box-shadow: 0 0 0 4px rgba(0, 84, 159, 0.1); }
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--zf-blue);
+            box-shadow: 0 0 0 4px rgba(0, 84, 159, 0.1);
+        }
 
         .btn-login {
-            width: 100%; padding: 16px; background: var(--zf-blue); color: white; border: none;
-            border-radius: 6px; font-size: 16px; font-weight: 700; cursor: pointer;
-            transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 12px;
+            background: var(--zf-blue);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
-        .btn-login:hover { background: var(--zf-dark); }
-        .contact-admin { margin-top: 35px; font-size: 12px; color: var(--text-gray); text-align: center; }
 
-        footer { width: 100%; text-align: center; padding: 20px 0; font-size: 12px; color: var(--text-gray); border-top: 1px solid #f1f5f9; }
-        footer strong { color: var(--zf-blue); font-weight: 700; }
+        .btn-login:hover { background: var(--zf-dark); }
+        
+        .footer-text {
+            margin-top: 40px;
+            font-size: 12px;
+            color: var(--text-gray);
+            text-align: center;
+        }
 
         @media (max-width: 900px) {
-            .login-container { flex-direction: column; }
-            .brand-side { flex: none; padding: 40px 20px; text-align: center; align-items: center; }
-            .system-list { display: none; }
-            .brand-content h1 { font-size: 36px; }
-            .form-side { padding: 20px; }
-            .login-card-boxed { padding: 30px 20px; border: none; box-shadow: none; }
+            .brand-side { display: none; }
+            .form-side { width: 100%; padding: 40px; }
         }
     </style>
 </head>
@@ -100,78 +140,86 @@
 
     <div class="login-container">
         <div class="brand-side">
-            <div class="brand-content">
-                <h1>ZF LOGISTICS</h1>
-                <p class="subtitle">Sistem za najavu transporta i upravljanje rampama</p>
-                <ul class="system-list">
-                    <li><i class="fas fa-truck"></i> Ulazna kapija - Najava kamiona</li>
-                    <li><i class="fas fa-warehouse"></i> Magacin - Upravljanje rampama</li>
-                    <li><i class="fas fa-door-open"></i> Izlazna kapija - Potvrda odlaska</li>
-                    <li><i class="fas fa-user-lock"></i> Administrator - Kontrola sistema</li>
-                </ul>
-            </div>
+            <div class="zf-logo-large">ZF</div>
+            <div class="brand-tagline">LOGISTICS & SUPPLY CHAIN</div>
         </div>
 
         <div class="form-side">
-            <div class="login-form-wrapper">
-                <div class="login-card-boxed">
-                    <div class="login-header-boxed">
-                        <h2>PRIJAVA</h2>
-                        <p>Unesite kredencijale za pristup portalu</p>
-                    </div>
-
-                    <form id="loginForm">
-                        <div class="input-group">
-                            <label>Korisničko ime</label>
-                            <input type="text" id="username" class="input-field" placeholder="korisnicko@zf.com" required>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Lozinka</label>
-                            <input type="password" id="password" class="input-field" placeholder="••••••••" required>
-                        </div>
-
-                        <button type="submit" class="btn-login">
-                             <i class="fas fa-sign-in-alt"></i> PRIJAVA
-                        </button>
-                    </form>
-
-                    <div class="contact-admin">
-                        Kontaktirajte administratora za pristup sistemu
-                    </div>
-                </div>
+            <div class="login-header">
+                <h2>Dobrodošli</h2>
+                <p>Unesite vaše podatke za pristup sistemu</p>
             </div>
 
-            <footer>
-                Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.1
-            </footer>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>Korisničko Ime</label>
+                    <i class="fas fa-envelope"></i>
+                    <input type="text" id="username" placeholder="ime.prezime@zf.com" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Lozinka</label>
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn-login" id="loginBtn">
+                    <span>PRISTUPI SISTEMU</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="footer-text">
+                &copy; 2026 ZF Group | Sva prava zadržana
+            </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // SUPABASE KONFIGURACIJA
-        const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
-        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+        // KREDENCIJALI KOJE SI DAO
+        const SUPABASE_URL = 'https://ljbqiavcibdlgmkkytkv.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        document.getElementById('loginForm').onsubmit = async function(e) {
+        document.getElementById('loginForm').onsubmit = async (e) => {
             e.preventDefault();
+            
             const user = document.getElementById('username').value.trim().toLowerCase();
             const pass = document.getElementById('password').value.trim();
+            const btn = document.getElementById('loginBtn');
 
-            // PROVERA U SUPABASE TABELI zf_users
-            const { data, error } = await _supabase
-                .from('zf_users')
-                .select('*')
-                .eq('username', user)
-                .eq('password', pass)
-                .single();
+            btn.disabled = true;
+            btn.innerHTML = 'PROVERA...';
 
-            if (data) {
-                sessionStorage.setItem('zf_user_logged', user);
-                window.location.href = data.role; // Redirect na stranicu definisanu u bazi
-            } else {
-                alert("Neispravni podaci! Proverite korisničko ime i lozinku.");
+            try {
+                // Provera u Supabase tabeli 'users'
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('username, password, role')
+                    .eq('username', user)
+                    .eq('password', pass)
+                    .single();
+
+                if (error || !data) {
+                    alert("Neispravni podaci! Proverite korisničko ime i lozinku.");
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>PRISTUPI SISTEMU</span> <i class="fas fa-arrow-right"></i>';
+                    return;
+                }
+
+                // Uspešan login
+                sessionStorage.setItem('zf_user_logged', data.username);
+                sessionStorage.setItem('zf_user_role', data.role);
+                
+                // Redirekcija na osnovu role (uloge)
+                window.location.href = data.role;
+
+            } catch (err) {
+                console.error("Greška:", err);
+                alert("Došlo je do greške pri povezovanju sa serverom.");
+                btn.disabled = false;
+                btn.innerHTML = '<span>PRISTUPI SISTEMU</span> <i class="fas fa-arrow-right"></i>';
             }
         };
     </script>
