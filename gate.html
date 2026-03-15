@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ulazna Kapija - ZF Logistics</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --zf-blue: #00549f;
@@ -27,295 +27,176 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
         }
 
         header {
-            background: white;
             width: 100%;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            height: 80px;
             display: flex;
             justify-content: center;
-            border-bottom: 1px solid var(--border);
-            min-height: 90px;
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
         .header-content {
-            width: 100%;
-            max-width: var(--container-width);
-            padding: 15px 20px;
+            width: var(--container-width);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-sizing: border-box;
+            padding: 0 20px;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
+        .header-left { display: flex; align-items: center; gap: 15px; }
         .zf-logo-square {
             background: var(--zf-blue);
             color: white;
-            width: 44px;
-            height: 44px;
+            width: 42px;
+            height: 42px;
             display: flex;
             justify-content: center;
             align-items: center;
             border-radius: 4px;
-            font-size: 22px;
-            flex-shrink: 0;
+            font-size: 20px;
         }
 
-        .header-title-wrapper {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header-title-wrapper h1 { 
-            margin: 0; 
-            font-size: 22px; 
-            text-transform: uppercase; 
-            font-weight: 800; 
-            color: var(--zf-dark);
-            line-height: 1.2;
-        }
-
-        .user-info {
-            font-size: 14px; 
-            color: var(--text-muted);
-            margin-top: 5px;
-            font-weight: 400;
-        }
+        .header-title-wrapper h1 { margin: 0; font-size: 20px; font-weight: 800; text-transform: uppercase; color: var(--zf-dark); }
+        .header-right { display: flex; align-items: center; gap: 15px; }
 
         .btn-logout {
-            background: white;
-            border: 1px solid var(--border);
-            padding: 8px 16px;
-            border-radius: 4px;
+            background: #f1f5f9;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            color: var(--text-main);
+            font-weight: 700;
             cursor: pointer;
             font-size: 13px;
-            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #be123c;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-        .btn-logout:hover { 
-            background-color: #fff1f2; 
-            border-color: #fda4af; 
         }
 
-        .main-layout {
-            width: 100%;
-            max-width: var(--container-width);
-            margin: 30px 0;
+        .main-grid {
             display: grid;
-            grid-template-columns: 1fr 1.4fr;
+            grid-template-columns: 400px 1fr;
             gap: 30px;
+            width: var(--container-width);
+            margin: 30px 0;
             padding: 0 20px;
             box-sizing: border-box;
-            align-items: start;
-            flex: 1;
         }
 
-        .card {
+        .panel {
             background: white;
-            border-radius: 8px;
             border: 1px solid var(--border);
+            border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            height: 655px; 
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         }
 
-        .card-header {
+        .panel-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--zf-dark);
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            box-sizing: border-box;
+        }
+
+        input:focus { outline: none; border-color: var(--zf-blue); }
+
+        .btn-save {
+            width: 100%;
+            padding: 15px;
+            background: var(--zf-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        .btn-save:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        .list-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid var(--zf-blue);
-            padding-bottom: 12px;
-            margin-bottom: 25px;
-            flex-shrink: 0;
+            margin-bottom: 20px;
         }
 
-        .card h2 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--zf-dark);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        #gateTruckList {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-
-        #gateTruckList::-webkit-scrollbar { width: 6px; }
-        #gateTruckList::-webkit-scrollbar-track { background: transparent; }
-        #gateTruckList::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-        .refresh-btn { 
-            cursor: pointer; 
-            font-size: 20px; 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            border: none; 
-            background: none; 
-            padding: 5px; 
-            outline: none; 
-        }
-        .refresh-btn i { color: #94a3b8; transition: color 0.2s ease; }
-        .refresh-btn:hover i, .refresh-btn.active i { color: var(--zf-blue); }
-        .refresh-btn.active i { animation: spin 0.8s linear; }
+        .refresh-indicator { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+        .refresh-indicator i.active { animation: spin 0.8s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .input-group { margin-bottom: 22px; }
-        .input-group label { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            font-size: 13px;
-            font-weight: 700; 
-            color: #475569; 
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .input-group label i { color: var(--zf-blue); font-size: 15px; width: 18px; text-align: center; }
-        
-        .input-group input, .input-group select {
-            width: 100%; 
-            padding: 14px;
-            border: 1px solid var(--border); 
-            border-radius: 6px; 
-            font-size: 15px;
-            font-family: 'Inter', sans-serif;
-            box-sizing: border-box;
-        }
-
-        .btn-announce {
-            background-color: var(--zf-dark);
-            color: white;
-            width: 100%; 
-            border: none;                     
-            padding: 18px; 
-            border-radius: 6px; 
-            font-size: 16px; 
-            font-weight: 700;
-            text-transform: uppercase;
+        .truck-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 12px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
+            transition: transform 0.2s;
         }
 
-        .btn-announce:disabled {
-            background-color: #cbd5e1 !important;
-            cursor: not-allowed;
-            color: #94a3b8;
+        .truck-card:hover { transform: translateX(5px); border-color: var(--zf-blue); }
+
+        .truck-info h3 { margin: 0; font-size: 18px; font-weight: 800; color: var(--zf-blue); }
+        .truck-info p { margin: 4px 0 0 0; font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .truck-meta { font-size: 12px; color: var(--text-muted); margin-top: 6px; display: flex; gap: 15px; }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
         }
 
-        .truck-item {
-            padding: 20px 0; 
-            border-bottom: 1px solid var(--border); 
-            display: flex;
-            justify-content: space-between; 
-            align-items: flex-start;
-        }
+        .status-waiting { background: #fff7ed; color: #9a3412; }
+        .status-ramp { background: #f0fdf4; color: #166534; }
+        .status-unloaded { background: #eff6ff; color: #1e40af; }
 
-        .plate-box { font-size: 19px; font-weight: 800; color: var(--zf-dark); }
-        .company-name-text { font-weight: 600; font-size: 16px; display: block; margin-top: 4px; color: #334155; }
-        
-        .tag {
-            font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 4px;
-            text-transform: uppercase; margin-left: 10px;
-        }
-        .status-announced { background: #fff3e0; color: #e65100; }
-        .status-ramp { background: #dcfce7; color: #15803d; }
-        .status-exit { background: #fee2e2; color: #991b1b; }
-        .status-exited-final { background: #1e293b; color: white; }
-
-        .item-right-content {
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
-        }
-
-        .timestamp-box {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-weight: 500;
-            line-height: 1.4;
-        }
-
-        .action-btns { display: flex; gap: 6px; }
-
-        .btn-action-small {
+        .actions { display: flex; gap: 10px; }
+        .btn-action {
+            width: 36px; height: 36px;
+            border-radius: 6px;
             border: 1px solid var(--border);
             background: white;
             cursor: pointer;
-            width: 32px;
-            height: 32px;
-            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 13px;
             color: var(--text-muted);
         }
-        .btn-edit:hover { color: #00549f; border-color: #00549f; }
-        .btn-delete:hover { color: #be123c; border-color: #be123c; }
 
-        footer {
-            width: 100%;
-            text-align: center;
-            padding: 20px 0;
-            font-size: 12px;
-            color: var(--text-muted);
-            border-top: 1px solid #f1f5f9;
-            background: white;
-            margin-top: auto;
-        }
+        .btn-edit:hover { color: var(--zf-blue); border-color: var(--zf-blue); }
+        .btn-delete:hover { color: #ef4444; border-color: #ef4444; }
 
-        footer strong {
-            color: var(--zf-blue);
-            font-weight: 700;
-        }
-
-        @media (max-width: 1000px) {
-            .main-layout { grid-template-columns: 1fr; }
-            .card { height: auto; max-height: 655px; }
-        }
-
-        @media (max-width: 600px) {
-            .header-content { padding: 10px 15px; }
-            .header-title-wrapper h1 { font-size: 18px; }
-            .user-info { font-size: 12px; }
-            .btn-logout { padding: 6px 12px; font-size: 12px; }
-            .truck-item { flex-direction: column; gap: 15px; }
-            .item-right-content { text-align: left; align-items: flex-start; width: 100%; border-top: 1px dashed #e2e8f0; padding-top: 10px; }
-        }
-
+        .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
     </style>
 </head>
 <body>
@@ -323,246 +204,228 @@
     <header>
         <div class="header-content">
             <div class="header-left">
-                <div class="zf-logo-square"><i class="fas fa-truck"></i></div>
+                <div class="zf-logo-square">ZF</div>
                 <div class="header-title-wrapper">
                     <h1>ULAZNA KAPIJA</h1>
-                    <div class="user-info">Operativni panel za najavu</div>
+                    <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Logistički Sistem Monitoringa</div>
                 </div>
             </div>
             <div class="header-right">
-                <button class="btn-logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Odjava</button>
+                <button class="btn-logout" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i> ODJAVA
+                </button>
             </div>
         </div>
     </header>
 
-    <main class="main-layout">
-        <section class="card">
-            <div class="card-header">
-                <h2 id="formTitle"><i class="fas fa-plus-circle"></i> NAJAVI KAMION</h2>
+    <div class="main-grid">
+        <div class="panel">
+            <div class="panel-title" id="formTitle">
+                <i class="fas fa-truck-moving"></i> NAJAVA NOVOG VOZILA
             </div>
-            <form id="announceForm">
-                <input type="hidden" id="editId">
-                <div class="input-group">
-                    <label><i class="fas fa-building"></i> NAZIV KOMPANIJE</label>
-                    <input type="text" id="companyName" placeholder="Unesite naziv kompanije" required>
-                </div>
-                <div class="input-group">
-                    <label><i class="fas fa-id-card"></i> REGISTARSKA OZNAKA</label>
-                    <input type="text" id="plateNumber" placeholder="AA-1234-BB" required style="text-transform: uppercase;">
-                </div>
-                <div class="input-group">
-                    <label><i class="fas fa-truck"></i> TIP VOZILA</label>
-                    <select id="vehicleType" required>
-                        <option value="" disabled selected>Izaberite tip vozila</option>
-                        <option value="Kamion">Kamion</option>
-                        <option value="Šleper">Šleper</option>
-                        <option value="Kombi">Kombi</option>
-                        <option value="Kontejner">Kontejner</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label><i class="fas fa-boxes"></i> TIP ROBE</label>
-                    <select id="goodsType" required>
-                        <option value="" disabled selected>Izaberite tip robe</option>
-                        <option value="Auto delovi">Auto delovi</option>
-                        <option value="Sirovine">Sirovine</option>
-                        <option value="Gotovi proizvodi">Gotovi proizvodi</option>
-                        <option value="Ambalaža">Ambalaža</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label><i class="fas fa-phone"></i> TELEFON VOZAČA</label>
-                    <input type="tel" id="driverPhone" placeholder="+381... (opciono)">
-                </div>
-                
-                <button type="submit" id="submitBtn" class="btn-announce" disabled>
-                    <i class="fas fa-plus-circle"></i> NAJAVI DOLAZAK
-                </button>
-                <button type="button" id="cancelBtn" onclick="resetForm()" style="display:none; width:100%; background:none; border:none; color:#64748b; margin-top:10px; cursor:pointer; font-weight:600; font-family:'Inter';">Odustani od izmene</button>
-            </form>
-        </section>
-
-        <section class="card">
-            <div class="card-header">
-                <h2><i class="far fa-clock"></i> NAJAVLJENI KAMIONI</h2>
-                <button class="refresh-btn" onclick="manualRefresh(this)" title="Osveži listu">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
+            
+            <div class="form-group">
+                <label>Registarska Oznaka</label>
+                <input type="text" id="truckPlate" placeholder="Npr. BG-123-XY" oninput="checkFormValidity()">
             </div>
-            <div id="gateTruckList"></div>
-        </section>
-    </main>
 
-    <footer>
-        Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.2
-    </footer>
+            <div class="form-group">
+                <label>Prevoznik / Kompanija</label>
+                <input type="text" id="companyName" placeholder="Naziv firme" oninput="checkFormValidity()">
+            </div>
+
+            <div class="form-group">
+                <label>Tip Vozila</label>
+                <select id="vehicleType" onchange="checkFormValidity()">
+                    <option value="">Izaberi...</option>
+                    <option value="Šleper">Šleper</option>
+                    <option value="Kamion">Kamion</option>
+                    <option value="Kombi">Kombi</option>
+                    <option value="Drugo">Drugo</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Vrsta Robe / Razlog Dolaska</label>
+                <input type="text" id="goodsType" placeholder="Npr. Delovi, Ambalaža..." oninput="checkFormValidity()">
+            </div>
+
+            <div class="form-group">
+                <label>Broj Telefona Vozača</label>
+                <input type="text" id="driverPhone" placeholder="06x / xxx-xxxx" oninput="checkFormValidity()">
+            </div>
+
+            <button class="btn-save" id="saveBtn" onclick="saveTruck()" disabled>EVIDENTIRAJ ULAZ</button>
+            <button id="cancelEdit" onclick="resetForm()" style="display:none; width:100%; background:none; border:none; color:var(--text-muted); margin-top:10px; cursor:pointer; font-weight:700;">Otkaži izmenu</button>
+        </div>
+
+        <div class="panel">
+            <div class="list-header">
+                <div class="panel-title" style="margin:0;"><i class="fas fa-list"></i> TRENUTNO U FABRICI</div>
+                <div class="refresh-indicator">
+                    <i class="fas fa-sync-alt" id="refreshIcon"></i> Automatsko osvežavanje (5s)
+                </div>
+            </div>
+
+            <div id="gateList">
+                </div>
+        </div>
+    </div>
+
+    <audio id="notifSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <script>
-        // SUPABASE KONFIGURACIJA
+        // SUPABASE CONFIG
         const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        function playNotification() {
-            try {
-                const context = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = context.createOscillator();
-                const gainNode = context.createGain();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(880, context.currentTime); 
-                gainNode.gain.setValueAtTime(0.1, context.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
-                oscillator.connect(gainNode);
-                gainNode.connect(context.destination);
-                oscillator.start();
-                oscillator.stop(context.currentTime + 0.2);
-            } catch (e) { console.log("Audio error"); }
-        }
-
-        const form = document.getElementById('announceForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const requiredInputs = ['companyName', 'plateNumber', 'vehicleType', 'goodsType'];
-
-        function checkFormValidity() {
-            const allFilled = requiredInputs.every(id => {
-                const val = document.getElementById(id).value;
-                return val && val.trim() !== "";
-            });
-            submitBtn.disabled = !allFilled;
-        }
-
-        requiredInputs.forEach(id => {
-            const el = document.getElementById(id);
-            el.addEventListener('input', checkFormValidity);
-            el.addEventListener('change', checkFormValidity);
-        });
+        let editId = null;
 
         async function renderGateList() {
+            const icon = document.getElementById('refreshIcon');
+            icon.classList.add('active');
+
             const { data: trucks, error } = await _supabase
-                .from('zf_trucks') // ISPRAVLJENO: Koristi se zf_trucks
+                .from('zf_trucks')
                 .select('*')
+                .neq('status', 'IZAŠAO')
                 .order('created_at', { ascending: false });
 
+            icon.classList.remove('active');
+
             if (error) {
-                console.error("Greška pri učitavanju:", error);
+                console.error("Greška pri čitanju:", error);
                 return;
             }
 
-            const gateList = document.getElementById('gateTruckList');
-            if(!gateList) return;
-            gateList.innerHTML = '';
+            const container = document.getElementById('gateList');
+            if (!trucks || trucks.length === 0) {
+                container.innerHTML = '<div class="empty-state">Nema aktivnih vozila u sistemu.</div>';
+                return;
+            }
 
-            trucks.forEach((t) => {
-                let statusTag = `<span class="tag status-announced">Na čekanju</span>`;
-                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Rampa: ${t.gate || t.ramp || ''}</span>`;
-                else if (t.status === 'ISTOVAREN') statusTag = `<span class="tag status-exit">Spreman za izlaz</span>`;
-                else if (t.status === 'IZAŠAO') statusTag = `<span class="tag status-exited-final">Izašao</span>`;
-                
-                const item = document.createElement('div');
-                item.className = 'truck-item';
-                const showActions = (t.status === 'NA ČEKANJU' || !t.status);
-
-                const dateObj = new Date(t.created_at);
-                const displayDate = dateObj.toLocaleDateString('sr-RS');
-                const displayTime = dateObj.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' });
-
-                item.innerHTML = `
-                    <div style="flex:1">
-                        <span class="plate-box">${t.plate}</span> ${statusTag}
-                        <span class="company-name-text">${t.company}</span>
-                        <small style="color:#64748b; display: block; margin-top: 6px;">
-                            <i class="fas fa-truck-moving"></i> ${t.vehicle || 'Nije navedeno'} • <i class="fas fa-box-open"></i> ${t.goods || 'Nije navedeno'}<br>
-                            <i class="fas fa-phone-alt"></i> ${t.phone || 'Nije unet'}
-                        </small>
+            container.innerHTML = trucks.map(t => `
+                <div class="truck-card">
+                    <div class="truck-info">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <h3>${t.plate}</h3>
+                            <span class="status-badge ${getStatusClass(t.status)}">${t.status}</span>
+                        </div>
+                        <p>${t.company}</p>
+                        <div class="truck-meta">
+                            <span><i class="fas fa-truck"></i> ${t.vehicle}</span>
+                            <span><i class="fas fa-box"></i> ${t.goods}</span>
+                            <span><i class="fas fa-clock"></i> ${t.time}</span>
+                        </div>
                     </div>
-                    <div class="item-right-content">
-                        <div class="timestamp-box">${displayDate}<br>${displayTime}</div>
-                        ${showActions ? `
-                        <div class="action-btns">
-                            <button class="btn-action-small btn-edit" onclick="editTruck('${t.id}')"><i class="fas fa-pen"></i></button>
-                            <button class="btn-action-small btn-delete" onclick="deleteTruck('${t.id}')"><i class="fas fa-trash"></i></button>
-                        </div>` : ''}
-                    </div>`;
-                gateList.appendChild(item);
-            });
+                    <div class="actions">
+                        <button class="btn-action btn-edit" onclick="editTruck('${t.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn-action btn-delete" onclick="deleteTruck('${t.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getStatusClass(status) {
+            if (status === 'NA ČEKANJU') return 'status-waiting';
+            if (status === 'NA RAMPI') return 'status-ramp';
+            return 'status-unloaded';
+        }
+
+        async function saveTruck() {
+            const truckData = {
+                plate: document.getElementById('truckPlate').value.toUpperCase(),
+                company: document.getElementById('companyName').value.toUpperCase(),
+                vehicle: document.getElementById('vehicleType').value,
+                goods: document.getElementById('goodsType').value,
+                phone: document.getElementById('driverPhone').value
+            };
+
+            if (editId) {
+                const { error } = await _supabase
+                    .from('zf_trucks')
+                    .update(truckData)
+                    .eq('id', editId);
+                
+                if (!error) {
+                    editId = null;
+                    document.getElementById('saveBtn').innerText = "EVIDENTIRAJ ULAZ";
+                    document.getElementById('formTitle').innerHTML = '<i class="fas fa-truck-moving"></i> NAJAVA NOVOG VOZILA';
+                    document.getElementById('cancelEdit').style.display = 'none';
+                }
+            } else {
+                truckData.status = 'NA ČEKANJU';
+                truckData.date = new Date().toLocaleDateString('sr-RS');
+                truckData.time = new Date().toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' });
+
+                const { error } = await _supabase.from('zf_trucks').insert([truckData]);
+                if (!error) playNotification();
+            }
+
+            resetForm();
+            renderGateList();
         }
 
         async function editTruck(id) {
-            const { data: truck, error } = await _supabase.from('zf_trucks').select('*').eq('id', id).single();
-            if(truck) {
-                document.getElementById('editId').value = truck.id;
-                document.getElementById('companyName').value = truck.company;
-                document.getElementById('plateNumber').value = truck.plate;
-                document.getElementById('vehicleType').value = truck.vehicle || '';
-                document.getElementById('goodsType').value = truck.goods || '';
-                document.getElementById('driverPhone').value = truck.phone || '';
-                document.getElementById('formTitle').innerHTML = '<i class="fas fa-pen"></i> IZMENI NAJAVU';
-                document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> SAČUVAJ IZMENE';
-                document.getElementById('cancelBtn').style.display = 'block';
-                checkFormValidity();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+            const { data: t } = await _supabase.from('zf_trucks').select('*').eq('id', id).single();
+            if (t) {
+                document.getElementById('truckPlate').value = t.plate;
+                document.getElementById('companyName').value = t.company;
+                document.getElementById('vehicleType').value = t.vehicle;
+                document.getElementById('goodsType').value = t.goods;
+                document.getElementById('driverPhone').value = t.phone;
+
+                editId = id;
+                document.getElementById('saveBtn').innerText = "SAČUVAJ IZMENE";
+                document.getElementById('formTitle').innerHTML = '<i class="fas fa-edit"></i> IZMENA PODATAKA';
+                document.getElementById('cancelEdit').style.display = 'block';
+                document.getElementById('saveBtn').disabled = false;
+                window.scrollTo({top: 0, behavior: 'smooth'});
             }
         }
 
-        async function deleteTruck(id) { 
-            if(confirm("Obrisati najavu?")) { 
+        async function deleteTruck(id) {
+            if (confirm("Da li ste sigurni da želite da obrišete ovu najavu?")) {
                 await _supabase.from('zf_trucks').delete().eq('id', id);
                 renderGateList();
-            } 
-        }
-
-        function resetForm() { 
-            form.reset(); 
-            document.getElementById('editId').value = ''; 
-            document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle"></i> NAJAVI KAMION'; 
-            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-plus-circle"></i> NAJAVI DOLAZAK'; 
-            document.getElementById('cancelBtn').style.display = 'none'; 
-            checkFormValidity(); 
-        }
-
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const editId = document.getElementById('editId').value;
-            
-            const truckData = { 
-                company: document.getElementById('companyName').value.trim(), 
-                plate: document.getElementById('plateNumber').value.toUpperCase().trim(),
-                vehicle: document.getElementById('vehicleType').value,
-                goods: document.getElementById('goodsType').value,
-                phone: document.getElementById('driverPhone').value.trim(),
-                status: 'NA ČEKANJU'
-            };
-
-            let error;
-            if(editId) {
-                const res = await _supabase.from('zf_trucks').update(truckData).eq('id', editId);
-                error = res.error;
-            } else {
-                const res = await _supabase.from('zf_trucks').insert([truckData]);
-                error = res.error;
             }
-
-            if (error) {
-                alert("Greška pri čuvanju podataka: " + error.message);
-            } else {
-                if(!editId) playNotification();
-                resetForm(); 
-                renderGateList();
-            }
-        };
-
-        function manualRefresh(btn) { 
-            btn.classList.add('active'); 
-            renderGateList(); 
-            setTimeout(() => { btn.classList.remove('active'); }, 800); 
         }
 
-        function handleLogout() { if(confirm("Odjava?")) window.location.href = 'index.html'; }
-        
+        function resetForm() {
+            document.getElementById('truckPlate').value = '';
+            document.getElementById('companyName').value = '';
+            document.getElementById('vehicleType').value = '';
+            document.getElementById('goodsType').value = '';
+            document.getElementById('driverPhone').value = '';
+            editId = null;
+            document.getElementById('saveBtn').innerText = "EVIDENTIRAJ ULAZ";
+            document.getElementById('formTitle').innerHTML = '<i class="fas fa-truck-moving"></i> NAJAVA NOVOG VOZILA';
+            document.getElementById('cancelEdit').style.display = 'none';
+            checkFormValidity();
+        }
+
+        function checkFormValidity() {
+            const p = document.getElementById('truckPlate').value;
+            const c = document.getElementById('companyName').value;
+            const v = document.getElementById('vehicleType').value;
+            const g = document.getElementById('goodsType').value;
+            const ph = document.getElementById('driverPhone').value;
+            document.getElementById('saveBtn').disabled = !(p && c && v && g && ph);
+        }
+
+        function playNotification() {
+            const sound = document.getElementById('notifSound');
+            sound.play().catch(e => console.log("Audio play blocked"));
+        }
+
+        function handleLogout() {
+            if (confirm("Odjava?")) window.location.href = 'login.html';
+        }
+
         // Inicijalizacija
-        renderGateList(); 
-        checkFormValidity(); 
-        setInterval(renderGateList, 5000); 
+        renderGateList();
+        setInterval(renderGateList, 5000); // Auto refresh svakih 5 sekundi
     </script>
 </body>
 </html>
