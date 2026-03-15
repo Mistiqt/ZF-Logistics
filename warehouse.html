@@ -6,6 +6,7 @@
     <title>Magacin - ZF Logistics</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --zf-blue: #00549f;
@@ -183,7 +184,6 @@
         .info-item i { width: 22px; color: var(--zf-blue); font-size: 13px; margin-right: 6px; text-align: center; }
         .info-value { color: var(--text-main); font-weight: 600; }
 
-        /* IZMENA: Okvir, fiksna visina i skrolovanje za listu čekanja */
         #waitingContainer {
             height: 500px;
             overflow-y: auto;
@@ -193,11 +193,6 @@
             border-radius: 8px;
             box-sizing: border-box;
         }
-
-        #waitingContainer::-webkit-scrollbar { width: 8px; }
-        #waitingContainer::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-        #waitingContainer::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f1f5f9; }
-        #waitingContainer::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         .waiting-card {
             background: white; border: 1px solid var(--border-color);
@@ -212,18 +207,14 @@
             width: 100%; padding: 12px; border-radius: 4px; font-weight: 800;
             cursor: pointer; margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px;
             font-size: 13px; text-transform: uppercase;
-            transition: background 0.2s;
         }
-        .btn-unload:hover { background: #059669; }
 
         .btn-assign { 
             background: var(--zf-blue); color: white; border: none; 
             padding: 12px 25px; border-radius: 6px; font-weight: 800; 
             cursor: pointer; font-size: 13px; align-self: center;
             text-transform: uppercase;
-            transition: background 0.2s;
         }
-        .btn-assign:hover { background: var(--zf-dark); }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -231,58 +222,19 @@
             justify-content: center; align-items: center; z-index: 1000;
             backdrop-filter: blur(2px);
         }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; position: relative; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        
-        .close-x {
-            position: absolute; top: 15px; right: 15px; background: none; border: none;
-            font-size: 22px; color: var(--text-muted); cursor: pointer; line-height: 1; padding: 5px; transition: color 0.2s;
-        }
-        .close-x:hover { color: #be123c; }
-
-        .ramp-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
-        .ramp-btn { background: var(--zf-blue); color: white; border: none; padding: 15px 10px; font-weight: 800; cursor: pointer; border-radius: 6px; font-size: 12px; transition: background 0.2s; }
-        .ramp-btn:hover:not(:disabled) { background: var(--zf-dark); }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; position: relative; }
         
         .pallet-input {
             width: 100%; padding: 15px; border: 2px solid var(--border-color);
             border-radius: 6px; font-size: 24px; font-weight: 800; text-align: center; margin: 20px 0;
-            box-sizing: border-box; font-family: 'Inter', sans-serif;
         }
         .btn-finalize {
             background: var(--success-green); color: white; border: none;
             width: 100%; padding: 15px; border-radius: 6px; font-weight: 800; cursor: pointer;
-            text-transform: uppercase; font-size: 14px; transition: background 0.2s;
         }
-        .btn-finalize:hover:not(:disabled) { background: #059669; }
+        .btn-finalize:disabled { background: #cbd5e1; cursor: not-allowed; }
 
-        .footer {
-            background: white;
-            border-top: 1px solid var(--border-color);
-            padding: 20px 0;
-            text-align: center;
-            margin-top: 40px;
-        }
-        .footer p { margin: 0; font-size: 13px; color: var(--text-muted); font-weight: 500; }
-        .footer b { color: var(--zf-blue); }
-
-        @media (max-width: 1250px) {
-            .ramp-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        
-        @media (max-width: 768px) {
-            header { height: 80px; }
-            .header-content { flex-direction: row !important; justify-content: space-between; padding: 0 15px; }
-            .header-left { gap: 10px; }
-            .zf-logo-square { width: 36px; height: 36px; font-size: 18px; }
-            .header-title-wrapper h1 { font-size: 16px; }
-            .page-description { font-size: 10px; }
-            .btn-logout { padding: 6px 10px; font-size: 12px; gap: 5px; }
-            .ramp-grid { grid-template-columns: 1fr; }
-            .waiting-card { flex-direction: column; gap: 15px; }
-            .btn-assign { width: 100%; }
-            .modal-content { width: 90%; }
-            #waitingContainer { height: 400px; }
-        }
+        .footer { background: white; border-top: 1px solid var(--border-color); padding: 20px 0; text-align: center; margin-top: 40px; }
     </style>
 </head>
 <body>
@@ -310,205 +262,156 @@
                 <i class="far fa-clock" style="color:#f97316"></i> Kamioni na čekanju 
                 <span id="waitingCount" style="background:#ffedd5; color:#9a3412; padding:2px 8px; border-radius:4px; font-size:11px; margin-left:10px;">0</span>
             </div>
-            <button class="refresh-btn" onclick="handleRefresh(this)" title="Osveži">
+            <button class="refresh-btn" onclick="handleRefresh(this)">
                 <i class="fas fa-sync-alt"></i>
             </button>
         </div>
-        
         <div id="waitingContainer"></div>
     </div>
 
     <div id="rampModal" class="modal-overlay">
         <div class="modal-content">
             <h2 style="margin:0; font-size:18px; color:var(--zf-blue); font-weight: 800;">IZABERITE RAMPU</h2>
-            <div id="modalRampGrid" class="ramp-selection-grid"></div>
-            <button onclick="closeModals()" style="margin-top:15px; width:100%; padding:10px; border:none; background:#f1f5f9; cursor:pointer; border-radius:6px; font-weight: 600;">Odustani</button>
+            <div id="modalRampGrid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:20px;"></div>
+            <button onclick="closeModals()" style="margin-top:15px; width:100%; padding:10px; border:none; background:#f1f5f9; cursor:pointer; border-radius:6px;">Odustani</button>
         </div>
     </div>
 
     <div id="palletModal" class="modal-overlay">
         <div class="modal-content">
-            <button class="close-x" onclick="closeModals()">&times;</button>
             <h2 style="margin:0; font-size:18px; color:var(--zf-blue); font-weight: 800;">UNESITE BROJ PALETA</h2>
-            <p id="palletTruckInfo" style="font-size: 13px; color: var(--text-muted); margin-top: 5px; font-weight: 500;"></p>
+            <p id="palletTruckInfo" style="font-size: 13px; color: var(--text-muted); margin-top: 5px;"></p>
             <input type="number" id="palletInput" class="pallet-input" placeholder="0" oninput="validatePallets()">
             <button id="finalizeBtn" class="btn-finalize" onclick="finalizeUnload()" disabled>ZAVRŠI ISTOVAR</button>
-            <button onclick="closeModals()" style="margin-top:10px; width:100%; padding:8px; border:none; background:transparent; color:var(--text-muted); cursor:pointer; font-weight: 500;">Poništi</button>
+            <button onclick="closeModals()" style="margin-top:10px; width:100%; background:none; border:none; color:var(--text-muted); cursor:pointer;">Poništi</button>
         </div>
     </div>
 
     <footer class="footer">
-        <p>Aplikaciju razvio <b>Dušan Kostić</b> © 2026. Ver 1.2</p>
+        <p>Aplikaciju razvio <b>Dušan Kostić</b> © 2026.</p>
     </footer>
 
     <script>
-        const DB_KEY = 'zf_trucks';
-        let currentTruckIdx = null;
-        let lastWaitingCount = -1; 
+        // --- TVOJI PODACI KOJE SI POSLAO ---
+        const SB_URL = "https://lbqiavcibdlgmkkytkv.supabase.co";
+        const SB_KEY = "sb_publishable_jeu7nFFmSa-mxNC4-Z3gkw_jkciHN94";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        let currentTruckId = null;
         const rampList = ["RAMPA 1", "RAMPA 2", "RAMPA 3", "RAMPA 4", "TEHNIČKA RAMPA", "ROLO RAMPA"];
 
-        function playNotification() {
-            try {
-                const context = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = context.createOscillator();
-                const gainNode = context.createGain();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(880, context.currentTime); 
-                gainNode.gain.setValueAtTime(0.1, context.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
-                oscillator.connect(gainNode);
-                gainNode.connect(context.destination);
-                oscillator.start();
-                oscillator.stop(context.currentTime + 0.2);
-            } catch (e) { console.log("Audio blocked"); }
-        }
+        // Funkcija za osvežavanje podataka sa Supabase
+        async function render() {
+            const { data: trucks, error } = await _supabase.from('zf_trucks').select('*');
+            if (error) return;
 
-        function getNumericDate() {
-            const now = new Date();
-            return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}.`;
-        }
-
-        function checkDailyCleanup() {
-            const lastCleanup = localStorage.getItem('zf_last_cleanup_date');
-            const today = getNumericDate();
-            if (lastCleanup && lastCleanup !== today) {
-                let trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-                const filtered = trucks.filter(t => t.status === 'NA ČEKANJU');
-                localStorage.setItem(DB_KEY, JSON.stringify(filtered));
-            }
-            localStorage.setItem('zf_last_cleanup_date', today);
-        }
-
-        function handleRefresh(btn) {
-            btn.classList.add('active');
-            render();
-            setTimeout(() => { btn.classList.remove('active'); }, 800);
-        }
-
-        function render() {
-            const trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
             const rContainer = document.getElementById('rampsContainer');
             const wContainer = document.getElementById('waitingContainer');
-            
             rContainer.innerHTML = ''; 
             wContainer.innerHTML = '';
-            let currentWaitingCount = 0;
+            
+            let wCount = 0;
 
+            // Logika za Rampe
             rampList.forEach(name => {
-                const truck = trucks.find(t => t.status === 'NA RAMPI' && t.ramp === name);
+                const t = trucks.find(tr => tr.status === 'NA RAMPI' && tr.ramp === name);
                 const card = document.createElement('div');
-                card.className = `ramp-card ${truck ? 'occupied' : ''}`;
+                card.className = `ramp-card ${t ? 'occupied' : ''}`;
                 
-                if (truck) {
-                    const realIdx = trucks.indexOf(truck);
+                if (t) {
                     card.innerHTML = `
                         <div class="ramp-top"><span>${name}</span><span style="color:var(--success-green)">ZAUZETO</span></div>
                         <div class="info-container">
-                            <span class="company-name">${truck.company}</span>
-                            <span class="plate-number">${truck.plate}</span>
-                            <div class="info-list">
-                                <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${truck.vehicle || '/'}</span></div>
-                                <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${truck.goods || '/'}</span></div>
-                                <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${truck.phone || '/'}</span></div>
-                                <div class="info-item" style="margin-top:3px;">
-                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Na rampi od:</b> ${truck.rampStartDate || ''} ${truck.rampStartTime || '/'}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="btn-unload" onclick="openPalletModal(${realIdx})"><i class="fas fa-check"></i> ISTOVAR ZAVRŠEN</button>`;
-                } else {
-                    card.innerHTML = `<div class="ramp-top">${name} <span style="color:var(--text-muted); font-weight:500">SLOBODNO</span></div>
-                                      <div style="margin:auto; color:#cbd5e1; text-align:center; font-size: 13px; font-weight:500;">Dostupno za dodelu</div>`;
-                }
-                rContainer.appendChild(card);
-            });
-
-            trucks.forEach((t, i) => {
-                if (t.status === 'NA ČEKANJU') {
-                    currentWaitingCount++;
-                    const card = document.createElement('div');
-                    card.className = 'waiting-card';
-                    card.innerHTML = `
-                        <div class="info-container" style="margin:0;">
                             <span class="company-name">${t.company}</span>
                             <span class="plate-number">${t.plate}</span>
                             <div class="info-list">
                                 <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${t.vehicle || '/'}</span></div>
-                                <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${t.goods || '/'}</span></div>
                                 <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${t.phone || '/'}</span></div>
-                                <div class="info-item" style="margin-top:3px;">
-                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Najavljen:</b> ${t.date || ''} ${t.time || ''}</span>
-                                </div>
+                                <div class="info-item" style="margin-top:3px;"><span class="info-value" style="font-size:11px; color:var(--text-muted);">Od: ${t.rampStartTime || '/'}</span></div>
                             </div>
                         </div>
-                        <button class="btn-assign" onclick="openRampModal(${i})">DODELI RAMPU</button>`;
-                    wContainer.appendChild(card);
+                        <button class="btn-unload" onclick="openPalletModal('${t.id}')">ISTOVAR ZAVRŠEN</button>`;
+                } else {
+                    card.innerHTML = `<div class="ramp-top">${name} <span style="color:#cbd5e1">SLOBODNO</span></div><div style="margin:auto; color:#cbd5e1; font-size:12px;">Dostupno</div>`;
                 }
+                rContainer.appendChild(card);
             });
 
-            if (lastWaitingCount !== -1 && currentWaitingCount > lastWaitingCount) {
-                playNotification();
-            }
-            lastWaitingCount = currentWaitingCount;
-            document.getElementById('waitingCount').textContent = currentWaitingCount;
+            // Logika za Čekanje
+            trucks.filter(t => t.status === 'NA ČEKANJU').forEach(t => {
+                wCount++;
+                const card = document.createElement('div');
+                card.className = 'waiting-card';
+                card.innerHTML = `
+                    <div class="info-container" style="margin:0;">
+                        <span class="company-name">${t.company}</span>
+                        <span class="plate-number">${t.plate}</span>
+                        <div class="info-item" style="font-size:12px; color:var(--text-muted);">Najavljen: ${t.time || ''}</div>
+                    </div>
+                    <button class="btn-assign" onclick="openRampModal('${t.id}')">DODELI</button>`;
+                wContainer.appendChild(card);
+            });
+
+            document.getElementById('waitingCount').textContent = wCount;
         }
 
-        window.openRampModal = (i) => {
-            currentTruckIdx = i;
-            const trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+        // Otvaranje modala za dodelu rampe
+        window.openRampModal = async (id) => {
+            currentTruckId = id;
+            const { data: busy } = await _supabase.from('zf_trucks').select('ramp').eq('status', 'NA RAMPI');
             const grid = document.getElementById('modalRampGrid');
-            grid.innerHTML = ''; 
-            rampList.forEach(rampName => {
-                const isOccupied = trucks.some(t => t.ramp === rampName && t.status === 'NA RAMPI');
-                const btn = document.createElement('button');
-                btn.className = isOccupied ? 'ramp-btn occupied-btn' : 'ramp-btn';
-                btn.innerHTML = rampName;
-                if (!isOccupied) {
-                    btn.onclick = () => {
-                        let allTrucks = JSON.parse(localStorage.getItem(DB_KEY));
-                        const now = new Date();
-                        allTrucks[currentTruckIdx].status = 'NA RAMPI';
-                        allTrucks[currentTruckIdx].ramp = rampName;
-                        allTrucks[currentTruckIdx].rampStartDate = getNumericDate();
-                        allTrucks[currentTruckIdx].rampStartTime = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                        localStorage.setItem(DB_KEY, JSON.stringify(allTrucks));
-                        closeModals(); render();
-                    };
-                } else { btn.disabled = true; btn.style.background = "#e2e8f0"; btn.style.color = "#94a3b8"; }
-                grid.appendChild(btn);
+            grid.innerHTML = '';
+            
+            rampList.forEach(r => {
+                const isBusy = busy.some(b => b.ramp === r);
+                const b = document.createElement('button');
+                b.style = `padding:12px; border:none; border-radius:6px; cursor:pointer; font-weight:800; background:${isBusy ? '#e2e8f0' : 'var(--zf-blue)'}; color:${isBusy ? '#94a3b8' : 'white'}`;
+                b.innerText = r;
+                b.disabled = isBusy;
+                if(!isBusy) b.onclick = () => assignRamp(r);
+                grid.appendChild(b);
             });
             document.getElementById('rampModal').style.display = 'flex';
         };
 
-        window.openPalletModal = (idx) => {
-            currentTruckIdx = idx;
-            const trucks = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-            const truck = trucks[idx];
-            document.getElementById('palletTruckInfo').textContent = `${truck.plate} | ${truck.company}`;
-            document.getElementById('palletInput').value = '';
+        async function assignRamp(rName) {
+            const now = new Date();
+            await _supabase.from('zf_trucks').update({
+                status: 'NA RAMPI',
+                ramp: rName,
+                rampStartTime: now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+            }).eq('id', currentTruckId);
+            closeModals(); render();
+        }
+
+        window.openPalletModal = (id) => {
+            currentTruckId = id;
             document.getElementById('palletModal').style.display = 'flex';
         };
 
         window.validatePallets = () => {
-            const val = parseInt(document.getElementById('palletInput').value);
-            document.getElementById('finalizeBtn').disabled = (isNaN(val) || val <= 0);
+            const v = document.getElementById('palletInput').value;
+            document.getElementById('finalizeBtn').disabled = !v || v <= 0;
         };
 
-        window.finalizeUnload = () => {
-            let trucks = JSON.parse(localStorage.getItem(DB_KEY));
-            trucks[currentTruckIdx].status = 'ISTOVAREN';
-            trucks[currentTruckIdx].pallets = document.getElementById('palletInput').value;
-            trucks[currentTruckIdx].unloadedTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            localStorage.setItem(DB_KEY, JSON.stringify(trucks));
+        window.finalizeUnload = async () => {
+            await _supabase.from('zf_trucks').update({
+                status: 'ISTOVAREN',
+                pallets: document.getElementById('palletInput').value,
+                unloadedTime: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+            }).eq('id', currentTruckId);
             closeModals(); render();
         };
 
-        window.closeModals = () => { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); };
-        
-        checkDailyCleanup();
+        window.closeModals = () => { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display='none'); };
+        function handleRefresh(btn) { btn.classList.add('active'); render(); setTimeout(()=>btn.classList.remove('active'), 800); }
+
+        // Realtime slušanje promena
+        _supabase.channel('custom-all-channel').on('postgres_changes', { event: '*', schema: 'public', table: 'zf_trucks' }, () => {
+            render();
+        }).subscribe();
+
         render();
-        setInterval(render, 3000); 
-        setInterval(checkDailyCleanup, 3600000);
     </script>
 </body>
 </html>
