@@ -6,7 +6,6 @@
     <title>Ulazna Kapija - ZF Logistics</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --zf-blue: #00549f;
@@ -393,12 +392,29 @@
     </main>
 
     <footer>
-        Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.1
+        Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.2 (Cloud Connected)
     </footer>
 
-    <script>
-        // SUPABASE KONFIGURACIJA
-        const _supabase = supabase.createClient('TVOJ_SUPABASE_URL', 'TVOJA_SUPABASE_ANON_KEY');
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            databaseURL: "https://zf-logistika-default-rtdb.europe-west1.firebasedatabase.app/"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const trucksRef = ref(db, 'trucks');
+
+        // Globalne funkcije za HTML dugmiće (moraju biti na window objektu jer je ovo modul)
+        window.editTruck = editTruck;
+        window.deleteTruck = deleteTruck;
+        window.manualRefresh = manualRefresh;
+        window.handleLogout = handleLogout;
+        window.resetForm = resetForm;
+
+        let localTrucks = []; // Lokalna kopija podataka
 
         function playNotification() {
             try {
@@ -413,75 +429,115 @@
                 gainNode.connect(context.destination);
                 oscillator.start();
                 oscillator.stop(context.currentTime + 0.2);
-            } catch (e) { console.log("Audio API blocked"); }
+            } catch (e) { console.log("Audio blocked"); }
         }
 
         function getNumericDate() {
             const now = new Date();
-            const dan = String(now.getDate()).padStart(2, '0');
-            const mesec = String(now.getMonth() + 1).padStart(2, '0');
-            const godina = now.getFullYear();
-            return `${dan}.${mesec}.${godina}.`;
+            return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}.`;
         }
 
-        const form = document.getElementById('announceForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const requiredInputs = ['companyName', 'plateNumber', 'vehicleType', 'goodsType'];
-
-        function checkFormValidity() {
-            const allFilled = requiredInputs.every(id => document.getElementById(id).value.trim() !== "");
-            submitBtn.disabled = !allFilled;
-        }
-
-        requiredInputs.forEach(id => {
-            const el = document.getElementById(id);
-            el.addEventListener('input', checkFormValidity);
-            el.addEventListener('change', checkFormValidity);
+        // --- REALTIME SLUŠALAC (Glavna stvar: Automatski osvežava listu čim neko promeni bazu) ---
+        onValue(trucksRef, (snapshot) => {
+            const data = snapshot.val();
+            localTrucks = [];
+            if (data) {
+                // Konvertujemo Firebase objekat u niz sa kojim lakše radimo
+                for (let id in data) {
+                    localTrucks.push({ id, ...data[id] });
+                }
+            }
+            renderGateList();
         });
 
-        async function renderGateList() {
-            const { data: trucks, error } = await _supabase
-                .from('trucks')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if(error) return console.error(error);
-
+        function renderGateList() {
             const gateList = document.getElementById('gateTruckList');
             if(!gateList) return;
             gateList.innerHTML = '';
+            
+            // Sortiranje: Najnoviji na vrhu
+            const sorted = [...localTrucks].sort((a, b) => b.timestamp - a.timestamp);
 
-            trucks.forEach((t) => {
+            sorted.forEach((t) => {
                 let statusTag = `<span class="tag status-announced">Na čekanju</span>`;
-                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Na rampi : ${t.ramp || ''}</span>`;
+                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Rampa: ${t.ramp || ''}</span>`;
                 else if (t.status === 'ISTOVAREN') statusTag = `<span class="tag status-exit">Spreman za izlaz</span>`;
                 else if (t.status === 'IZAŠAO') statusTag = `<span class="tag status-exited-final">Izašao</span>`;
                 
                 const item = document.createElement('div');
                 item.className = 'truck-item';
-                const showActions = (t.status === 'NA ČEKANJU');
+                const canEdit = (t.status === 'NA ČEKANJU');
 
                 item.innerHTML = `
                     <div>
                         <span class="plate-box">${t.plate}</span> ${statusTag}
                         <span class="company-name-text">${t.company}</span>
-                        <small style="color:#64748b; display: block; margin-top: 6px;">${t.vehicle} • ${t.goods}<br><i class="fas fa-phone-alt"></i> ${t.phone || 'Nije unet'}</small>
+                        <small style="color:#64748b; display: block; margin-top: 6px;">
+                            ${t.vehicle} • ${t.goods}<br>
+                            <i class="fas fa-phone-alt"></i> ${t.phone || 'Nije unet'}
+                        </small>
                     </div>
                     <div class="item-right-content">
-                        <div class="timestamp-box">${t.date || ''}<br>${t.time}</div>
-                        ${showActions ? `<div class="action-btns">
-                            <button class="btn-action-small btn-edit" onclick="editTruck(${t.id})"><i class="fas fa-pen"></i></button>
-                            <button class="btn-action-small btn-delete" onclick="deleteTruck(${t.id})"><i class="fas fa-trash"></i></button>
+                        <div class="timestamp-box">${t.date}<br>${t.time}</div>
+                        ${canEdit ? `
+                        <div class="action-btns">
+                            <button class="btn-action-small btn-edit" onclick="editTruck('${t.id}')"><i class="fas fa-pen"></i></button>
+                            <button class="btn-action-small btn-delete" onclick="deleteTruck('${t.id}')"><i class="fas fa-trash"></i></button>
                         </div>` : ''}
                     </div>`;
                 gateList.appendChild(item);
             });
         }
 
-        async function editTruck(id) {
-            const { data: truck } = await _supabase.from('trucks').select('*').eq('id', id).single();
+        const form = document.getElementById('announceForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const fields = ['companyName', 'plateNumber', 'vehicleType', 'goodsType'];
+
+        function checkFormValidity() {
+            const allFilled = fields.every(id => document.getElementById(id).value.trim() !== "");
+            submitBtn.disabled = !allFilled;
+        }
+
+        fields.forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', checkFormValidity);
+            el.addEventListener('change', checkFormValidity);
+        });
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('editId').value;
+            const now = new Date();
+            
+            const truckData = {
+                company: document.getElementById('companyName').value,
+                plate: document.getElementById('plateNumber').value.toUpperCase(),
+                vehicle: document.getElementById('vehicleType').value,
+                goods: document.getElementById('goodsType').value,
+                phone: document.getElementById('driverPhone').value,
+                date: getNumericDate(),
+                time: now.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' }),
+                timestamp: Date.now()
+            };
+
+            try {
+                if(editId) {
+                    await update(ref(db, `trucks/${editId}`), truckData);
+                } else {
+                    truckData.status = 'NA ČEKANJU';
+                    await push(trucksRef, truckData);
+                    playNotification();
+                }
+                resetForm();
+            } catch (err) {
+                alert("Greška pri slanju podataka!");
+            }
+        };
+
+        function editTruck(id) {
+            const truck = localTrucks.find(t => t.id === id);
             if(truck) {
-                document.getElementById('editId').value = truck.id;
+                document.getElementById('editId').value = id;
                 document.getElementById('companyName').value = truck.company;
                 document.getElementById('plateNumber').value = truck.plate;
                 document.getElementById('vehicleType').value = truck.vehicle;
@@ -495,59 +551,29 @@
             }
         }
 
-        async function deleteTruck(id) { 
-            if(confirm("Obrisati najavu?")) { 
-                await _supabase.from('trucks').delete().eq('id', id);
-                renderGateList(); 
-            } 
-        }
-
-        function resetForm() { 
-            form.reset(); 
-            document.getElementById('editId').value = ''; 
-            document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle"></i> NAJAVI KAMION'; 
-            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-plus-circle"></i> NAJAVI DOLAZAK'; 
-            document.getElementById('cancelBtn').style.display = 'none'; 
-            checkFormValidity(); 
-        }
-
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const editId = document.getElementById('editId').value;
-            const truckData = { 
-                company: document.getElementById('companyName').value, 
-                plate: document.getElementById('plateNumber').value.toUpperCase(), 
-                vehicle: document.getElementById('vehicleType').value, 
-                goods: document.getElementById('goodsType').value, 
-                phone: document.getElementById('driverPhone').value 
-            };
-
-            if(editId) { 
-                await _supabase.from('trucks').update(truckData).eq('id', editId);
-            } else { 
-                const now = new Date();
-                await _supabase.from('trucks').insert([{ 
-                    ...truckData, 
-                    status: 'NA ČEKANJU', 
-                    date: getNumericDate(), 
-                    time: now.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) 
-                }]); 
-                playNotification();
+        async function deleteTruck(id) {
+            if(confirm("Obrisati najavu?")) {
+                await remove(ref(db, `trucks/${id}`));
             }
-            resetForm(); renderGateList();
-        };
-
-        function manualRefresh(btn) { 
-            btn.classList.add('active'); 
-            renderGateList(); 
-            setTimeout(() => { btn.classList.remove('active'); }, 800); 
         }
 
-        function handleLogout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
-        
-        renderGateList(); 
-        checkFormValidity(); 
-        setInterval(renderGateList, 5000); 
+        function resetForm() {
+            form.reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle"></i> NAJAVI KAMION';
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-plus-circle"></i> NAJAVI DOLAZAK';
+            document.getElementById('cancelBtn').style.display = 'none';
+            checkFormValidity();
+        }
+
+        function manualRefresh(btn) {
+            btn.classList.add('active');
+            setTimeout(() => btn.classList.remove('active'), 800);
+        }
+
+        function handleLogout() {
+            if(confirm("Odjava?")) window.location.href = 'login.html';
+        }
     </script>
 </body>
 </html>
