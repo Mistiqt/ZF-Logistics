@@ -152,7 +152,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // TVOJA SUPABASE KONFIGURACIJA
+        // SUPABASE KONFIGURACIJA
         const SUPABASE_URL = 'https://ljbqiavcibdlgmkkytkv.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE';
         
@@ -172,15 +172,18 @@
 
             let targetPage = "";
 
-            // 1. HARDKODIRANI KORISNICI (Uvek rade)
-            if (user === 'dusan.kostic@zf.com' && pass === 'Ninica1122!') targetPage = 'admin.html';
-            else if (user === 'kapija@zf.com' && pass === '123') targetPage = 'gate.html';
+            // 1. HARDKODIRANI KORISNICI (Ostavljeno kao fallback)
+            if (user === 'dusan.kostic@zf.com' && pass === 'Ninica1122!') {
+                targetPage = 'admin.html';
+            } else if (user === 'kapija@zf.com' && pass === '123') {
+                targetPage = 'gate.html';
+            }
 
-            // 2. SUPABASE PROVERA (Za ostale korisnike iz tabele 'users')
+            // 2. SUPABASE PROVERA (Tabela: zf_users)
             if (targetPage === "") {
                 try {
                     const { data, error } = await _supabase
-                        .from('users')
+                        .from('zf_users') // Ključna ispravka: naziv tabele je zf_users
                         .select('role')
                         .eq('username', user)
                         .eq('password', pass)
@@ -189,18 +192,22 @@
                     if (error) throw error;
 
                     if (data) {
-                        targetPage = data.role;
+                        let roleValue = data.role.toLowerCase(); 
+                        
+                        // Mapiranje uloga iz baze na .html stranice
+                        if (roleValue.includes('admin')) targetPage = 'admin.html';
+                        else if (roleValue.includes('magacin')) targetPage = 'warehouse.html';
+                        else if (roleValue.includes('kapija')) targetPage = 'gate.html';
+                        else targetPage = roleValue;
                     }
                 } catch (err) {
-                    console.error("Greška:", err.message);
+                    console.error("Greška pri logovanju:", err.message);
                 }
             }
 
             // REDIREKCIJA
             if (targetPage !== "") {
-                // Automatsko dodavanje .html ako fali u bazi
                 if (!targetPage.endsWith('.html')) targetPage += '.html';
-                
                 sessionStorage.setItem('zf_user_logged', user);
                 window.location.href = targetPage;
             } else {
