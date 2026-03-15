@@ -325,98 +325,75 @@
             document.getElementById('avg-time').innerText = countDone > 0 ? Math.round(sumMin / countDone) : "0";
         }
 
-        async function renderUserList() {
-            const { data: users, error } = await _supabase.from('users').select('*').order('created_at', { ascending: false });
-            if (error) return;
-            
-            const tbody = document.getElementById('user-list-body');
-            tbody.innerHTML = '';
-            
-            users.forEach((u) => { 
-                const config = roleConfig[u.role] || { label: u.role, class: "role-admin" };
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="font-weight:600;">${u.username}</td>
-                    <td style="color:var(--text-muted); font-size: 11px;">${new Date(u.created_at).toLocaleDateString()}</td>
-                    <td><span class="badge ${config.class}">${config.label}</span></td>
-                    <td style="text-align:right;">
-                        <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn btn-delete" onclick="confirmDelete('${u.id}')"><i class="fas fa-trash-alt"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-                tr.querySelector('.btn-edit').onclick = () => openUserModal(u);
-            });
-        }
+       // ... ostatak koda iznad je isti ...
 
-        function openUserModal(user = null) {
-            if(user && typeof user === 'object' && user.id) {
-                document.getElementById('edit-id').value = user.id;
-                document.getElementById('new-username').value = user.username;
-                document.getElementById('new-password').value = user.password;
-                document.getElementById('new-access').value = user.role;
-                document.getElementById('modal-title').innerText = "Izmeni Korisnički Nalog";
-            } else {
-                document.getElementById('edit-id').value = "";
-                document.getElementById('new-username').value = ""; 
-                document.getElementById('new-password').value = "";
-                document.getElementById('modal-title').innerText = "Novi Korisnički Nalog";
-            }
-            document.getElementById('userModal').style.display = 'flex';
-        }
+async function renderUserList() {
+    // OVDE JE BILA GREŠKA: promenjeno sa 'users' na 'zf_users'
+    const { data: users, error } = await _supabase.from('zf_users').select('*').order('created_at', { ascending: false });
+    if (error) return console.error("Greška pri učitavanju:", error);
+    
+    const tbody = document.getElementById('user-list-body');
+    tbody.innerHTML = '';
+    
+    users.forEach((u) => { 
+        const config = roleConfig[u.role] || { label: u.role, class: "role-admin" };
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-weight:600;">${u.username}</td>
+            <td style="color:var(--text-muted); font-size: 11px;">${new Date(u.created_at).toLocaleDateString()}</td>
+            <td><span class="badge ${config.class}">${config.label}</span></td>
+            <td style="text-align:right;">
+                <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
+                <button class="action-btn btn-delete" onclick="confirmDelete('${u.id}')"><i class="fas fa-trash-alt"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+        tr.querySelector('.btn-edit').onclick = () => openUserModal(u);
+    });
+}
 
-        function closeUserModal() { document.getElementById('userModal').style.display = 'none'; }
-        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; }
+async function saveUser() {
+    const id = document.getElementById('edit-id').value;
+    const userData = {
+        username: document.getElementById('new-username').value.trim(),
+        password: document.getElementById('new-password').value.trim(),
+        role: document.getElementById('new-access').value
+    };
 
-        function requestAdminAuth() {
-            document.getElementById('authModal').style.display = 'flex';
-            document.getElementById('auth-password').value = "";
-            document.getElementById('auth-password').focus();
-            document.getElementById('auth-confirm-btn').onclick = async function() {
-                if(document.getElementById('auth-password').value === ADMIN_PASS) {
-                    await saveUser();
-                    closeAuthModal();
-                } else alert("Netačna lozinka!");
-            };
-        }
+    if(!userData.username || !userData.password) return alert("Popunite sva polja!");
 
-        async function saveUser() {
-            const id = document.getElementById('edit-id').value;
-            const userData = {
-                username: document.getElementById('new-username').value.trim(),
-                password: document.getElementById('new-password').value.trim(),
-                role: document.getElementById('new-access').value
-            };
+    let error;
+    if (id) {
+        // PROMENJENO na 'zf_users'
+        const { error: err } = await _supabase.from('zf_users').update(userData).eq('id', id);
+        error = err;
+    } else {
+        // PROMENJENO na 'zf_users'
+        const { error: err } = await _supabase.from('zf_users').insert([userData]);
+        error = err;
+    }
 
-            if(!userData.username || !userData.password) return alert("Popunite sva polja!");
+    if(error) alert("Greška: " + error.message);
+    else {
+        closeUserModal();
+        renderUserList();
+    }
+}
 
-            let error;
-            if (id) {
-                const { error: err } = await _supabase.from('users').update(userData).eq('id', id);
-                error = err;
-            } else {
-                const { error: err } = await _supabase.from('users').insert([userData]);
-                error = err;
-            }
-
-            if(error) alert("Greška: " + error.message);
-            else {
-                closeUserModal();
-                renderUserList();
-            }
-        }
-
-        function confirmDelete(id) {
-            document.getElementById('authModal').style.display = 'flex';
-            document.getElementById('auth-password').value = "";
-            document.getElementById('auth-confirm-btn').onclick = async function() {
-                if(document.getElementById('auth-password').value === ADMIN_PASS) {
-                    await _supabase.from('users').delete().eq('id', id);
-                    renderUserList(); 
-                    closeAuthModal();
-                } else alert("Netačna lozinka!");
-            };
-        }
+function confirmDelete(id) {
+    document.getElementById('authModal').style.display = 'flex';
+    document.getElementById('auth-password').value = "";
+    document.getElementById('auth-confirm-btn').onclick = async function() {
+        if(document.getElementById('auth-password').value === ADMIN_PASS) {
+            // PROMENJENO na 'zf_users'
+            const { error } = await _supabase.from('zf_users').delete().eq('id', id);
+            if(error) alert("Greška pri brisanju: " + error.message);
+            renderUserList(); 
+            closeAuthModal();
+        } else alert("Netačna lozinka!");
+    };
+}
+// ... ostatak koda ...
 
         function manualRefresh(btn) { btn.classList.add('active'); loadAdminData(); renderUserList(); setTimeout(() => btn.classList.remove('active'), 800); }
         function logout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
