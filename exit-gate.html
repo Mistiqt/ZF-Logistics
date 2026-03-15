@@ -192,9 +192,10 @@
         }
 
         function createCard(truck, isReady) {
-            // Logika za prikaz vremena: Ako je istovaren, piše "Istovaren" i povlači vreme istovara, inače piše "Ulaz"
+            // Labela i podatak koji se prikazuje
             const timeLabel = isReady ? 'Istovaren' : 'Ulaz';
-            const displayTime = isReady ? (truck.unloaded_time || truck.unloadedTime || '-') : (truck.entry_time || truck.time || '');
+            // Koristimo unloaded_time za istovar, a entry_time za ulaz
+            const displayTime = isReady ? (truck.unloaded_time || '-') : (truck.entry_time || truck.time || '-');
 
             return `
                 <div class="exit-card ${isReady ? 'status-istovaren' : 'status-na-istovaru'}">
@@ -221,14 +222,24 @@
 
         async function confirmExit(truckId, plate) {
             if (confirm(`Potvrdi izlaz za vozilo ${plate}?`)) {
+                // Generišemo tačno vreme izlaska
                 const now = new Date().toLocaleTimeString('sr-RS', {hour:'2-digit', minute:'2-digit'});
+                
+                // Ključna ispravka: upisujemo status 'IZAŠAO' i 'exit_time' kolonu
                 const { error } = await _supabase
                     .from('zf_trucks')
-                    .update({ status: 'IZAŠAO', exit_time: now })
+                    .update({ 
+                        status: 'IZAŠAO', 
+                        exit_time: now 
+                    })
                     .eq('id', truckId);
 
-                if (error) alert("Greška: " + error.message);
-                else renderExitList();
+                if (error) {
+                    alert("Greška pri upisu u bazu: " + error.message);
+                } else {
+                    // Odmah osvežavamo listu
+                    renderExitList();
+                }
             }
         }
 
