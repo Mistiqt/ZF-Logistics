@@ -464,7 +464,7 @@
                         
                         if(error) console.error(error);
                         closeModals();
-                        fetchTrucks(); // Odmah osveži
+                        fetchTrucks();
                     };
                 } else { btn.disabled = true; btn.style.background = "#e2e8f0"; btn.style.color = "#94a3b8"; }
                 grid.appendChild(btn);
@@ -507,7 +507,8 @@
             setTimeout(() => { btn.classList.remove('active'); }, 800);
         }
 
-        _supabase.channel('custom-all-channel')
+        // Realtime pretplata
+        _supabase.channel('magacin-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'zf_trucks' }, () => {
             fetchTrucks();
         })
