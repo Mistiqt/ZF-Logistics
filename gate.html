@@ -398,12 +398,11 @@
     </footer>
 
     <script>
-        // --- SUPABASE KONFIGURACIJA ---
+        // Postavke klijenta prema slikama koje si poslao
         const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        // SINTETIČKI BIP ZVUK
         function playNotification() {
             try {
                 const context = new (window.AudioContext || window.webkitAudioContext)();
@@ -435,14 +434,14 @@
             el.addEventListener('change', checkFormValidity);
         });
 
-        // --- RENDER LISTE IZ SUPABASE-A ---
+        // Korišćenje naziva tabele 'trucks' iz baze
         async function renderGateList() {
             const { data: trucks, error } = await _supabase
-                .from('zf_transports')
+                .from('trucks')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            if (error) { console.error(error); return; }
+            if (error) { console.error("Greška pri čitanju:", error); return; }
 
             const gateList = document.getElementById('gateTruckList');
             if(!gateList) return;
@@ -450,13 +449,14 @@
 
             trucks.forEach((t) => {
                 let statusTag = `<span class="tag status-announced">Na čekanju</span>`;
-                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Rampa: ${t.rampa || ''}</span>`;
+                // Korišćenje kolone 'status' i 'gate' iz baze
+                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Rampa: ${t.gate || ''}</span>`;
                 else if (t.status === 'ISTOVAREN') statusTag = `<span class="tag status-exit">Spreman za izlaz</span>`;
                 else if (t.status === 'IZAŠAO') statusTag = `<span class="tag status-exited-final">Izašao</span>`;
                 
                 const item = document.createElement('div');
                 item.className = 'truck-item';
-                const showActions = (t.status === 'NA ČEKANJU');
+                const showActions = (t.status === 'NA ČEKANJU' || !t.status);
 
                 const dateObj = new Date(t.created_at);
                 const displayDate = dateObj.toLocaleDateString('sr-RS');
@@ -464,11 +464,10 @@
 
                 item.innerHTML = `
                     <div>
-                        <span class="plate-box">${t.registracija}</span> ${statusTag}
-                        <span class="company-name-text">${t.firma}</span>
+                        <span class="plate-box">${t.plate}</span> ${statusTag}
+                        <span class="company-name-text">${t.company}</span>
                         <small style="color:#64748b; display: block; margin-top: 6px;">
-                            Tip: ${t.tip_vozila} | Roba: ${t.roba}<br>
-                            <i class="fas fa-phone-alt"></i> ${t.telefon || 'Nije unet'}
+                            <i class="fas fa-phone-alt"></i> ${t.phone || 'Nije unet'}
                         </small>
                     </div>
                     <div class="item-right-content">
@@ -479,10 +478,9 @@
             });
         }
 
-        // --- BRISANJE IZ SUPABASE-A ---
         async function deleteTruck(id) { 
             if(confirm("Obrisati najavu?")) { 
-                const { error } = await _supabase.from('zf_transports').delete().eq('id', id);
+                const { error } = await _supabase.from('trucks').delete().eq('id', id);
                 if(!error) renderGateList();
             } 
         }
@@ -496,19 +494,16 @@
             checkFormValidity(); 
         }
 
-        // --- SLANJE U SUPABASE ---
+        // Korišćenje ispravnih naziva kolona 'plate' i 'company'
         form.onsubmit = async (e) => {
             e.preventDefault();
             const truckData = { 
-                firma: document.getElementById('companyName').value, 
-                registracija: document.getElementById('plateNumber').value.toUpperCase(), 
-                tip_vozila: document.getElementById('vehicleType').value,
-                roba: document.getElementById('goodsType').value,
-                telefon: document.getElementById('driverPhone').value,
+                company: document.getElementById('companyName').value, 
+                plate: document.getElementById('plateNumber').value.toUpperCase(), 
                 status: 'NA ČEKANJU'
             };
 
-            const { error } = await _supabase.from('zf_transports').insert([truckData]);
+            const { error } = await _supabase.from('trucks').insert([truckData]);
 
             if(!error) {
                 playNotification();
@@ -526,7 +521,7 @@
             setTimeout(() => { btn.classList.remove('active'); }, 800); 
         }
 
-        function handleLogout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
+        function handleLogout() { if(confirm("Odjava?")) window.location.href = 'index.html'; }
         
         renderGateList(); 
         checkFormValidity(); 
