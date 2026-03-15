@@ -247,7 +247,7 @@
     </div>
 
     <script>
-        // SUPABASE CONFIG (Tvoji parametri koje si mi dao)
+        // SUPABASE CONFIG
         const SB_URL = "https://kxyjnditofshghyaxkpx.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4eWpuZGl0b2ZzaGdoeWF4a3B4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzYyNDIsImV4cCI6MjA1NjgxMjI0Mn0.NIn6eI0vBvYIuFpP0C_6G7Q6-oG5L3z_O-E6u9jH6-0";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
@@ -281,14 +281,15 @@
 
             indicator.innerText = plateFilter || dateInput ? "PRIMENJEN FILTER" : "PRIKAZ: SVI PODACI";
 
-            let { data: trucks, error } = await _supabase.from('zf_trucks').select('*').order('id', { ascending: false });
+            // IZMENA: zamenjeno sa 'trucks'
+            let { data: trucks, error } = await _supabase.from('trucks').select('*').order('id', { ascending: false });
             if (error) return console.error(error);
 
             const tbody = document.getElementById('admin-table-body');
             tbody.innerHTML = '';
 
             let filtered = trucks.filter(t => {
-                const mPlate = t.plate.toUpperCase().includes(plateFilter);
+                const mPlate = t.plate ? t.plate.toUpperCase().includes(plateFilter) : false;
                 const mDate = dateInput ? t.date === dateInput : true;
                 return mPlate && mDate;
             });
@@ -325,10 +326,10 @@
             document.getElementById('avg-time').innerText = countDone > 0 ? Math.round(sumMin / countDone) : "0";
         }
 
-        // KORISNICI - CRUD SA SUPABASE
         async function renderUserList() {
-            let { data: users, error } = await _supabase.from('zf_users').select('*').order('created_at', { ascending: false });
-            if (error) return;
+            // IZMENA: zamenjeno sa 'profiles'
+            let { data: users, error } = await _supabase.from('profiles').select('*').order('created_at', { ascending: false });
+            if (error) return console.error(error);
 
             const tbody = document.getElementById('user-list-body');
             tbody.innerHTML = '';
@@ -377,10 +378,11 @@
                 role: document.getElementById('new-access').value
             };
 
+            // IZMENA: zamenjeno sa 'profiles'
             if (id) {
-                await _supabase.from('zf_users').update(userData).eq('id', id);
+                await _supabase.from('profiles').update(userData).eq('id', id);
             } else {
-                await _supabase.from('zf_users').insert([userData]);
+                await _supabase.from('profiles').insert([userData]);
             }
             closeUserModal(); renderUserList();
         }
@@ -389,15 +391,16 @@
             document.getElementById('authModal').style.display = 'flex';
             document.getElementById('auth-confirm-btn').onclick = async function() {
                 if(document.getElementById('auth-password').value === ADMIN_PASS) {
-                    await _supabase.from('zf_users').delete().eq('id', id);
+                    // IZMENA: zamenjeno sa 'profiles'
+                    await _supabase.from('profiles').delete().eq('id', id);
                     renderUserList(); closeAuthModal();
                 } else alert("Netačna lozinka!");
             };
         }
 
-        // EXPORT I BRISANJE
         async function exportAndCleanup() {
-            let { data: trucks } = await _supabase.from('zf_trucks').select('*');
+            // IZMENA: zamenjeno sa 'trucks'
+            let { data: trucks } = await _supabase.from('trucks').select('*');
             if(!trucks || trucks.length === 0) return alert("Nema podataka.");
 
             let csv = "\uFEFFTablica,Firma,Vozilo,Roba,Palete,Status,Datum,Ulaz,Istovar,Izlaz\r\n";
@@ -412,7 +415,8 @@
 
             setTimeout(async () => {
                 if(confirm("Obriši ARHIVU (Istovarene i Završene)?")) {
-                    await _supabase.from('zf_trucks').delete().in('status', ['ISTOVAREN', 'IZAŠAO', 'ZAVRŠENO']);
+                    // IZMENA: zamenjeno sa 'trucks'
+                    await _supabase.from('trucks').delete().in('status', ['ISTOVAREN', 'IZAŠAO', 'ZAVRŠENO']);
                     loadAdminData();
                 }
             }, 1000);
