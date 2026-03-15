@@ -369,7 +369,7 @@
         <section class="card">
             <div class="card-header">
                 <h2><i class="far fa-clock"></i> NAJAVLJENI KAMIONI</h2>
-                <button class="refresh-btn" onclick="fetchTrucks()" title="Osveži listu">
+                <button class="refresh-btn" onclick="fetchTrucks(this)" title="Osveži listu">
                     <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
@@ -383,39 +383,40 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // KREDENCIJALI (Povučeni iz login.html podešavanja)
-        const SUPABASE_URL = 'TVOJ_SUPABASE_URL';
-        const SUPABASE_KEY = 'TVOJ_SUPABASE_KEY';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // KREDENCIJALI
+        const SUPABASE_URL = 'https://ljbqiavcibdlgmkkytkv.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const form = document.getElementById('announceForm');
         const submitBtn = document.getElementById('submitBtn');
         const requiredFields = ['companyName', 'plateNumber', 'vehicleType', 'goodsType'];
 
-        // --- VALIDACIJA FORME ---
+        // Provera popunjenosti forme
         function checkFormValidity() {
             const allFilled = requiredFields.every(id => document.getElementById(id).value.trim() !== "");
             submitBtn.disabled = !allFilled;
         }
-        requiredFields.forEach(id => {
-            document.getElementById(id).addEventListener('input', checkFormValidity);
-        });
+        requiredFields.forEach(id => document.getElementById(id).addEventListener('input', checkFormValidity));
 
-        // --- DOBAVLJANJE PODATAKA ---
-        async function fetchTrucks() {
-            const btn = document.querySelector('.refresh-btn');
-            btn.classList.add('active');
+        // Dobavljanje podataka iz Supabase
+        async function fetchTrucks(btn = null) {
+            if(btn) btn.classList.add('active');
 
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('trucks')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            if (!error) renderList(data);
-            setTimeout(() => btn.classList.remove('active'), 800);
+            if (error) {
+                console.error("Greška:", error);
+            } else {
+                renderList(data);
+            }
+            if(btn) setTimeout(() => btn.classList.remove('active'), 800);
         }
 
-        // --- RENDER LISTE ---
+        // Prikaz liste na ekranu
         function renderList(trucks) {
             const listContainer = document.getElementById('gateTruckList');
             listContainer.innerHTML = '';
@@ -440,7 +441,10 @@
                         </small>
                     </div>
                     <div class="item-right-content">
-                        <div class="timestamp-box">${new Date(t.created_at).toLocaleDateString('sr-RS')}<br>${new Date(t.created_at).toLocaleTimeString('sr-RS', {hour:'2-digit', minute:'2-digit'})}</div>
+                        <div class="timestamp-box">
+                            ${new Date(t.created_at).toLocaleDateString('sr-RS')}<br>
+                            ${new Date(t.created_at).toLocaleTimeString('sr-RS', {hour:'2-digit', minute:'2-digit'})}
+                        </div>
                         ${canEdit ? `
                         <div class="action-btns">
                             <button class="btn-action-small btn-edit" onclick="editTruck('${t.id}')"><i class="fas fa-pen"></i></button>
@@ -452,12 +456,12 @@
             });
         }
 
-        // --- SLANJE / IZMENA ---
+        // Slanje forme (Insert ili Update)
         form.onsubmit = async (e) => {
             e.preventDefault();
             const editId = document.getElementById('editId').value;
             
-            const payload = {
+            const truckData = {
                 company: document.getElementById('companyName').value,
                 plate: document.getElementById('plateNumber').value.toUpperCase(),
                 vehicle_type: document.getElementById('vehicleType').value,
@@ -466,19 +470,21 @@
             };
 
             if (editId) {
-                await supabase.from('trucks').update(payload).eq('id', editId);
+                const { error } = await supabaseClient.from('trucks').update(truckData).eq('id', editId);
+                if (error) alert("Greška pri ažuriranju!");
             } else {
-                payload.status = 'NA ČEKANJU';
-                await supabase.from('trucks').insert([payload]);
+                truckData.status = 'NA ČEKANJU';
+                const { error } = await supabaseClient.from('trucks').insert([truckData]);
+                if (error) alert("Greška pri unosu!");
             }
 
             resetForm();
             fetchTrucks();
         };
 
-        // --- POMOĆNE FUNKCIJE ---
+        // Edit funkcija
         window.editTruck = async (id) => {
-            const { data } = await supabase.from('trucks').select('*').eq('id', id).single();
+            const { data, error } = await supabaseClient.from('trucks').select('*').eq('id', id).single();
             if (data) {
                 document.getElementById('editId').value = data.id;
                 document.getElementById('companyName').value = data.company;
@@ -495,10 +501,11 @@
             }
         };
 
+        // Brisanje
         window.deleteTruck = async (id) => {
-            if (confirm("Obriši najavu?")) {
-                await supabase.from('trucks').delete().eq('id', id);
-                fetchTrucks();
+            if (confirm("Da li ste sigurni da želite da obrišete ovu najavu?")) {
+                const { error } = await supabaseClient.from('trucks').delete().eq('id', id);
+                if (!error) fetchTrucks();
             }
         };
 
@@ -515,10 +522,12 @@
             if (confirm("Odjava?")) window.location.href = 'login.html';
         }
 
-        // Real-time osluškivanje promena (da se lista sama ažurira kad magacin promeni status)
-        supabase
-            .channel('schema-db-changes')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'trucks' }, () => fetchTrucks())
+        // Real-time osluškivanje promena
+        supabaseClient
+            .channel('any')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'trucks' }, payload => {
+                fetchTrucks();
+            })
             .subscribe();
 
         // Inicijalno učitavanje
