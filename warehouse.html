@@ -342,7 +342,7 @@
     </footer>
 
     <script>
-        // --- SUPABASE CONFIG ---
+        // --- POVEZIVANJE SA SUPABASE ---
         const SUPABASE_URL = 'https://ljbqiavclbdlgmkkytkv.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -379,15 +379,13 @@
         }
 
         async function render() {
+            // Čitamo sve kamione koji su ili na čekanju ili na rampi
             const { data: trucks, error } = await _supabase
                 .from('zf_trucks')
                 .select('*')
                 .or('status.eq.NA ČEKANJU,status.eq.NA RAMPI');
 
-            if (error) {
-                console.error("Greška pri preuzimanju:", error);
-                return;
-            }
+            if (error) return;
 
             const rContainer = document.getElementById('rampsContainer');
             const wContainer = document.getElementById('waitingContainer');
@@ -396,7 +394,7 @@
             wContainer.innerHTML = '';
             let currentWaitingCount = 0;
 
-            // Renderuj rampe
+            // Render rampi
             rampList.forEach(name => {
                 const truck = trucks.find(t => t.status === 'NA RAMPI' && t.ramp === name);
                 const card = document.createElement('div');
@@ -425,7 +423,7 @@
                 rContainer.appendChild(card);
             });
 
-            // Renderuj listu čekanja
+            // Render liste čekanja
             trucks.filter(t => t.status === 'NA ČEKANJU').forEach(t => {
                 currentWaitingCount++;
                 const card = document.createElement('div');
@@ -456,15 +454,12 @@
 
         window.openRampModal = async (id) => {
             currentTruckId = id;
-            const { data: occupiedRamps } = await _supabase
-                .from('zf_trucks')
-                .select('ramp')
-                .eq('status', 'NA RAMPI');
+            // Provera koje su rampe već zauzete direktno iz baze
+            const { data: occupied } = await _supabase.from('zf_trucks').select('ramp').eq('status', 'NA RAMPI');
+            const occupiedNames = occupied ? occupied.map(o => o.ramp) : [];
 
-            const occupiedNames = occupiedRamps ? occupiedRamps.map(r => r.ramp) : [];
             const grid = document.getElementById('modalRampGrid');
             grid.innerHTML = ''; 
-            
             rampList.forEach(rampName => {
                 const isOccupied = occupiedNames.includes(rampName);
                 const btn = document.createElement('button');
@@ -473,15 +468,12 @@
                 if (!isOccupied) {
                     btn.onclick = async () => {
                         const now = new Date();
-                        await _supabase
-                            .from('zf_trucks')
-                            .update({
-                                status: 'NA RAMPI',
-                                ramp: rampName,
-                                rampStartDate: getNumericDate(),
-                                rampStartTime: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                            })
-                            .eq('id', currentTruckId);
+                        await _supabase.from('zf_trucks').update({
+                            status: 'NA RAMPI',
+                            ramp: rampName,
+                            rampStartDate: getNumericDate(),
+                            rampStartTime: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                        }).eq('id', currentTruckId);
                         closeModals(); render();
                     };
                 } else { btn.disabled = true; btn.style.background = "#e2e8f0"; btn.style.color = "#94a3b8"; }
@@ -504,22 +496,18 @@
 
         window.finalizeUnload = async () => {
             const pVal = document.getElementById('palletInput').value;
-            await _supabase
-                .from('zf_trucks')
-                .update({
-                    status: 'ISTOVAREN',
-                    pallets: pVal,
-                    unloadedTime: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                })
-                .eq('id', currentTruckId);
+            await _supabase.from('zf_trucks').update({
+                status: 'ISTOVAREN',
+                pallets: pVal,
+                unloadedTime: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            }).eq('id', currentTruckId);
             closeModals(); render();
         };
 
         window.closeModals = () => { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); };
         
-        // Inicijalizacija
+        // Inicijalni render i automatsko osvežavanje na 3 sekunde
         render();
-        // Osvežavanje na svake 3 sekunde za real-time efekat
         setInterval(render, 3000); 
     </script>
 </body>
