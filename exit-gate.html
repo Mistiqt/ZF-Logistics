@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Izlazna Kapija - ZF Logistics</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -15,18 +14,35 @@
         }
 
         body { 
-            font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; color: var(--text-main);
-            display: flex; flex-direction: column; min-height: 100vh;
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg); 
+            margin: 0; 
+            color: var(--text-main); 
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         header { 
-            background: white; border-bottom: 1px solid var(--border); height: 90px;
-            display: flex; justify-content: center; position: sticky; top: 0; z-index: 100; 
+            background: white; 
+            border-bottom: 1px solid var(--border); 
+            height: 90px; 
+            display: flex; 
+            justify-content: center; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
         }
 
         .header-content { 
-            width: var(--container-width); max-width: 100%; padding: 0 20px; 
-            display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; 
+            width: var(--container-width); 
+            max-width: 100%;
+            padding: 0 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-sizing: border-box; 
         }
 
         .header-left { display: flex; align-items: center; gap: 15px; }
@@ -34,11 +50,16 @@
         .header-title-wrapper h1 { margin: 0; font-size: 22px; text-transform: uppercase; font-weight: 800; color: var(--zf-dark); line-height: 1; letter-spacing: -0.02em; }
         .page-description { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
 
-        .btn-logout { background: white; border: 1px solid var(--border); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: #be123c; transition: all 0.2s; }
+        .btn-logout { background: white; border: 1px solid var(--border); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: #be123c; transition: all 0.2s; white-space: nowrap; }
+        .btn-logout:hover { background-color: #fff1f2; border-color: #fda4af; }
 
         .main-container { 
-            width: var(--container-width); max-width: 100%; margin: 30px auto; 
-            padding: 0 20px; box-sizing: border-box; flex: 1;
+            width: var(--container-width); 
+            max-width: 100%;
+            margin: 30px auto; 
+            padding: 0 20px; 
+            box-sizing: border-box;
+            flex: 1;
         }
 
         .section-header { display: flex; justify-content: space-between; align-items: center; margin: 25px 0 15px 0; padding-bottom: 10px; border-bottom: 2px solid var(--border); }
@@ -46,10 +67,23 @@
         .badge-count { background: #64748b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
         .badge-ready { background: var(--success-green); }
 
+        .refresh-btn { cursor: pointer; font-size: 20px; display: inline-flex; align-items: center; justify-content: center; border: none; background: none; padding: 5px; outline: none; }
+        .refresh-btn i { color: #94a3b8; transition: color 0.2s ease; }
+        .refresh-btn:hover i, .refresh-btn.active i { color: var(--zf-blue); }
+        .refresh-btn.active i { animation: spin 0.8s linear; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
         .exit-card { 
-            background: white; border: 1px solid var(--border); border-radius: 8px; 
-            padding: 15px 25px; margin-bottom: 12px; display: flex; 
-            justify-content: space-between; align-items: center; gap: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+            background: white; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            padding: 15px 25px; 
+            margin-bottom: 12px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            gap: 15px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
         }
 
         .status-istovaren { border-left: 6px solid var(--success-green); }
@@ -59,27 +93,34 @@
         .plate-box { min-width: 150px; }
         .company-tag { font-size: 10px; font-weight: 800; color: var(--zf-blue); text-transform: uppercase; }
         .plate-number { font-size: 22px; font-weight: 900; color: var(--zf-dark); line-height: 1; }
-        
         .details-inline { display: flex; align-items: center; gap: 30px; flex-wrap: wrap; }
         .detail-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; }
         .detail-item i { color: var(--zf-blue); width: 18px; text-align: center; }
 
-        .btn-exit { 
-            min-width: 180px; background: var(--zf-blue); color: white; border: none; 
-            padding: 12px 20px; border-radius: 6px; font-weight: 800; font-size: 12px; 
-            cursor: pointer; text-transform: uppercase; 
-        }
-        .btn-exit:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+        .btn-zf-style { display: flex; align-items: center; justify-content: center; gap: 10px; min-width: 180px; background: var(--zf-blue); color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer; transition: background 0.2s; white-space: nowrap; text-transform: uppercase; }
+        .btn-zf-style:hover:not(:disabled) { background: var(--zf-dark); }
+        .btn-zf-style:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; border: 1px solid var(--border); }
         
         .empty-msg { padding: 30px; text-align: center; color: #94a3b8; font-size: 13px; background: #f1f5f9; border-radius: 8px; border: 1px dashed #cbd5e1; }
 
-        .footer { background: white; border-top: 1px solid var(--border); padding: 20px 0; text-align: center; margin-top: auto; }
+        .footer {
+            background: white;
+            border-top: 1px solid var(--border);
+            padding: 20px 0;
+            text-align: center;
+            margin-top: auto;
+        }
+        .footer p { margin: 0; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .footer b { color: var(--zf-blue); }
 
         @media (max-width: 768px) {
-            .exit-card { flex-direction: column; align-items: flex-start; }
-            .truck-main-info { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .details-inline { flex-direction: column; gap: 5px; }
-            .btn-exit { width: 100%; }
+            .header-content { flex-direction: row !important; justify-content: space-between; padding: 0 15px; }
+            .header-left { gap: 10px; }
+            .zf-logo-square { width: 36px; height: 36px; font-size: 18px; }
+            .header-title-wrapper h1 { font-size: 16px; }
+            .exit-card { flex-direction: column; align-items: flex-start; padding: 20px; }
+            .truck-main-info { flex-direction: column; align-items: flex-start; gap: 15px; width: 100%; }
+            .btn-zf-style { width: 100%; margin-top: 10px; }
         }
     </style>
 </head>
@@ -100,97 +141,115 @@
     <div class="main-container">
         <div class="section-header">
             <div class="section-title"><i class="fas fa-check-circle" style="color:var(--success-green)"></i> Spremni za odjavu <span id="readyCount" class="badge-count badge-ready">0</span></div>
+            <button class="refresh-btn" onclick="startRefresh(this)" title="Osveži"><i class="fas fa-sync-alt"></i></button>
         </div>
         <div id="readyList"></div>
 
         <div class="section-header" style="margin-top: 40px;">
-            <div class="section-title"><i class="fas fa-truck-loading" style="color:var(--warning-amber)"></i> Vozila na rampama / čekanju <span id="processCount" class="badge-count">0</span></div>
+            <div class="section-title"><i class="fas fa-truck-loading" style="color:var(--warning-amber)"></i> Vozila na rampama (U procesu) <span id="processCount" class="badge-count">0</span></div>
         </div>
         <div id="processList"></div>
     </div>
 
     <footer class="footer">
-        <p>Aplikaciju razvio <b>Dušan Kostić</b> © 2026. Ver 1.2</p>
+        <p>Aplikaciju razvio <b>Dušan Kostić</b> © 2026. Ver 1.0</p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
-        const SB_KEY = "sb_publishable_jeu7nFFmSa-mxNC4-Z3gkw_jkciHN94";
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        const SUPABASE_URL = 'https://ljbqiavcibdlgmkkytkv.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function fetchExitData() {
-            const { data: trucks, error } = await supabaseClient
-                .from('trucks')
+        async function renderExitList() {
+            const { data: trucks, error } = await _supabase
+                .from('zf_trucks')
                 .select('*')
-                .not('status', 'eq', 'IZAŠAO') // Ne prikazujemo one koji su već otišli
-                .order('created_at', { ascending: false });
+                .or('status.eq.NA RAMPI,status.eq.U PROCESU,status.eq.NA ISTOVARU,status.eq.ISTOVAREN')
+                .order('created_at', { ascending: true });
 
-            if (error) return;
-
-            const readyTrucks = trucks.filter(t => t.status === 'ISTOVAREN');
-            const processTrucks = trucks.filter(t => t.status === 'NA RAMPI' || t.status === 'NA ČEKANJU');
-
-            renderList('readyList', readyTrucks, true);
-            renderList('processList', processTrucks, false);
-            
-            document.getElementById('readyCount').textContent = readyTrucks.length;
-            document.getElementById('processCount').textContent = processTrucks.length;
-        }
-
-        function renderList(containerId, list, isReady) {
-            const container = document.getElementById(containerId);
-            if (list.length === 0) {
-                container.innerHTML = `<div class="empty-msg">Nema vozila u ovoj kategoriji.</div>`;
+            if (error) {
+                console.error("Greška pri učitavanju:", error);
                 return;
             }
 
-            container.innerHTML = list.map(truck => `
+            const readyContainer = document.getElementById('readyList');
+            const processContainer = document.getElementById('processList');
+
+            const readyTrucks = trucks.filter(t => t.status === 'ISTOVAREN');
+            const processTrucks = trucks.filter(t => t.status !== 'ISTOVAREN');
+
+            document.getElementById('readyCount').textContent = readyTrucks.length;
+            document.getElementById('processCount').textContent = processTrucks.length;
+
+            readyContainer.innerHTML = readyTrucks.length === 0 
+                ? '<div class="empty-msg">Nema vozila spremnih za izlaz.</div>' 
+                : readyTrucks.map(truck => createCard(truck, true)).join('');
+
+            processContainer.innerHTML = processTrucks.length === 0 
+                ? '<div class="empty-msg">Nema vozila na rampama.</div>' 
+                : processTrucks.map(truck => createCard(truck, false)).join('');
+        }
+
+        function createCard(truck, isReady) {
+            return `
                 <div class="exit-card ${isReady ? 'status-istovaren' : 'status-na-istovaru'}">
                     <div class="truck-main-info">
                         <div class="plate-box">
-                            <span class="company-tag">${truck.company}</span>
+                            <span class="company-tag">${truck.company || 'ZF Partner'}</span>
                             <div class="plate-number">${truck.plate}</div>
                         </div>
                         <div class="details-inline">
-                            <div class="detail-item"><i class="fas fa-boxes"></i><span>Paleta: <b>${truck.pallets || '-'}</b></span></div>
+                            <div class="detail-item"><i class="fas fa-phone-alt"></i><span><b>${truck.phone || '-'}</b></span></div>
+                            <div class="detail-item"><i class="fas fa-boxes"></i><span><b>${truck.goods || 'Roba'}</b></span></div>
                             <div class="detail-item"><i class="fas fa-warehouse"></i><span>Rampa: <b>${truck.ramp || '-'}</b></span></div>
-                            <div class="detail-item"><i class="far fa-clock"></i><span>Ulaz: <b>${truck.time_in || ''}</b></span></div>
+                            <div class="detail-item">
+                                <i class="far fa-clock"></i>
+                                <span>Ulaz: <b>${truck.entry_time || truck.time || ''}</b></span>
+                            </div>
                         </div>
                     </div>
-                    <button class="btn-exit" ${!isReady ? 'disabled' : `onclick="confirmExit(${truck.id}, '${truck.plate}')"`}>
-                        ${isReady ? '<i class="fas fa-check-double"></i> POTVRDI IZLAZ' : '<i class="fas fa-spinner fa-spin"></i> PROCES TRAJE'}
+                    <button class="btn-zf-style" ${!isReady ? 'disabled' : `onclick="confirmExit(${truck.id}, '${truck.plate}')"`}>
+                        ${isReady ? '<i class="fas fa-check-double"></i> POTVRDI IZLAZ' : '<i class="fas fa-spinner fa-spin"></i> NA ISTOVARU'}
                     </button>
-                </div>
-            `).join('');
+                </div>`;
         }
 
-        async function confirmExit(id, plate) {
-            if (!confirm(`Potvrdi konačan izlaz za vozilo ${plate}?`)) return;
+        async function confirmExit(truckId, plate) {
+            if (confirm(`Potvrdi izlaz za vozilo ${plate}?`)) {
+                const now = new Date().toLocaleTimeString('sr-RS', {hour:'2-digit', minute:'2-digit'});
+                
+                const { error } = await _supabase
+                    .from('zf_trucks')
+                    .update({ 
+                        status: 'ZAVRŠENO', 
+                        exit_time: now 
+                    })
+                    .eq('id', truckId);
 
-            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            const { error } = await supabaseClient
-                .from('trucks')
-                .update({ 
-                    status: 'IZAŠAO', 
-                    time_out: now 
-                })
-                .eq('id', id);
-
-            if (error) {
-                alert("Greška pri odjavi.");
-            } else {
-                fetchExitData();
+                if (!error) {
+                    renderExitList();
+                } else {
+                    alert("Greška pri potvrdi izlaza.");
+                }
             }
         }
 
-        function logout() {
-            window.location.href = 'login.html';
+        function startRefresh(el) { 
+            el.classList.add('active'); 
+            renderExitList(); 
+            setTimeout(() => el.classList.remove('active'), 800); 
         }
 
-        // Inicijalno učitavanje i auto-refresh
-        fetchExitData();
-        setInterval(fetchExitData, 3000);
+        function logout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
+
+        // Slušaj promene u bazi uživo (Realtime)
+        _supabase.channel('schema-db-changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'zf_trucks' }, renderExitList)
+            .subscribe();
+
+        renderExitList(); 
+        setInterval(renderExitList, 5000);
     </script>
 </body>
 </html>
