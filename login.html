@@ -7,78 +7,225 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --zf-blue: #00549f; --zf-dark: #002e5d; --border: #e2e8f0; --text-dark: #1e293b; --text-gray: #64748b; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .login-container { display: flex; min-height: 100vh; width: 100vw; }
-        .brand-side { flex: 1; background: url('pictures/images_enhanced.jpg') no-repeat center center; background-size: cover; position: relative; display: flex; flex-direction: column; justify-content: center; padding: 80px; color: white; }
-        .brand-side::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 84, 159, 0.88); z-index: 1; }
+        :root {
+            --zf-blue: #00549f;
+            --zf-dark: #002e5d;
+            --border: #e2e8f0;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .login-container { display: flex; min-height: 100vh; width: 100vw; flex-direction: row; }
+
+        .brand-side {
+            flex: 1;
+            background: url('pictures/images_enhanced.jpg') no-repeat center center;
+            background-size: cover;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        .brand-side::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 84, 159, 0.88);
+            z-index: 1;
+        }
+
         .brand-content { position: relative; z-index: 2; }
-        .brand-content h1 { font-size: 64px; font-weight: 900; margin: 0; }
+        .brand-content h1 { font-size: 64px; font-weight: 900; margin: 0; letter-spacing: -2px; }
+        .brand-content p.subtitle { font-size: 24px; opacity: 0.95; margin-top: 15px; max-width: 600px; line-height: 1.4; font-weight: 500; }
+
         .system-list { margin-top: 60px; list-style: none; padding: 0; }
         .system-list li { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; font-size: 20px; font-weight: 600; }
-        .form-side { flex: 1; background: #ffffff; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; }
-        .login-card-boxed { width: 100%; max-width: 440px; padding: 40px; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.06); }
+        .system-list i { font-size: 28px; width: 40px; text-align: center; }
+
+        .form-side {
+            flex: 1;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .login-form-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
+        .login-card-boxed { width: 100%; max-width: 440px; background: white; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.06); padding: 40px; box-sizing: border-box; }
+        .login-header-boxed { margin-bottom: 35px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; }
+        .login-header-boxed h2 { font-size: 24px; font-weight: 800; color: var(--zf-dark); margin: 0; text-transform: uppercase; }
+        .login-header-boxed p { color: var(--text-gray); font-size: 14px; margin-top: 5px; }
+
         .input-group { margin-bottom: 22px; }
-        .input-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 10px; }
-        .input-field { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
-        .btn-login { width: 100%; padding: 16px; background: var(--zf-blue); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
-        .error-alert { background: #fee2e2; color: #b91c1c; padding: 12px; border-radius: 6px; margin-bottom: 20px; display: none; text-align: center; font-size: 14px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 10px; text-transform: uppercase; }
+        .input-field { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; box-sizing: border-box; background: #f8fafc; transition: all 0.2s; }
+        .input-field:focus { outline: none; border-color: var(--zf-blue); background: white; box-shadow: 0 0 0 4px rgba(0, 84, 159, 0.1); }
+
+        .btn-login {
+            width: 100%; padding: 16px; background: var(--zf-blue); color: white; border: none;
+            border-radius: 6px; font-size: 16px; font-weight: 700; cursor: pointer;
+            transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 12px;
+        }
+        .btn-login:hover { background: var(--zf-dark); }
+        .btn-login:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        .contact-admin { margin-top: 35px; font-size: 12px; color: var(--text-gray); text-align: center; }
+
+        footer { width: 100%; text-align: center; padding: 20px 0; font-size: 12px; color: var(--text-gray); border-top: 1px solid #f1f5f9; }
+        footer strong { color: var(--zf-blue); font-weight: 700; }
+
+        @media (max-width: 900px) {
+            .login-container { flex-direction: column; }
+            .brand-side { flex: none; padding: 40px 20px; text-align: center; align-items: center; }
+            .system-list { display: none; }
+            .brand-content h1 { font-size: 36px; }
+            .form-side { padding: 20px; }
+            .login-card-boxed { padding: 30px 20px; border: none; box-shadow: none; }
+        }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
     <div class="login-container">
         <div class="brand-side">
             <div class="brand-content">
                 <h1>ZF LOGISTICS</h1>
-                <p>Sistem za upravljanje transportom</p>
+                <p class="subtitle">Sistem za najavu transporta i upravljanje rampama</p>
                 <ul class="system-list">
-                    <li><i class="fas fa-truck"></i> Najava kamiona</li>
-                    <li><i class="fas fa-warehouse"></i> Upravljanje rampama</li>
-                    <li><i class="fas fa-user-lock"></i> Administrator</li>
+                    <li><i class="fas fa-truck"></i> Ulazna kapija - Najava kamiona</li>
+                    <li><i class="fas fa-warehouse"></i> Magacin - Upravljanje rampama</li>
+                    <li><i class="fas fa-door-open"></i> Izlazna kapija - Potvrda odlaska</li>
+                    <li><i class="fas fa-user-lock"></i> Administrator - Kontrola sistema</li>
                 </ul>
             </div>
         </div>
+
         <div class="form-side">
-            <div class="login-card-boxed">
-                <h2 style="color:var(--zf-dark); margin-bottom:20px;">PRIJAVA</h2>
-                <div id="errorMsg" class="error-alert">Neispravno korisničko ime ili lozinka.</div>
-                <div class="input-group">
-                    <label>KORISNIČKO IME</label>
-                    <input type="text" id="username" class="input-field" placeholder="Unesite email/korisničko ime">
+            <div class="login-form-wrapper">
+                <div class="login-card-boxed">
+                    <div class="login-header-boxed">
+                        <h2>PRIJAVA</h2>
+                        <p>Unesite kredencijale za pristup portalu</p>
+                    </div>
+
+                    <form id="loginForm">
+                        <div class="input-group">
+                            <label>Korisničko ime</label>
+                            <input type="text" id="username" class="input-field" placeholder="korisnicko@zf.com" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Lozinka</label>
+                            <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="btn-login">
+                             <i class="fas fa-sign-in-alt"></i> <span id="btnText">PRIJAVA</span>
+                        </button>
+                    </form>
+
+                    <div class="contact-admin">
+                        Kontaktirajte administratora za pristup sistemu
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label>LOZINKA</label>
-                    <input type="password" id="password" class="input-field" placeholder="••••••••">
-                </div>
-                <button class="btn-login" onclick="login()">PRIJAVI SE</button>
             </div>
+
+            <footer>
+                Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.1
+            </footer>
         </div>
     </div>
 
-    <script>
-        const SB_URL = "https://kxyjnditofshghyaxkpx.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4eWpuZGl0b2ZzaGdoeWF4a3B4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzYyNDIsImV4cCI6MjA1NjgxMjI0Mn0.NIn6eI0vBvYIuFpP0C_6G7Q6-oG5L3z_O-E6u9jH6-0";
-        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        async function login() {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            const errorBox = document.getElementById('errorMsg');
+        // Firebase konfiguracija
+        const firebaseConfig = {
+            apiKey: "AIzaSyCt91DoCBywkfJecEKPGGxQEJKWMEDGPIo",
+            authDomain: "zf-logistics.firebaseapp.com",
+            projectId: "zf-logistics",
+            storageBucket: "zf-logistics.firebasestorage.app",
+            messagingSenderId: "739846408335",
+            appId: "1:739846408335:web:1cceef0a63dd96d9fc48fa",
+            measurementId: "G-HVJLQSNHKV"
+        };
 
-            const { data, error } = await _supabase
-                .from('zf_users')
-                .select('*')
-                .eq('username', user)
-                .eq('password', pass)
-                .single();
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-            if (data) {
-                window.location.href = data.role; // Prebacuje na gate.html, admin.html itd.
-            } else {
-                errorBox.style.display = 'block';
+        document.getElementById('loginForm').onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            
+            // Onemogući dugme tokom provere
+            btn.disabled = true;
+            btnText.innerText = "PROVERA...";
+
+            const user = document.getElementById('username').value.trim().toLowerCase();
+            const pass = document.getElementById('password').value.trim();
+
+            let targetPage = "";
+
+            // 1. HARDKODIRANI KORISNICI
+            if (user === 'dusan.kostic@zf.com' && pass === 'Ninica1122!') targetPage = 'admin.html';
+            else if (user === 'kapija@zf.com' && pass === '123') targetPage = 'gate.html';
+            else if (user === 'magacin1@zf.com' && pass === '123') targetPage = 'warehouse.html';
+            else if (user === 'kapijaizlaz@zf.com' && pass === '123') targetPage = 'exit-gate.html';
+
+            // 2. PROVERA U FIREBASE-U (ako nije hardkodiran)
+            if (targetPage === "") {
+                try {
+                    const usersRef = ref(db, 'users');
+                    const snapshot = await get(usersRef);
+                    
+                    if (snapshot.exists()) {
+                        const firebaseUsers = snapshot.val();
+                        for (let id in firebaseUsers) {
+                            let u = firebaseUsers[id];
+                            // Provera da li postoji username i password u objektu pre poređenja
+                            if (u.username && u.username.toLowerCase() === user && u.password === pass) {
+                                targetPage = u.role;
+                                break;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error("Greška pri čitanju korisnika:", error);
+                    alert("Greška pri povezivanju sa bazom.");
+                }
             }
-        }
+
+            // REDIREKCIJA
+            if (targetPage !== "") {
+                // Osiguraj da targetPage ima .html ekstenziju ako je uloga samo npr "admin"
+                if (!targetPage.includes('.html')) {
+                    targetPage = targetPage + ".html";
+                }
+                
+                sessionStorage.setItem('zf_user_logged', user);
+                window.location.href = targetPage;
+            } else {
+                alert("Neispravni podaci! Proverite korisničko ime i lozinku.");
+                btn.disabled = false;
+                btnText.innerText = "PRIJAVA";
+            }
+        };
     </script>
 </body>
 </html>
