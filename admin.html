@@ -247,7 +247,6 @@
     </div>
 
     <script>
-        // SUPABASE CONFIG
         const SB_URL = "https://kxyjnditofshghyaxkpx.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4eWpuZGl0b2ZzaGdoeWF4a3B4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzYyNDIsImV4cCI6MjA1NjgxMjI0Mn0.NIn6eI0vBvYIuFpP0C_6G7Q6-oG5L3z_O-E6u9jH6-0";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
@@ -260,49 +259,28 @@
             "admin.html": { label: "Administrator", class: "role-admin" }
         };
 
-        // POMOĆNE FUNKCIJE
         function formatToNumericDate(dateStr) {
             if (!dateStr) return "-";
             const d = new Date(dateStr);
             return isNaN(d) ? dateStr : `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}.`;
         }
 
-        function getDiffMin(start, end) {
-            if(!start || !end || start === "-" || end === "-") return null;
-            const s = start.split(':'), e = end.split(':');
-            let diff = (parseInt(e[0])*60 + parseInt(e[1])) - (parseInt(s[0])*60 + parseInt(s[1]));
-            return diff < 0 ? diff + 1440 : diff;
-        }
-
         async function loadAdminData() {
             const plateFilter = document.getElementById('filter-plate').value.toUpperCase();
             const dateInput = document.getElementById('filter-date').value;
-            const indicator = document.getElementById('filter-status-text');
-
-            indicator.innerText = plateFilter || dateInput ? "PRIMENJEN FILTER" : "PRIKAZ: SVI PODACI";
-
             let { data: trucks, error } = await _supabase.from('trucks').select('*').order('id', { ascending: false });
             if (error) return console.error(error);
 
             const tbody = document.getElementById('admin-table-body');
             tbody.innerHTML = '';
-
             let filtered = trucks.filter(t => {
                 const mPlate = t.plate ? t.plate.toUpperCase().includes(plateFilter) : false;
                 const mDate = dateInput ? t.date === dateInput : true;
                 return mPlate && mDate;
             });
 
-            let sumMin = 0, countDone = 0;
-
             filtered.forEach(t => {
                 let sCls = t.status === 'NA ČEKANJU' ? 'status-waiting' : t.status === 'NA RAMPI' ? 'status-ramp' : t.status === 'ISTOVAREN' ? 'status-unloaded' : 'status-exited';
-                
-                if((t.status === 'IZAŠAO' || t.status === 'ZAVRŠENO') && t.entry_time && t.exit_time) {
-                    const diff = getDiffMin(t.entry_time, t.exit_time);
-                    if(diff !== null) { sumMin += diff; countDone++; }
-                }
-
                 tbody.innerHTML += `<tr>
                     <td style="font-weight:800; color:var(--zf-blue);">${t.plate}</td>
                     <td>${t.company}</td>
@@ -316,20 +294,12 @@
                     <td>${t.exit_time || '-'}</td>
                 </tr>`;
             });
-
             document.getElementById('count-total').innerText = filtered.length;
-            document.getElementById('count-waiting').innerText = filtered.filter(x => x.status === 'NA ČEKANJU').length;
-            document.getElementById('count-ramp').innerText = filtered.filter(x => x.status === 'NA RAMPI').length;
-            document.getElementById('count-unloaded').innerText = filtered.filter(x => x.status === 'ISTOVAREN').length;
-            document.getElementById('count-exited').innerText = filtered.filter(x => x.status === 'IZAŠAO' || x.status === 'ZAVRŠENO').length;
-            document.getElementById('avg-time').innerText = countDone > 0 ? Math.round(sumMin / countDone) : "0";
         }
 
         async function renderUserList() {
-            // IZMENA: zamenjeno sa 'zf_users'
             let { data: users, error } = await _supabase.from('zf_users').select('*').order('created_at', { ascending: false });
             if (error) return console.error(error);
-
             const tbody = document.getElementById('user-list-body');
             tbody.innerHTML = '';
             users.forEach((u) => { 
@@ -351,18 +321,15 @@
             document.getElementById('new-username').value = user;
             document.getElementById('new-password').value = pass;
             document.getElementById('new-access').value = role;
-            document.getElementById('modal-title').innerText = id ? "Izmeni Korisnički Nalog" : "Novi Korisnički Nalog";
-            document.getElementById('new-password').type = id ? "text" : "password";
             document.getElementById('userModal').style.display = 'flex';
         }
 
         function closeUserModal() { document.getElementById('userModal').style.display = 'none'; }
-        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; document.getElementById('auth-password').value = ""; }
+        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; }
 
         function requestAdminAuth() {
             if(!document.getElementById('new-username').value || !document.getElementById('new-password').value) return alert("Popunite polja!");
             document.getElementById('authModal').style.display = 'flex';
-            document.getElementById('auth-password').focus();
             document.getElementById('auth-confirm-btn').onclick = async function() {
                 if(document.getElementById('auth-password').value === ADMIN_PASS) { await saveUser(); closeAuthModal(); }
                 else alert("Netačna lozinka!");
@@ -376,8 +343,6 @@
                 password: document.getElementById('new-password').value.trim(),
                 role: document.getElementById('new-access').value
             };
-
-            // IZMENA: zamenjeno sa 'zf_users'
             if (id) {
                 await _supabase.from('zf_users').update(userData).eq('id', id);
             } else {
@@ -390,40 +355,15 @@
             document.getElementById('authModal').style.display = 'flex';
             document.getElementById('auth-confirm-btn').onclick = async function() {
                 if(document.getElementById('auth-password').value === ADMIN_PASS) {
-                    // IZMENA: zamenjeno sa 'zf_users'
                     await _supabase.from('zf_users').delete().eq('id', id);
                     renderUserList(); closeAuthModal();
                 } else alert("Netačna lozinka!");
             };
         }
 
-        async function exportAndCleanup() {
-            let { data: trucks } = await _supabase.from('trucks').select('*');
-            if(!trucks || trucks.length === 0) return alert("Nema podataka.");
-
-            let csv = "\uFEFFTablica,Firma,Vozilo,Roba,Palete,Status,Datum,Ulaz,Istovar,Izlaz\r\n";
-            trucks.forEach(t => { 
-                csv += `"${t.plate}","${t.company}","${t.vehicle}","${t.goods}","${t.pallets}","${t.status}","${t.date}","${t.entry_time}","${t.unloaded_time}","${t.exit_time}"\r\n`; 
-            });
-
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-            link.download = `zf_izvestaj_${new Date().toLocaleDateString()}.csv`;
-            link.click();
-
-            setTimeout(async () => {
-                if(confirm("Obriši ARHIVU (Istovarene i Završene)?")) {
-                    await _supabase.from('trucks').delete().in('status', ['ISTOVAREN', 'IZAŠAO', 'ZAVRŠENO']);
-                    loadAdminData();
-                }
-            }, 1000);
-        }
-
         function manualRefresh(btn) { btn.classList.add('active'); loadAdminData(); setTimeout(() => btn.classList.remove('active'), 800); }
-        function resetFilters() { document.getElementById('filter-plate').value = ''; document.getElementById('filter-date').value = ''; loadAdminData(); }
         function logout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
-
-        window.onload = () => { loadAdminData(); renderUserList(); setInterval(loadAdminData, 10000); };
+        window.onload = () => { loadAdminData(); renderUserList(); };
     </script>
 </body>
 </html>
