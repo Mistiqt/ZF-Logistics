@@ -208,7 +208,7 @@
 
     <script>
         const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
-        const SB_KEY = "sb_publishable_jeu7nFFmSa-mxNC4-Z3gkw_jkciHN94";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
         const rampList = ["RAMPA 1", "RAMPA 2", "RAMPA 3", "RAMPA 4", "TEHNIČKA RAMPA", "ROLO RAMPA"];
@@ -220,7 +220,10 @@
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            if (error) return;
+            if (error) {
+                console.error("Greška:", error);
+                return;
+            }
 
             renderRamps(trucks);
             renderWaiting(trucks);
@@ -228,10 +231,11 @@
 
         function renderRamps(trucks) {
             const container = document.getElementById('rampsContainer');
+            if(!container) return;
             container.innerHTML = '';
 
             rampList.forEach(rampName => {
-                const truck = trucks.find(t => t.ramp === rampName && t.status === 'NA RAMPI');
+                const truck = trucks.find(t => t.gate === rampName && t.status === 'NA RAMPI');
                 const card = document.createElement('div');
                 card.className = `ramp-card ${truck ? 'occupied' : ''}`;
 
@@ -240,8 +244,9 @@
                         <div class="ramp-top"><span>${rampName}</span><span style="color:var(--success-green)">ZAUZETO</span></div>
                         <span class="company-name">${truck.company}</span>
                         <span class="plate-number">${truck.plate}</span>
-                        <div class="info-item"><i class="fas fa-clock"></i> Na rampi od: ${truck.ramp_start_time || ''}</div>
-                        <button class="btn-unload" onclick="openPalletModal(${truck.id}, '${truck.plate}')">ZAVRŠI</button>
+                        <div class="info-item"><i class="fas fa-box-open"></i> ${truck.goods || 'Nepoznato'}</div>
+                        <div class="info-item"><i class="fas fa-clock"></i> Početak: ${truck.ramp_start_time || '--:--'}</div>
+                        <button class="btn-unload" onclick="openPalletModal('${truck.id}', '${truck.plate}')">ZAVRŠI</button>
                     `;
                 } else {
                     card.innerHTML = `
@@ -256,8 +261,9 @@
         function renderWaiting(trucks) {
             const container = document.getElementById('waitingContainer');
             const waitingCount = document.getElementById('waitingCount');
-            const waitingTrucks = trucks.filter(t => t.status === 'NA ČEKANJU');
+            const waitingTrucks = trucks.filter(t => t.status === 'NA ČEKANJU' || !t.status);
             
+            if(!container) return;
             container.innerHTML = '';
             waitingCount.textContent = waitingTrucks.length;
 
@@ -266,27 +272,31 @@
                 card.className = 'waiting-card';
                 card.innerHTML = `
                     <div>
-                        <span class="company-name">${t.company}</span><br>
-                        <span class="plate-number" style="font-size:16px;">${t.plate}</span>
-                        <div style="font-size:12px; color:var(--text-muted)">Stigao: ${t.time_in}</div>
+                        <span class="company-name">${t.company}</span>
+                        <span class="plate-number" style="font-size:16px; margin: 0;">${t.plate}</span>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top: 5px;">
+                            <i class="fas fa-truck"></i> ${t.vehicle || ''} | <i class="fas fa-boxes"></i> ${t.goods || ''}
+                        </div>
                     </div>
-                    <button class="btn-assign" onclick="openRampModal(${t.id})">DODELI RAMPU</button>
+                    <button class="btn-assign" onclick="openRampModal('${t.id}')">DODELI RAMPU</button>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // AKCIJE
         function openRampModal(id) {
             selectedTruckId = id;
             const grid = document.getElementById('modalRampGrid');
             grid.innerHTML = '';
             
-            // Ovde bi idealno trebalo ponovo proveriti koji su zauzeti, ali render() to drži ažurnim
+            // Prikazujemo samo one rampe koje trenutno nisu zauzete u listi
+            const occupiedRamps = Array.from(document.querySelectorAll('.ramp-card.occupied .ramp-top span:first-child')).map(el => el.textContent);
+
             rampList.forEach(r => {
                 const btn = document.createElement('button');
                 btn.className = 'ramp-btn';
                 btn.textContent = r;
+                if(occupiedRamps.includes(r)) btn.disabled = true;
                 btn.onclick = () => assignRamp(r);
                 grid.appendChild(btn);
             });
@@ -294,12 +304,17 @@
         }
 
         async function assignRamp(rampName) {
-            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            await supabaseClient
+            const now = new Date().toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' });
+            const { error } = await supabaseClient
                 .from('trucks')
-                .update({ status: 'NA RAMPI', ramp: rampName, ramp_start_time: now })
+                .update({ 
+                    status: 'NA RAMPI', 
+                    gate: rampName, 
+                    ramp_start_time: now 
+                })
                 .eq('id', selectedTruckId);
             
+            if(error) alert("Greška: " + error.message);
             closeModals();
             fetchData();
         }
@@ -314,11 +329,17 @@
             const pallets = document.getElementById('palletInput').value;
             if(!pallets) return alert("Unesite broj paleta!");
 
-            await supabaseClient
+            const { error } = await supabaseClient
                 .from('trucks')
-                .update({ status: 'ISTOVAREN', pallets: pallets })
+                .update({ 
+                    status: 'ISTOVAREN', 
+                    pallets: pallets 
+                })
                 .eq('id', selectedTruckId);
 
+            if(error) alert("Greška: " + error.message);
+            
+            document.getElementById('palletInput').value = '';
             closeModals();
             fetchData();
         }
@@ -328,13 +349,12 @@
         }
 
         function logout() {
-            sessionStorage.clear();
-            window.location.href = 'login.html';
+            if(confirm("Odjava?")) window.location.href = 'index.html';
         }
 
-        // Inicijalizacija
+        // Inicijalizacija i Refresh
         fetchData();
-        setInterval(fetchData, 3000); // Automatsko osvežavanje na 3 sekunde
+        setInterval(fetchData, 4000); 
     </script>
 </body>
 </html>
