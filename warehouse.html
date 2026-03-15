@@ -360,7 +360,7 @@
                 oscillator.type = 'sine';
                 oscillator.frequency.setValueAtTime(880, context.currentTime); 
                 gainNode.gain.setValueAtTime(0.1, context.currentTime);
-                gainNode.gain.exponential_rampToValueAtTime(0.01, context.currentTime + 0.2);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
                 oscillator.connect(gainNode);
                 gainNode.connect(context.destination);
                 oscillator.start();
@@ -376,7 +376,6 @@
             if (!error) {
                 trucksGlobal = data;
                 render();
-                // Ažuriranje timestamp-a u footeru
                 const now = new Date();
                 document.getElementById('footerTimestamp').textContent = `Poslednje ažuriranje: ${now.toLocaleTimeString()}`;
             }
@@ -431,7 +430,7 @@
                                 <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${t.goods || '/'}</span></div>
                                 <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${t.phone || '/'}</span></div>
                                 <div class="info-item" style="margin-top:3px;">
-                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Najavljen u:</b> ${t.date || ''} ${t.time || ''}</span>
+                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Najavljen u:</b> ${t.arrivalDate || ''} ${t.arrivalTime || '/'}</span>
                                 </div>
                             </div>
                         </div>
@@ -511,16 +510,13 @@
             setTimeout(() => { btn.classList.remove('active'); }, 800);
         }
 
-        // Realtime pretplata (za momentalne promene)
         _supabase.channel('magacin-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'zf_trucks' }, () => {
             fetchTrucks();
         })
         .subscribe();
 
-        // HIDDEN REFRESH - Periodična provera svakih 5 sekundi za svaki slučaj
         setInterval(fetchTrucks, 5000);
-
         fetchTrucks();
     </script>
 </body>
