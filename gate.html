@@ -440,7 +440,10 @@
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            if (error) return;
+            if (error) {
+                console.error("Greška pri učitavanju:", error);
+                return;
+            }
 
             const gateList = document.getElementById('gateTruckList');
             if(!gateList) return;
@@ -465,7 +468,7 @@
                         <span class="plate-box">${t.plate}</span> ${statusTag}
                         <span class="company-name-text">${t.company}</span>
                         <small style="color:#64748b; display: block; margin-top: 6px;">
-                            ${t.vehicle || ''} • ${t.goods || ''}<br>
+                            <i class="fas fa-truck-moving"></i> ${t.vehicle || 'Nije navedeno'} • <i class="fas fa-box-open"></i> ${t.goods || 'Nije navedeno'}<br>
                             <i class="fas fa-phone-alt"></i> ${t.phone || 'Nije unet'}
                         </small>
                     </div>
@@ -517,6 +520,8 @@
         form.onsubmit = async (e) => {
             e.preventDefault();
             const editId = document.getElementById('editId').value;
+            
+            // Proveri da li su ovi nazivi ključeva IDENTIČNI onima u SQL editoru
             const truckData = { 
                 company: document.getElementById('companyName').value, 
                 plate: document.getElementById('plateNumber').value.toUpperCase(),
@@ -526,13 +531,21 @@
                 status: 'NA ČEKANJU'
             };
 
+            let response;
             if(editId) {
-                await _supabase.from('trucks').update(truckData).eq('id', editId);
+                response = await _supabase.from('trucks').update(truckData).eq('id', editId);
             } else {
-                await _supabase.from('trucks').insert([truckData]);
-                playNotification();
+                response = await _supabase.from('trucks').insert([truckData]);
             }
-            resetForm(); renderGateList();
+
+            if (response.error) {
+                console.error("Supabase greška:", response.error);
+                alert("Greška pri čuvanju podataka: " + response.error.message);
+            } else {
+                if(!editId) playNotification();
+                resetForm(); 
+                renderGateList();
+            }
         };
 
         function manualRefresh(btn) { 
