@@ -380,7 +380,7 @@
             
             const waitingTrucks = trucks.filter(t => t.status === 'NA ČEKANJU');
             
-            // RENDER RAMPI
+            // Render Rampi
             rampList.forEach(name => {
                 const truck = trucks.find(t => t.status === 'NA RAMPI' && t.ramp === name);
                 const card = document.createElement('div');
@@ -398,7 +398,7 @@
                                 <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${truck.phone || '/'}</span></div>
                                 <div class="info-item" style="margin-top:3px;">
                                     <span class="info-value" style="font-size:12px; color:var(--text-muted);">
-                                        <b>Na rampi od:</b> ${truck.ramp_start_date || '/'} ${truck.ramp_start_time || ''}
+                                        <b>Na rampi od:</b> ${truck.ramp_start_date || ''} ${truck.ramp_start_time || ''}
                                     </span>
                                 </div>
                             </div>
@@ -411,7 +411,7 @@
                 rContainer.appendChild(card);
             });
 
-            // RENDER ČEKANJA
+            // Render Čekanja
             waitingTrucks.forEach(t => {
                 const card = document.createElement('div');
                 card.className = 'waiting-card';
@@ -425,7 +425,7 @@
                             <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${t.phone || '/'}</span></div>
                             <div class="info-item" style="margin-top:3px;">
                                 <span class="info-value" style="font-size:12px; color:var(--text-muted);">
-                                    <b>Najavljen:</b> ${t.date || '/'} ${t.time || ''}
+                                    <b>Najavljen:</b> ${t.date || ''} ${t.time || ''}
                                 </span>
                             </div>
                         </div>
@@ -459,24 +459,24 @@
         }
 
         async function assignRamp(rampName) {
-            // Generisanje trenutnog vremena OVDE, da bi se upisalo u bazu
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('sr-RS') + '.';
-            const timeStr = now.toLocaleTimeString('sr-RS', {hour: '2-digit', minute:'2-digit'});
+            // GENERISANJE TRENUTNOG DATUMA I VREMENA
+            const sada = new Date();
+            const datum = sada.toLocaleDateString('sr-RS') + '.';
+            const vreme = sada.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' });
 
             const { error } = await _supabase.from('zf_trucks').update({
                 status: 'NA RAMPI',
                 ramp: rampName,
-                ramp_start_date: dateStr,
-                ramp_start_time: timeStr
+                ramp_start_date: datum,
+                ramp_start_time: vreme
             }).eq('id', selectedTruckId);
 
-            if(error) {
-                alert("Greška pri upisu u bazu!");
-                console.error(error);
+            if (error) {
+                console.error("Greška pri upisu:", error);
+            } else {
+                closeModals(); 
+                fetchData();
             }
-
-            closeModals(); fetchData();
         }
 
         function openPalletModal(id, plate, company) {
