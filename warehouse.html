@@ -6,52 +6,282 @@
     <title>Magacin - ZF Logistics</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* TVOJ CSS OSTAJE NETAKNUT */
         :root {
-            --zf-blue: #00549f; --zf-dark: #002e5d; --border-color: #e2e8f0;
-            --bg: #f8fafc; --success-green: #10b981; --success-bg: #f0fdf4;
-            --text-main: #1e293b; --text-muted: #64748b; --container-width: 1250px;
+            --zf-blue: #00549f;
+            --zf-dark: #002e5d;
+            --border-color: #e2e8f0;
+            --bg: #f8fafc;
+            --success-green: #10b981;
+            --success-bg: #f0fdf4;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --container-width: 1250px;
         }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; color: var(--text-main); -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; min-height: 100vh; }
-        header { background: white; border-bottom: 1px solid var(--border-color); height: 90px; display: flex; justify-content: center; position: sticky; top: 0; z-index: 100; }
-        .header-content { width: var(--container-width); max-width: 100%; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            height: 90px;
+            display: flex;
+            justify-content: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            width: var(--container-width);
+            max-width: 100%;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
         .header-left { display: flex; align-items: center; gap: 15px; }
-        .zf-logo-square { background: var(--zf-blue); color: white; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border-radius: 4px; font-size: 22px; }
-        .header-title-wrapper { display: flex; flex-direction: column; }
-        .header-title-wrapper h1 { margin: 0; font-size: 22px; text-transform: uppercase; font-weight: 800; color: var(--zf-dark); line-height: 1; letter-spacing: -0.02em; }
-        .page-description { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
-        .btn-logout { background: white; border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: #be123c; transition: all 0.2s; white-space: nowrap; }
-        .container { width: var(--container-width); max-width: 100%; margin: 30px auto; padding: 0 20px; box-sizing: border-box; flex: 1; }
-        .section-header-flex { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 15px; }
-        .section-title { font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 8px; text-transform: uppercase; margin: 0; color: var(--zf-dark); }
-        .refresh-btn { cursor: pointer; font-size: 20px; display: inline-flex; align-items: center; justify-content: center; border: none; background: none; padding: 5px; outline: none; }
+        
+        .zf-logo-square {
+            background: var(--zf-blue); 
+            color: white;
+            width: 44px; 
+            height: 44px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            border-radius: 4px;
+            font-size: 22px;
+        }
+
+        .header-title-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-title-wrapper h1 { 
+            margin: 0; 
+            font-size: 22px; 
+            text-transform: uppercase; 
+            font-weight: 800; 
+            color: var(--zf-dark);
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .page-description { 
+            font-size: 13px; 
+            color: var(--text-muted); 
+            margin-top: 4px; 
+            font-weight: 500;
+        }
+
+        .btn-logout {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #be123c;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-logout:hover { background-color: #fff1f2; border-color: #fda4af; }
+
+        .container { 
+            width: var(--container-width);
+            max-width: 100%;
+            margin: 30px auto; 
+            padding: 0 20px; 
+            box-sizing: border-box;
+            flex: 1;
+        }
+        
+        .section-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .section-title { 
+            font-size: 14px; 
+            font-weight: 800; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            text-transform: uppercase; 
+            margin: 0; 
+            color: var(--zf-dark);
+        }
+
+        .refresh-btn { 
+            cursor: pointer; 
+            font-size: 20px; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            border: none; 
+            background: none; 
+            padding: 5px; 
+            outline: none; 
+        }
         .refresh-btn i { color: #94a3b8; transition: color 0.2s ease; }
         .refresh-btn:hover i, .refresh-btn.active i { color: var(--zf-blue); }
         .refresh-btn.active i { animation: spin 0.8s linear; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        .ramp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 35px; }
-        .ramp-card { background: white; border: 1px solid #cbd5e1; border-style: dashed; border-radius: 6px; padding: 12px; min-height: 250px; display: flex; flex-direction: column; transition: all 0.2s; }
+
+        .ramp-grid {
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 15px;
+            margin-bottom: 35px;
+        }
+
+        .ramp-card {
+            background: white; 
+            border: 1px solid #cbd5e1;
+            border-style: dashed;
+            border-radius: 6px; 
+            padding: 12px;
+            min-height: 250px;
+            display: flex; 
+            flex-direction: column;
+            transition: all 0.2s;
+        }
         .ramp-card.occupied { border: 2px solid var(--success-green); background: var(--success-bg); border-style: solid; }
-        .ramp-top { display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 800; font-size: 13px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; }
+
+        .ramp-top { 
+            display: flex; justify-content: space-between; 
+            margin-bottom: 12px; font-weight: 800; font-size: 13px; 
+            border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; 
+        }
+
+        .info-container { margin: 5px 0; }
         .company-name { font-size: 16px; font-weight: 700; color: #334155; margin-bottom: 2px; display: block; }
         .plate-number { font-size: 20px; font-weight: 800; color: var(--zf-blue); margin-bottom: 10px; display: block; }
+
         .info-list { display: flex; flex-direction: column; gap: 5px; }
         .info-item { display: flex; align-items: center; font-size: 13.5px; line-height: 1.3; }
         .info-item i { width: 22px; color: var(--zf-blue); font-size: 13px; margin-right: 6px; text-align: center; }
         .info-value { color: var(--text-main); font-weight: 600; }
-        #waitingContainer { height: 500px; overflow-y: auto; padding: 15px; background: #f1f5f9; border: 2px solid var(--border-color); border-radius: 8px; box-sizing: border-box; }
-        .waiting-card { background: white; border: 1px solid var(--border-color); padding: 15px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .btn-unload { background: var(--success-green); color: white; border: none; width: 100%; padding: 12px; border-radius: 4px; font-weight: 800; cursor: pointer; margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; text-transform: uppercase; }
-        .btn-assign { background: var(--zf-blue); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: 13px; align-self: center; text-transform: uppercase; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
+
+        #waitingContainer {
+            height: 500px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f1f5f9;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        #waitingContainer::-webkit-scrollbar { width: 8px; }
+        #waitingContainer::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        #waitingContainer::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f1f5f9; }
+        #waitingContainer::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .waiting-card {
+            background: white; border: 1px solid var(--border-color);
+            padding: 15px 20px; border-radius: 8px; 
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .btn-unload {
+            background: var(--success-green); color: white; border: none;
+            width: 100%; padding: 12px; border-radius: 4px; font-weight: 800;
+            cursor: pointer; margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 13px; text-transform: uppercase;
+            transition: background 0.2s;
+        }
+        .btn-unload:hover { background: #059669; }
+
+        .btn-assign { 
+            background: var(--zf-blue); color: white; border: none; 
+            padding: 12px 25px; border-radius: 6px; font-weight: 800; 
+            cursor: pointer; font-size: 13px; align-self: center;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+        .btn-assign:hover { background: var(--zf-dark); }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.8); display: none;
+            justify-content: center; align-items: center; z-index: 1000;
+            backdrop-filter: blur(2px);
+        }
         .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; position: relative; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        
+        .close-x {
+            position: absolute; top: 15px; right: 15px; background: none; border: none;
+            font-size: 22px; color: var(--text-muted); cursor: pointer; line-height: 1; padding: 5px; transition: color 0.2s;
+        }
+        .close-x:hover { color: #be123c; }
+
         .ramp-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
-        .ramp-btn { background: var(--zf-blue); color: white; border: none; padding: 15px 10px; font-weight: 800; cursor: pointer; border-radius: 6px; font-size: 12px; }
-        .pallet-input { width: 100%; padding: 15px; border: 2px solid var(--border-color); border-radius: 6px; font-size: 24px; font-weight: 800; text-align: center; margin: 20px 0; box-sizing: border-box; }
-        .btn-finalize { background: var(--success-green); color: white; border: none; width: 100%; padding: 15px; border-radius: 6px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 14px; }
-        .footer { background: white; border-top: 1px solid var(--border-color); padding: 20px 0; text-align: center; margin-top: 40px; }
+        .ramp-btn { background: var(--zf-blue); color: white; border: none; padding: 15px 10px; font-weight: 800; cursor: pointer; border-radius: 6px; font-size: 12px; transition: background 0.2s; }
+        .ramp-btn:hover:not(:disabled) { background: var(--zf-dark); }
+        
+        .pallet-input {
+            width: 100%; padding: 15px; border: 2px solid var(--border-color);
+            border-radius: 6px; font-size: 24px; font-weight: 800; text-align: center; margin: 20px 0;
+            box-sizing: border-box; font-family: 'Inter', sans-serif;
+        }
+        .btn-finalize {
+            background: var(--success-green); color: white; border: none;
+            width: 100%; padding: 15px; border-radius: 6px; font-weight: 800; cursor: pointer;
+            text-transform: uppercase; font-size: 14px; transition: background 0.2s;
+        }
+        .btn-finalize:hover:not(:disabled) { background: #059669; }
+
+        .footer {
+            background: white;
+            border-top: 1px solid var(--border-color);
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 40px;
+        }
+        .footer p { margin: 0; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .footer b { color: var(--zf-blue); }
+
+        @media (max-width: 1250px) {
+            .ramp-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 768px) {
+            header { height: 80px; }
+            .header-content { flex-direction: row !important; justify-content: space-between; padding: 0 15px; }
+            .header-left { gap: 10px; }
+            .zf-logo-square { width: 36px; height: 36px; font-size: 18px; }
+            .header-title-wrapper h1 { font-size: 16px; }
+            .page-description { font-size: 10px; }
+            .btn-logout { padding: 6px 10px; font-size: 12px; gap: 5px; }
+            .ramp-grid { grid-template-columns: 1fr; }
+            .waiting-card { flex-direction: column; gap: 15px; }
+            .btn-assign { width: 100%; }
+            .modal-content { width: 90%; }
+            #waitingContainer { height: 400px; }
+        }
     </style>
 </head>
 <body>
@@ -64,7 +294,9 @@
                     <div class="page-description">Operativni panel rampi</div>
                 </div>
             </div>
-            <button class="btn-logout" onclick="window.location.href='login.html'"><i class="fas fa-sign-out-alt"></i> Odjava</button>
+            <button class="btn-logout" onclick="window.location.href='login.html'">
+                <i class="fas fa-sign-out-alt"></i> Odjava
+            </button>
         </div>
     </header>
 
@@ -77,8 +309,11 @@
                 <i class="far fa-clock" style="color:#f97316"></i> Kamioni na čekanju 
                 <span id="waitingCount" style="background:#ffedd5; color:#9a3412; padding:2px 8px; border-radius:4px; font-size:11px; margin-left:10px;">0</span>
             </div>
-            <button class="refresh-btn" onclick="handleRefresh(this)"><i class="fas fa-sync-alt"></i></button>
+            <button class="refresh-btn" onclick="handleRefresh(this)" title="Osveži">
+                <i class="fas fa-sync-alt"></i>
+            </button>
         </div>
+        
         <div id="waitingContainer"></div>
     </div>
 
@@ -92,10 +327,12 @@
 
     <div id="palletModal" class="modal-overlay">
         <div class="modal-content">
+            <button class="close-x" onclick="closeModals()">&times;</button>
             <h2 style="margin:0; font-size:18px; color:var(--zf-blue); font-weight: 800;">UNESITE BROJ PALETA</h2>
             <p id="palletTruckInfo" style="font-size: 13px; color: var(--text-muted); margin-top: 5px; font-weight: 500;"></p>
             <input type="number" id="palletInput" class="pallet-input" placeholder="0" oninput="validatePallets()">
             <button id="finalizeBtn" class="btn-finalize" onclick="finalizeUnload()" disabled>ZAVRŠI ISTOVAR</button>
+            <button onclick="closeModals()" style="margin-top:10px; width:100%; padding:8px; border:none; background:transparent; color:var(--text-muted); cursor:pointer; font-weight: 500;">Poništi</button>
         </div>
     </div>
 
@@ -103,17 +340,17 @@
         <p>Aplikaciju razvio <b>Dušan Kostić</b> © 2026. Ver 1.2</p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // --- SUPABASE KONFIGURACIJA ---
-        const SUPABASE_URL = 'https://tvoj-url.supabase.co';
-        const SUPABASE_KEY = 'tvoj-anon-key';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SUPABASE_URL = 'https://ljbqiavcibdlgmkkytkv.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        let trucksGlobal = [];
+        let currentTruckId = null;
+        let lastWaitingCount = -1; 
         const rampList = ["RAMPA 1", "RAMPA 2", "RAMPA 3", "RAMPA 4", "TEHNIČKA RAMPA", "ROLO RAMPA"];
-        let currentTruckId = null; 
-        let lastWaitingCount = -1;
 
-        // Funkcija za zvuk (tvoja originalna)
         function playNotification() {
             try {
                 const context = new (window.AudioContext || window.webkitAudioContext)();
@@ -130,24 +367,26 @@
             } catch (e) { console.log("Audio blocked"); }
         }
 
-        async function render() {
-            // Povuci podatke iz zf_trucks (Supabase)
-            const { data: trucks, error } = await supabase
+        async function fetchTrucks() {
+            const { data, error } = await _supabase
                 .from('zf_trucks')
                 .select('*')
-                .or('status.eq.NA ČEKANJU,status.eq.NA RAMPI');
+                .order('created_at', { ascending: true });
+            if (!error) {
+                trucksGlobal = data;
+                render();
+            }
+        }
 
-            if (error) { console.error(error); return; }
-
+        function render() {
             const rContainer = document.getElementById('rampsContainer');
             const wContainer = document.getElementById('waitingContainer');
-            rContainer.innerHTML = ''; wContainer.innerHTML = '';
-            
+            rContainer.innerHTML = ''; 
+            wContainer.innerHTML = '';
             let currentWaitingCount = 0;
 
-            // RENDER RAMPI (Tvoj dizajn)
             rampList.forEach(name => {
-                const truck = trucks.find(t => t.status === 'NA RAMPI' && t.ramp === name);
+                const truck = trucksGlobal.find(t => t.status === 'NA RAMPI' && t.ramp === name);
                 const card = document.createElement('div');
                 card.className = `ramp-card ${truck ? 'occupied' : ''}`;
                 
@@ -162,11 +401,11 @@
                                 <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${truck.goods || '/'}</span></div>
                                 <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${truck.phone || '/'}</span></div>
                                 <div class="info-item" style="margin-top:3px;">
-                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Na rampi od:</b> ${truck.rampStartTime || '/'}</span>
+                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Na rampi od:</b> ${truck.rampStartDate || ''} ${truck.rampStartTime || '/'}</span>
                                 </div>
                             </div>
                         </div>
-                        <button class="btn-unload" onclick="openPalletModal('${truck.id}', '${truck.plate}', '${truck.company}')"><i class="fas fa-check"></i> ISTOVAR ZAVRŠEN</button>`;
+                        <button class="btn-unload" onclick="openPalletModal('${truck.id}')"><i class="fas fa-check"></i> ISTOVAR ZAVRŠEN</button>`;
                 } else {
                     card.innerHTML = `<div class="ramp-top">${name} <span style="color:var(--text-muted); font-weight:500">SLOBODNO</span></div>
                                       <div style="margin:auto; color:#cbd5e1; text-align:center; font-size: 13px; font-weight:500;">Dostupno za dodelu</div>`;
@@ -174,85 +413,102 @@
                 rContainer.appendChild(card);
             });
 
-            // RENDER ČEKANJA (Tvoj dizajn)
-            const waiting = trucks.filter(t => t.status === 'NA ČEKANJU');
-            currentWaitingCount = waiting.length;
-            
-            waiting.forEach(t => {
-                const card = document.createElement('div');
-                card.className = 'waiting-card';
-                card.innerHTML = `
-                    <div class="info-container" style="margin:0;">
-                        <span class="company-name">${t.company}</span>
-                        <span class="plate-number">${t.plate}</span>
-                        <div class="info-item" style="font-size:12px; color:gray;">Najavljen: ${t.date || ''} ${t.time || ''}</div>
-                    </div>
-                    <button class="btn-assign" onclick="openRampModal('${t.id}')">DODELI RAMPU</button>`;
-                wContainer.appendChild(card);
+            trucksGlobal.forEach((t) => {
+                if (t.status === 'NA ČEKANJU') {
+                    currentWaitingCount++;
+                    const card = document.createElement('div');
+                    card.className = 'waiting-card';
+                    card.innerHTML = `
+                        <div class="info-container" style="margin:0;">
+                            <span class="company-name">${t.company}</span>
+                            <span class="plate-number">${t.plate}</span>
+                            <div class="info-list">
+                                <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${t.vehicle || '/'}</span></div>
+                                <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${t.goods || '/'}</span></div>
+                                <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${t.phone || '/'}</span></div>
+                                <div class="info-item" style="margin-top:3px;">
+                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Najavljen:</b> ${t.date || ''} ${t.time || ''}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-assign" onclick="openRampModal('${t.id}')">DODELI RAMPU</button>`;
+                    wContainer.appendChild(card);
+                }
             });
 
-            if (lastWaitingCount !== -1 && currentWaitingCount > lastWaitingCount) playNotification();
+            if (lastWaitingCount !== -1 && currentWaitingCount > lastWaitingCount) {
+                playNotification();
+            }
             lastWaitingCount = currentWaitingCount;
             document.getElementById('waitingCount').textContent = currentWaitingCount;
         }
 
-        // Dodela rampe (Supabase update)
-        async function openRampModal(id) {
+        window.openRampModal = (id) => {
             currentTruckId = id;
-            const { data: occupied } = await supabase.from('zf_trucks').select('ramp').eq('status', 'NA RAMPI');
-            const taken = occupied.map(o => o.ramp);
-            
             const grid = document.getElementById('modalRampGrid');
             grid.innerHTML = ''; 
-            rampList.forEach(r => {
+            rampList.forEach(rampName => {
+                const isOccupied = trucksGlobal.some(t => t.ramp === rampName && t.status === 'NA RAMPI');
                 const btn = document.createElement('button');
-                btn.className = 'ramp-btn';
-                btn.innerText = r;
-                if (taken.includes(r)) { btn.disabled = true; btn.style.background = "#e2e8f0"; }
-                else { btn.onclick = () => assignRamp(r); }
+                btn.className = isOccupied ? 'ramp-btn occupied-btn' : 'ramp-btn';
+                btn.innerHTML = rampName;
+                if (!isOccupied) {
+                    btn.onclick = async () => {
+                        const now = new Date();
+                        await _supabase.from('zf_trucks').update({
+                            status: 'NA RAMPI',
+                            ramp: rampName,
+                            rampStartDate: now.toLocaleDateString('de-DE'),
+                            rampStartTime: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                        }).eq('id', currentTruckId);
+                        closeModals();
+                    };
+                } else { btn.disabled = true; btn.style.background = "#e2e8f0"; btn.style.color = "#94a3b8"; }
                 grid.appendChild(btn);
             });
             document.getElementById('rampModal').style.display = 'flex';
-        }
+        };
 
-        async function assignRamp(rampName) {
-            const now = new Date();
-            await supabase.from('zf_trucks').update({
-                status: 'NA RAMPI',
-                ramp: rampName,
-                rampStartTime: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                rampStartDate: now.toLocaleDateString('sr-RS')
-            }).eq('id', currentTruckId);
-            closeModals(); render();
-        }
-
-        function openPalletModal(id, plate, company) {
+        window.openPalletModal = (id) => {
             currentTruckId = id;
-            document.getElementById('palletTruckInfo').textContent = `${plate} | ${company}`;
+            const truck = trucksGlobal.find(t => t.id === id);
+            document.getElementById('palletTruckInfo').textContent = `${truck.plate} | ${truck.company}`;
             document.getElementById('palletInput').value = '';
             document.getElementById('palletModal').style.display = 'flex';
-        }
+        };
 
-        async function finalizeUnload() {
-            const p = document.getElementById('palletInput').value;
-            await supabase.from('zf_trucks').update({
-                status: 'ISTOVAREN',
-                pallets: p,
-                unloadedTime: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-            }).eq('id', currentTruckId);
-            closeModals(); render();
-        }
-
-        function validatePallets() {
+        window.validatePallets = () => {
             const val = parseInt(document.getElementById('palletInput').value);
             document.getElementById('finalizeBtn').disabled = (isNaN(val) || val <= 0);
+        };
+
+        window.finalizeUnload = async () => {
+            const pallets = document.getElementById('palletInput').value;
+            const now = new Date();
+            await _supabase.from('zf_trucks').update({
+                status: 'ISTOVAREN',
+                pallets: pallets,
+                unloadedTime: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            }).eq('id', currentTruckId);
+            closeModals();
+        };
+
+        window.closeModals = () => { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); };
+        
+        function handleRefresh(btn) {
+            btn.classList.add('active');
+            fetchTrucks();
+            setTimeout(() => { btn.classList.remove('active'); }, 800);
         }
 
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
-        function handleRefresh(btn) { btn.classList.add('active'); render(); setTimeout(() => btn.classList.remove('active'), 800); }
+        // REALTIME SUBSCRIPTION
+        _supabase.channel('custom-all-channel')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'zf_trucks' }, () => {
+            fetchTrucks();
+        })
+        .subscribe();
 
-        render();
-        setInterval(render, 5000); // Automatsko osvežavanje
+        fetchTrucks();
     </script>
 </body>
 </html>
