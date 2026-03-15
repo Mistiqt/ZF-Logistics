@@ -439,7 +439,7 @@
 
         async function renderGateList() {
             const { data: trucks, error } = await _supabase
-                .from('trucks')
+                .from('zf_trucks') // ISPRAVLJENO: Koristi se zf_trucks
                 .select('*')
                 .order('created_at', { ascending: false });
 
@@ -454,7 +454,7 @@
 
             trucks.forEach((t) => {
                 let statusTag = `<span class="tag status-announced">Na čekanju</span>`;
-                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Rampa: ${t.gate || ''}</span>`;
+                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Rampa: ${t.gate || t.ramp || ''}</span>`;
                 else if (t.status === 'ISTOVAREN') statusTag = `<span class="tag status-exit">Spreman za izlaz</span>`;
                 else if (t.status === 'IZAŠAO') statusTag = `<span class="tag status-exited-final">Izašao</span>`;
                 
@@ -488,7 +488,7 @@
         }
 
         async function editTruck(id) {
-            const { data: truck, error } = await _supabase.from('trucks').select('*').eq('id', id).single();
+            const { data: truck, error } = await _supabase.from('zf_trucks').select('*').eq('id', id).single();
             if(truck) {
                 document.getElementById('editId').value = truck.id;
                 document.getElementById('companyName').value = truck.company;
@@ -506,7 +506,7 @@
 
         async function deleteTruck(id) { 
             if(confirm("Obrisati najavu?")) { 
-                await _supabase.from('trucks').delete().eq('id', id);
+                await _supabase.from('zf_trucks').delete().eq('id', id);
                 renderGateList();
             } 
         }
@@ -535,10 +535,10 @@
 
             let error;
             if(editId) {
-                const res = await _supabase.from('trucks').update(truckData).eq('id', editId);
+                const res = await _supabase.from('zf_trucks').update(truckData).eq('id', editId);
                 error = res.error;
             } else {
-                const res = await _supabase.from('trucks').insert([truckData]);
+                const res = await _supabase.from('zf_trucks').insert([truckData]);
                 error = res.error;
             }
 
