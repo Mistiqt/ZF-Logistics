@@ -34,10 +34,13 @@
         .waiting-card { background: white; border: 1px solid var(--border-color); padding: 15px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
         .btn-unload { background: var(--success-green); color: white; border: none; width: 100%; padding: 12px; border-radius: 4px; font-weight: 800; cursor: pointer; margin-top: auto; font-size: 13px; }
         .btn-assign { background: var(--zf-blue); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: 13px; text-transform: uppercase; }
+        
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 400px; text-align: center; }
         .ramp-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
         .ramp-btn { background: var(--zf-blue); color: white; border: none; padding: 15px 10px; font-weight: 800; cursor: pointer; border-radius: 6px; }
+        .pallet-input { width: 100%; padding: 15px; border: 2px solid var(--border-color); border-radius: 6px; font-size: 24px; font-weight: 800; text-align: center; margin: 20px 0; box-sizing: border-box; }
+        .btn-finalize { background: var(--success-green); color: white; border: none; width: 100%; padding: 15px; border-radius: 6px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -69,13 +72,28 @@
         </div>
     </div>
 
+    <div id="palletModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 style="margin:0; font-size:18px; color:var(--zf-blue); font-weight: 800;">BROJ PALETA</h2>
+            <p id="palletTruckInfo" style="font-size: 13px; color: var(--text-muted); margin-top: 5px;"></p>
+            <input type="number" id="palletInput" class="pallet-input" placeholder="0">
+            <button class="btn-finalize" onclick="finalizeUnload()">ZAVRŠI ISTOVAR</button>
+            <button onclick="closeModals()" style="margin-top:10px; width:100%; padding:8px; border:none; background:transparent; color:var(--text-muted); cursor:pointer;">Otkaži</button>
+        </div>
+    </div>
+
     <script>
         const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        let selectedTruckId = null;
+        let activeTruckId = null;
         const rampList = ["RAMPA 1", "RAMPA 2", "RAMPA 3", "RAMPA 4", "TEHNIČKA RAMPA", "ROLO RAMPA"];
+
+        function getTodayDate() {
+            const now = new Date();
+            return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}.`;
+        }
 
         async function fetchData() {
             const { data: trucks, error } = await _supabase.from('zf_trucks').select('*').not('status', 'eq', 'ISTOVAREN');
@@ -103,10 +121,10 @@
                                 <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${t.vehicle || '/'}</span></div>
                                 <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${t.goods || '/'}</span></div>
                                 <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${t.phone || '/'}</span></div>
-                                <div class="info-item" style="margin-top:3px;"><span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Na rampi od:</b> ${t.ramp_time || '/'}</span></div>
+                                <div class="info-item" style="margin-top:3px;"><span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Na rampi od:</b> ${t.date || ''} ${t.ramp_time || '/'}</span></div>
                             </div>
                         </div>
-                        <button class="btn-unload" onclick="finish(${t.id})">ISTOVAR ZAVRŠEN</button>`;
+                        <button class="btn-unload" onclick="openPalletModal(${t.id}, '${t.plate}')">ISTOVAR ZAVRŠEN</button>`;
                 } else {
                     card.innerHTML = `<div class="ramp-top">${name}</div><div style="margin:auto; color:#cbd5e1; text-align:center;">Slobodno</div>`;
                 }
@@ -133,30 +151,53 @@
         }
 
         function openAssign(id) {
-            selectedTruckId = id;
+            activeTruckId = id;
             const grid = document.getElementById('modalRampGrid');
             grid.innerHTML = '';
             rampList.forEach(r => {
                 const btn = document.createElement('button');
                 btn.className = 'ramp-btn'; btn.innerText = r;
-                btn.onclick = () => assign(r);
+                btn.onclick = () => assignRamp(r);
                 grid.appendChild(btn);
             });
             document.getElementById('rampModal').style.display = 'flex';
         }
 
-        async function assign(rampName) {
-            const sad = new Date().toLocaleTimeString('sr-RS', {hour: '2-digit', minute:'2-digit'});
-            await _supabase.from('zf_trucks').update({ status: 'NA RAMPI', ramp: rampName, ramp_time: sad }).eq('id', selectedTruckId);
+        async function assignRamp(rampName) {
+            const time = new Date().toLocaleTimeString('sr-RS', {hour: '2-digit', minute:'2-digit'});
+            const date = getTodayDate();
+            await _supabase.from('zf_trucks').update({ 
+                status: 'NA RAMPI', 
+                ramp: rampName, 
+                ramp_time: time,
+                date: date 
+            }).eq('id', activeTruckId);
             closeModals(); fetchData();
         }
 
-        async function finish(id) {
-            await _supabase.from('zf_trucks').update({ status: 'ISTOVAREN' }).eq('id', id);
-            fetchData();
+        function openPalletModal(id, plate) {
+            activeTruckId = id;
+            document.getElementById('palletTruckInfo').innerText = "Vozilo: " + plate;
+            document.getElementById('palletInput').value = '';
+            document.getElementById('palletModal').style.display = 'flex';
         }
 
-        function closeModals() { document.getElementById('rampModal').style.display = 'none'; }
+        async function finalizeUnload() {
+            const pallets = document.getElementById('palletInput').value;
+            if (!pallets || pallets <= 0) { alert("Unesi broj paleta!"); return; }
+            
+            await _supabase.from('zf_trucks').update({ 
+                status: 'ISTOVAREN', 
+                pallets: pallets 
+            }).eq('id', activeTruckId);
+            
+            closeModals(); fetchData();
+        }
+
+        function closeModals() {
+            document.getElementById('rampModal').style.display = 'none';
+            document.getElementById('palletModal').style.display = 'none';
+        }
 
         fetchData();
         setInterval(fetchData, 5000);
