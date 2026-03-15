@@ -157,13 +157,11 @@
     </footer>
 
     <script>
-        // SUPABASE KONFIGURACIJA
         const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
         async function renderExitList() {
-            // Povlačimo sve koji nisu izašli
             const { data: trucks, error } = await _supabase
                 .from('zf_trucks')
                 .select('*')
@@ -178,7 +176,6 @@
             const readyContainer = document.getElementById('readyList');
             const processContainer = document.getElementById('processList');
 
-            // Filtriranje po statusima
             const readyTrucks = trucks.filter(t => t.status === 'ISTOVAREN');
             const processTrucks = trucks.filter(t => (t.status === 'NA RAMPI' || t.status === 'U PROCESU' || t.status === 'NA ISTOVARU' || t.status === 'NA ČEKANJU'));
 
@@ -195,6 +192,10 @@
         }
 
         function createCard(truck, isReady) {
+            // Logika za prikaz vremena: Ako je istovaren, piše "Istovaren" i povlači vreme istovara, inače piše "Ulaz"
+            const timeLabel = isReady ? 'Istovaren' : 'Ulaz';
+            const displayTime = isReady ? (truck.unloaded_time || truck.unloadedTime || '-') : (truck.entry_time || truck.time || '');
+
             return `
                 <div class="exit-card ${isReady ? 'status-istovaren' : 'status-na-istovaru'}">
                     <div class="truck-main-info">
@@ -208,7 +209,7 @@
                             <div class="detail-item"><i class="fas fa-warehouse"></i><span>Rampa: <b>${truck.ramp || '-'}</b></span></div>
                             <div class="detail-item">
                                 <i class="far fa-clock"></i>
-                                <span>Ulaz: <b>${truck.entry_time || truck.time || ''}</b></span>
+                                <span>${timeLabel}: <b>${displayTime}</b></span>
                             </div>
                         </div>
                     </div>
@@ -221,20 +222,13 @@
         async function confirmExit(truckId, plate) {
             if (confirm(`Potvrdi izlaz za vozilo ${plate}?`)) {
                 const now = new Date().toLocaleTimeString('sr-RS', {hour:'2-digit', minute:'2-digit'});
-                
                 const { error } = await _supabase
                     .from('zf_trucks')
-                    .update({ 
-                        status: 'IZAŠAO', 
-                        exit_time: now 
-                    })
+                    .update({ status: 'IZAŠAO', exit_time: now })
                     .eq('id', truckId);
 
-                if (error) {
-                    alert("Greška pri potvrdi izlaza: " + error.message);
-                } else {
-                    renderExitList();
-                }
+                if (error) alert("Greška: " + error.message);
+                else renderExitList();
             }
         }
 
@@ -246,10 +240,7 @@
 
         function logout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
 
-        // Inicijalno učitavanje
         renderExitList(); 
-        
-        // Automatsko osvežavanje na svakih 5 sekundi
         setInterval(renderExitList, 5000);
     </script>
 </body>
