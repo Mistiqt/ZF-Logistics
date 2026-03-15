@@ -338,6 +338,7 @@
 
     <footer class="footer">
         <p>Aplikaciju razvio <b>Dušan Kostić</b> © 2026. Ver 1.2</p>
+        <p id="footerTimestamp" style="font-size: 11px; margin-top: 5px; opacity: 0.8;"></p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -359,7 +360,7 @@
                 oscillator.type = 'sine';
                 oscillator.frequency.setValueAtTime(880, context.currentTime); 
                 gainNode.gain.setValueAtTime(0.1, context.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
+                gainNode.gain.exponential_rampToValueAtTime(0.01, context.currentTime + 0.2);
                 oscillator.connect(gainNode);
                 gainNode.connect(context.destination);
                 oscillator.start();
@@ -375,6 +376,9 @@
             if (!error) {
                 trucksGlobal = data;
                 render();
+                // Ažuriranje timestamp-a u footeru
+                const now = new Date();
+                document.getElementById('footerTimestamp').textContent = `Poslednje ažuriranje: ${now.toLocaleTimeString()}`;
             }
         }
 
@@ -507,12 +511,15 @@
             setTimeout(() => { btn.classList.remove('active'); }, 800);
         }
 
-        // Realtime pretplata
+        // Realtime pretplata (za momentalne promene)
         _supabase.channel('magacin-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'zf_trucks' }, () => {
             fetchTrucks();
         })
         .subscribe();
+
+        // HIDDEN REFRESH - Periodična provera svakih 5 sekundi za svaki slučaj
+        setInterval(fetchTrucks, 5000);
 
         fetchTrucks();
     </script>
