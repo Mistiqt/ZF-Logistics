@@ -16,34 +16,28 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; color: var(--text-main); -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; min-height: 100vh; }
         header { background: white; border-bottom: 1px solid var(--border-color); height: 90px; display: flex; justify-content: center; position: sticky; top: 0; z-index: 100; }
         .header-content { width: var(--container-width); max-width: 100%; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        .header-left { display: flex; align-items: center; gap: 15px; }
         .zf-logo-square { background: var(--zf-blue); color: white; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border-radius: 4px; font-size: 22px; }
-        .header-title-wrapper h1 { margin: 0; font-size: 22px; text-transform: uppercase; font-weight: 800; color: var(--zf-dark); line-height: 1; letter-spacing: -0.02em; }
-        .page-description { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
-        .btn-logout { background: white; border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: #be123c; }
+        .header-title-wrapper h1 { margin: 0; font-size: 22px; text-transform: uppercase; font-weight: 800; color: var(--zf-dark); line-height: 1; }
         .container { width: var(--container-width); max-width: 100%; margin: 30px auto; padding: 0 20px; box-sizing: border-box; flex: 1; }
         .section-title { font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 8px; text-transform: uppercase; margin: 0; color: var(--zf-dark); }
         .ramp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0 35px 0; }
         .ramp-card { background: white; border: 1px solid #cbd5e1; border-style: dashed; border-radius: 6px; padding: 12px; min-height: 250px; display: flex; flex-direction: column; }
         .ramp-card.occupied { border: 2px solid var(--success-green); background: var(--success-bg); border-style: solid; }
         .ramp-top { display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 800; font-size: 13px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; }
-        .info-container { margin: 5px 0; }
         .company-name { font-size: 16px; font-weight: 700; color: #334155; margin-bottom: 2px; display: block; }
         .plate-number { font-size: 20px; font-weight: 800; color: var(--zf-blue); margin-bottom: 10px; display: block; }
         .info-list { display: flex; flex-direction: column; gap: 5px; }
-        .info-item { display: flex; align-items: center; font-size: 13.5px; line-height: 1.3; }
+        .info-item { display: flex; align-items: center; font-size: 13.5px; }
         .info-item i { width: 22px; color: var(--zf-blue); font-size: 13px; margin-right: 6px; text-align: center; }
         .info-value { color: var(--text-main); font-weight: 600; }
         #waitingContainer { height: 500px; overflow-y: auto; padding: 15px; background: #f1f5f9; border: 2px solid var(--border-color); border-radius: 8px; }
         .waiting-card { background: white; border: 1px solid var(--border-color); padding: 15px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-        .btn-unload { background: var(--success-green); color: white; border: none; width: 100%; padding: 12px; border-radius: 4px; font-weight: 800; cursor: pointer; margin-top: auto; font-size: 13px; text-transform: uppercase; }
+        .btn-unload { background: var(--success-green); color: white; border: none; width: 100%; padding: 12px; border-radius: 4px; font-weight: 800; cursor: pointer; margin-top: auto; font-size: 13px; }
         .btn-assign { background: var(--zf-blue); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: 13px; text-transform: uppercase; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; position: relative; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; }
         .ramp-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
         .ramp-btn { background: var(--zf-blue); color: white; border: none; padding: 15px 10px; font-weight: 800; cursor: pointer; border-radius: 6px; }
-        .pallet-input { width: 100%; padding: 15px; border: 2px solid var(--border-color); border-radius: 6px; font-size: 24px; font-weight: 800; text-align: center; margin: 20px 0; }
-        .footer { background: white; border-top: 1px solid var(--border-color); padding: 20px 0; text-align: center; margin-top: 40px; }
     </style>
 </head>
 <body>
@@ -51,9 +45,8 @@
         <div class="header-content">
             <div class="header-left">
                 <div class="zf-logo-square"><i class="fas fa-warehouse"></i></div>
-                <div class="header-title-wrapper"><h1>MAGACIN</h1><div class="page-description">Operativni panel rampi</div></div>
+                <div class="header-title-wrapper"><h1>MAGACIN</h1><div style="font-size:13px; color:var(--text-muted);">Operativni panel rampi</div></div>
             </div>
-            <button class="btn-logout" onclick="window.location.href='login.html'"><i class="fas fa-sign-out-alt"></i> Odjava</button>
         </div>
     </header>
 
@@ -76,16 +69,6 @@
         </div>
     </div>
 
-    <div id="palletModal" class="modal-overlay">
-        <div class="modal-content">
-            <h2 style="margin:0; font-size:18px; color:var(--zf-blue); font-weight: 800;">UNESITE BROJ PALETA</h2>
-            <input type="number" id="palletInput" class="pallet-input" placeholder="0">
-            <button id="finalizeBtn" class="btn-unload" onclick="finalizeUnload()">ZAVRŠI ISTOVAR</button>
-        </div>
-    </div>
-
-    <footer class="footer"><p>Aplikaciju razvio <b>Dušan Kostić</b> © 2026.</p></footer>
-
     <script>
         const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
@@ -95,7 +78,7 @@
         const rampList = ["RAMPA 1", "RAMPA 2", "RAMPA 3", "RAMPA 4", "TEHNIČKA RAMPA", "ROLO RAMPA"];
 
         async function fetchData() {
-            const { data: trucks, error } = await _supabase.from('zf_trucks').select('*').not('status', 'in', '("IZAŠAO", "ZA IZLAZ")');
+            const { data: trucks, error } = await _supabase.from('zf_trucks').select('*').not('status', 'eq', 'ISTOVAREN');
             if (error) return;
 
             const rContainer = document.getElementById('rampsContainer');
@@ -119,12 +102,13 @@
                             <div class="info-list">
                                 <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${t.vehicle || '/'}</span></div>
                                 <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${t.goods || '/'}</span></div>
+                                <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${t.phone || '/'}</span></div>
                                 <div class="info-item" style="margin-top:3px;"><span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Na rampi od:</b> ${t.ramp_time || '/'}</span></div>
                             </div>
                         </div>
-                        <button class="btn-unload" onclick="openPallet(${t.id})"><i class="fas fa-check"></i> ISTOVAR ZAVRŠEN</button>`;
+                        <button class="btn-unload" onclick="finish(${t.id})">ISTOVAR ZAVRŠEN</button>`;
                 } else {
-                    card.innerHTML = `<div class="ramp-top">${name} <span style="color:var(--text-muted); font-weight:500">SLOBODNO</span></div><div style="margin:auto; color:#cbd5e1; text-align:center; font-size: 13px; font-weight:500;">Dostupno za dodelu</div>`;
+                    card.innerHTML = `<div class="ramp-top">${name}</div><div style="margin:auto; color:#cbd5e1; text-align:center;">Slobodno</div>`;
                 }
                 rContainer.appendChild(card);
             });
@@ -138,7 +122,9 @@
                         <span class="plate-number">${t.plate}</span>
                         <div class="info-list">
                             <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${t.vehicle || '/'}</span></div>
-                            <div class="info-item" style="margin-top:3px;"><span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Najavljen:</b> ${t.date || '/'} ${t.time || '/'}</span></div>
+                            <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${t.goods || '/'}</span></div>
+                            <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${t.phone || '/'}</span></div>
+                            <div class="info-item" style="margin-top:3px;"><span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Najavljen:</b> ${t.date || ''} ${t.time || ''}</span></div>
                         </div>
                     </div>
                     <button class="btn-assign" onclick="openAssign(${t.id})">DODELI RAMPU</button>`;
@@ -165,15 +151,12 @@
             closeModals(); fetchData();
         }
 
-        function openPallet(id) { selectedTruckId = id; document.getElementById('palletModal').style.display = 'flex'; }
-        
-        async function finalizeUnload() {
-            const p = document.getElementById('palletInput').value;
-            await _supabase.from('zf_trucks').update({ status: 'ISTOVAREN', pallets: p }).eq('id', selectedTruckId);
-            closeModals(); fetchData();
+        async function finish(id) {
+            await _supabase.from('zf_trucks').update({ status: 'ISTOVAREN' }).eq('id', id);
+            fetchData();
         }
 
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+        function closeModals() { document.getElementById('rampModal').style.display = 'none'; }
 
         fetchData();
         setInterval(fetchData, 5000);
