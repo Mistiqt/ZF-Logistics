@@ -114,14 +114,24 @@
         .footer p { margin: 0; font-size: 13px; color: var(--text-muted); font-weight: 500; }
         .footer b { color: var(--zf-blue); }
 
+        @media (max-width: 1024px) {
+            .truck-main-info { gap: 20px; }
+            .details-inline { gap: 15px; }
+        }
+
         @media (max-width: 768px) {
             header { height: 80px; }
             .header-content { flex-direction: row !important; justify-content: space-between; padding: 0 15px; }
+            .header-left { gap: 10px; }
             .zf-logo-square { width: 36px; height: 36px; font-size: 18px; }
             .header-title-wrapper h1 { font-size: 16px; }
+            .page-description { font-size: 10px; }
+            .btn-logout { padding: 6px 10px; font-size: 12px; gap: 5px; }
             .exit-card { flex-direction: column; align-items: flex-start; padding: 20px; }
             .truck-main-info { flex-direction: column; align-items: flex-start; gap: 15px; width: 100%; }
+            .details-inline { flex-direction: column; align-items: flex-start; gap: 8px; }
             .btn-zf-style { width: 100%; margin-top: 10px; }
+            .plate-box { min-width: unset; }
         }
     </style>
 </head>
@@ -157,7 +167,7 @@
     </footer>
 
     <script>
-        // Supabase Config
+        // Supabase Konfiguracija
         const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
@@ -190,9 +200,10 @@
         }
 
         function createCard(truck, isReady) {
-            // FIX: Koristimo tvoju originalnu logiku ali sa ispravnim nazivima kolona iz baze
-            // Na slici se vidi da su nazivi kolona 'date' i 'time'
-            const timestamp = `${truck.date || ''} ${truck.time || ''}`;
+            // Povezivanje sa Supabase imenima kolona: ramp_start_date i ramp_start_time
+            // Ovo su podaci koje warehouse.html upisuje pri dodeli rampe
+            const dateVal = truck.ramp_start_date || '';
+            const timeVal = truck.ramp_start_time || '';
 
             return `
                 <div class="exit-card ${isReady ? 'status-istovaren' : 'status-na-istovaru'}">
@@ -207,7 +218,7 @@
                             <div class="detail-item"><i class="fas fa-warehouse"></i><span>Rampa: <b>${truck.ramp || '-'}</b></span></div>
                             <div class="detail-item">
                                 <i class="far fa-clock"></i>
-                                <span>Ulaz: <b>${timestamp}</b></span>
+                                <span>Ulaz: <b>${dateVal} ${timeVal}</b></span>
                             </div>
                         </div>
                     </div>
@@ -220,13 +231,20 @@
         async function confirmExit(truckId, plate) {
             if (confirm(`Potvrdi izlaz za vozilo ${plate}?`)) {
                 const now = new Date().toLocaleTimeString('sr-RS', {hour:'2-digit', minute:'2-digit'});
+                
                 const { error } = await _supabase
                     .from('zf_trucks')
-                    .update({ status: 'IZAŠAO', exit_time: now }) // Ovde sam dodao exit_time kolonu
+                    .update({ 
+                        status: 'IZAŠAO', 
+                        exit_time: now 
+                    })
                     .eq('id', truckId);
-                
-                if (error) alert("Greška: " + error.message);
-                else renderExitList();
+
+                if (error) {
+                    alert("Greška pri upisu u bazu: " + error.message);
+                } else {
+                    renderExitList();
+                }
             }
         }
 
@@ -238,6 +256,7 @@
 
         function logout() { if(confirm("Odjava?")) window.location.href = 'login.html'; }
 
+        // Inicijalno učitavanje i auto-refresh
         renderExitList(); 
         setInterval(renderExitList, 5000);
     </script>
