@@ -172,42 +172,47 @@
 
             let targetPage = "";
 
-            // 1. HARDKODIRANI KORISNICI (Ostavljeno kao fallback)
+            // 1. HARDKODIRANI KORISNICI (Fallback)
             if (user === 'dusan.kostic@zf.com' && pass === 'Ninica1122!') {
                 targetPage = 'admin.html';
             } else if (user === 'kapija@zf.com' && pass === '123') {
                 targetPage = 'gate.html';
             }
 
-            // 2. SUPABASE PROVERA (Tabela: zf_users)
+            // 2. SUPABASE PROVERA
             if (targetPage === "") {
                 try {
+                    // Pretraga korisnika u tabeli zf_users
                     const { data, error } = await _supabase
-                        .from('zf_users') // Ključna ispravka: naziv tabele je zf_users
+                        .from('zf_users')
                         .select('role')
                         .eq('username', user)
-                        .eq('password', pass)
-                        .maybeSingle();
+                        .eq('password', pass);
 
                     if (error) throw error;
 
-                    if (data) {
-                        let roleValue = data.role.toLowerCase(); 
+                    if (data && data.length > 0) {
+                        let roleValue = data[0].role.toLowerCase(); 
                         
-                        // Mapiranje uloga iz baze na .html stranice
-                        if (roleValue.includes('admin')) targetPage = 'admin.html';
-                        else if (roleValue.includes('magacin')) targetPage = 'warehouse.html';
-                        else if (roleValue.includes('kapija')) targetPage = 'gate.html';
-                        else targetPage = roleValue;
+                        // Logika redirekcije na osnovu uloge
+                        if (roleValue.includes('admin')) {
+                            targetPage = 'admin.html';
+                        } else if (roleValue.includes('magacin')) {
+                            targetPage = 'warehouse.html';
+                        } else if (roleValue.includes('kapija')) {
+                            targetPage = 'gate.html';
+                        } else {
+                            // Ako uloga već sadrži .html ili je specifična
+                            targetPage = roleValue.endsWith('.html') ? roleValue : roleValue + '.html';
+                        }
                     }
                 } catch (err) {
                     console.error("Greška pri logovanju:", err.message);
                 }
             }
 
-            // REDIREKCIJA
+            // FINALNA REDIREKCIJA
             if (targetPage !== "") {
-                if (!targetPage.endsWith('.html')) targetPage += '.html';
                 sessionStorage.setItem('zf_user_logged', user);
                 window.location.href = targetPage;
             } else {
