@@ -331,7 +331,6 @@
     </footer>
 
     <script>
-        // Supabase Konfiguracija
         const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
@@ -340,7 +339,6 @@
         let lastWaitingCount = -1; 
         const rampList = ["RAMPA 1", "RAMPA 2", "RAMPA 3", "RAMPA 4", "TEHNIČKA RAMPA", "ROLO RAMPA"];
 
-        // Audio notifikacija
         function playNotification() {
             try {
                 const context = new (window.AudioContext || window.webkitAudioContext)();
@@ -357,19 +355,12 @@
             } catch (e) { console.log("Audio blocked"); }
         }
 
-        function getNumericDate() {
-            const now = new Date();
-            return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}.`;
-        }
-
-        // Osvežavanje
         function handleRefresh(btn) {
             btn.classList.add('active');
             fetchData();
             setTimeout(() => { btn.classList.remove('active'); }, 800);
         }
 
-        // Glavno dovlačenje podataka iz Supabase-a
         async function fetchData() {
             const { data: trucks, error } = await _supabase
                 .from('zf_trucks')
@@ -406,7 +397,9 @@
                                 <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${truck.goods || '/'}</span></div>
                                 <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${truck.phone || '/'}</span></div>
                                 <div class="info-item" style="margin-top:3px;">
-                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Na rampi od:</b> ${truck.ramp_start_date || ''} ${truck.ramp_start_time || '/'}</span>
+                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);">
+                                        <b>Datum:</b> ${truck.date || '/'} | <b>Vreme:</b> ${truck.time || '/'}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -431,7 +424,9 @@
                             <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${t.goods || '/'}</span></div>
                             <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${t.phone || '/'}</span></div>
                             <div class="info-item" style="margin-top:3px;">
-                                <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Najavljen:</b> ${t.date || ''} ${t.time || ''}</span>
+                                <span class="info-value" style="font-size:12px; color:var(--text-muted);">
+                                    <b>Najavljen:</b> ${t.date || '/'} ${t.time || '/'}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -439,13 +434,11 @@
                 wContainer.appendChild(card);
             });
 
-            // Zvučna notifikacija
             if (lastWaitingCount !== -1 && waitingTrucks.length > lastWaitingCount) playNotification();
             lastWaitingCount = waitingTrucks.length;
             document.getElementById('waitingCount').textContent = waitingTrucks.length;
         }
 
-        // Modal Rampa
         async function openRampModal(id) {
             selectedTruckId = id;
             const { data: busy } = await _supabase.from('zf_trucks').select('ramp').eq('status', 'NA RAMPI');
@@ -466,21 +459,14 @@
         }
 
         async function assignRamp(rampName) {
-            const now = new Date();
-            const dateStr = getNumericDate();
-            const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
             await _supabase.from('zf_trucks').update({
                 status: 'NA RAMPI',
-                ramp: rampName,
-                ramp_start_date: dateStr,
-                ramp_start_time: timeStr
+                ramp: rampName
             }).eq('id', selectedTruckId);
 
             closeModals(); fetchData();
         }
 
-        // Modal Palete
         function openPalletModal(id, plate, company) {
             selectedTruckId = id;
             document.getElementById('palletTruckInfo').textContent = `${plate} | ${company}`;
@@ -510,7 +496,6 @@
 
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
-        // Pokretanje i intervali
         fetchData();
         setInterval(fetchData, 4000); 
     </script>
