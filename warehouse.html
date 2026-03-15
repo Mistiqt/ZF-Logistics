@@ -4,18 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magacin - ZF Logistics</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --zf-blue: #00549f;
             --zf-dark: #002e5d;
-            --border: #e2e8f0;
+            --border-color: #e2e8f0;
             --bg: #f8fafc;
-            --container-width: 1250px;
+            --success-green: #10b981;
+            --success-bg: #f0fdf4;
             --text-main: #1e293b;
             --text-muted: #64748b;
+            --container-width: 1250px;
         }
 
         body {
@@ -23,52 +25,45 @@
             background-color: var(--bg);
             margin: 0;
             color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
             display: flex;
             flex-direction: column;
-            align-items: center;
             min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
         }
 
         header {
             background: white;
-            width: 100%;
+            border-bottom: 1px solid var(--border-color);
+            height: 90px;
             display: flex;
             justify-content: center;
-            border-bottom: 1px solid var(--border);
-            min-height: 90px;
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
         .header-content {
-            width: 100%;
-            max-width: var(--container-width);
-            padding: 15px 20px;
+            width: var(--container-width);
+            max-width: 100%;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-sizing: border-box;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        
         .zf-logo-square {
-            background: #eab308;
+            background: var(--zf-blue); 
             color: white;
-            width: 44px;
+            width: 44px; 
             height: 44px;
-            display: flex;
-            justify-content: center;
+            display: flex; 
+            justify-content: center; 
             align-items: center;
             border-radius: 4px;
             font-size: 22px;
-            flex-shrink: 0;
         }
 
         .header-title-wrapper {
@@ -82,19 +77,20 @@
             text-transform: uppercase; 
             font-weight: 800; 
             color: var(--zf-dark);
-            line-height: 1.2;
+            line-height: 1;
+            letter-spacing: -0.02em;
         }
 
-        .user-info {
-            font-size: 14px; 
-            color: var(--text-muted);
-            margin-top: 5px;
-            font-weight: 400;
+        .page-description { 
+            font-size: 13px; 
+            color: var(--text-muted); 
+            margin-top: 4px; 
+            font-weight: 500;
         }
 
         .btn-logout {
             background: white;
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-color);
             padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
@@ -107,270 +103,402 @@
             transition: all 0.2s;
             white-space: nowrap;
         }
+        .btn-logout:hover { background-color: #fff1f2; border-color: #fda4af; }
 
-        .main-layout {
-            width: 100%;
-            max-width: var(--container-width);
-            margin: 30px 0;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
-            padding: 0 20px;
+        .container { 
+            width: var(--container-width);
+            max-width: 100%;
+            margin: 30px auto; 
+            padding: 0 20px; 
             box-sizing: border-box;
             flex: 1;
         }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            padding: 25px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            min-height: 600px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card-header {
+        
+        .section-header-flex {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #eab308;
-            padding-bottom: 12px;
-            margin-bottom: 25px;
+            margin-top: 30px;
+            margin-bottom: 15px;
         }
 
-        .card h2 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 800;
+        .section-title { 
+            font-size: 14px; 
+            font-weight: 800; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            text-transform: uppercase; 
+            margin: 0; 
             color: var(--zf-dark);
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
 
-        .warehouse-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
+        .refresh-btn { 
+            cursor: pointer; 
+            font-size: 20px; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            border: none; 
+            background: none; 
+            padding: 5px; 
+            outline: none; 
+        }
+        .refresh-btn i { color: #94a3b8; transition: color 0.2s ease; }
+        .refresh-btn:hover i, .refresh-btn.active i { color: var(--zf-blue); }
+        .refresh-btn.active i { animation: spin 0.8s linear; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .ramp-grid {
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 15px;
+            margin-bottom: 35px;
         }
 
-        .truck-card {
-            border: 1px solid var(--border);
+        .ramp-card {
+            background: white; 
+            border: 1px solid #cbd5e1;
+            border-style: dashed;
+            border-radius: 6px; 
+            padding: 12px;
+            min-height: 250px;
+            display: flex; 
+            flex-direction: column;
+            transition: all 0.2s;
+        }
+        .ramp-card.occupied { border: 2px solid var(--success-green); background: var(--success-bg); border-style: solid; }
+
+        .ramp-top { 
+            display: flex; justify-content: space-between; 
+            margin-bottom: 12px; font-weight: 800; font-size: 13px; 
+            border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; 
+        }
+
+        .info-container { margin: 5px 0; }
+        .company-name { font-size: 16px; font-weight: 700; color: #334155; margin-bottom: 2px; display: block; }
+        .plate-number { font-size: 20px; font-weight: 800; color: var(--zf-blue); margin-bottom: 10px; display: block; }
+
+        .info-list { display: flex; flex-direction: column; gap: 5px; }
+        .info-item { display: flex; align-items: center; font-size: 13.5px; line-height: 1.3; }
+        .info-item i { width: 22px; color: var(--zf-blue); font-size: 13px; margin-right: 6px; text-align: center; }
+        .info-value { color: var(--text-main); font-weight: 600; }
+
+        #waitingContainer {
+            height: 500px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f1f5f9;
+            border: 2px solid var(--border-color);
             border-radius: 8px;
-            padding: 20px;
-            position: relative;
-            transition: transform 0.2s;
+            box-sizing: border-box;
         }
 
-        .truck-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        #waitingContainer::-webkit-scrollbar { width: 8px; }
+        #waitingContainer::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        #waitingContainer::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f1f5f9; }
+        #waitingContainer::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .waiting-card {
+            background: white; border: 1px solid var(--border-color);
+            padding: 15px 20px; border-radius: 8px; 
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        .plate-badge {
-            background: var(--zf-dark);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-weight: 800;
-            font-size: 16px;
-            display: inline-block;
-            margin-bottom: 10px;
+        .btn-unload {
+            background: var(--success-green); color: white; border: none;
+            width: 100%; padding: 12px; border-radius: 4px; font-weight: 800;
+            cursor: pointer; margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 13px; text-transform: uppercase;
+            transition: background 0.2s;
         }
+        .btn-unload:hover { background: #059669; }
 
-        .company-name {
-            display: block;
-            font-weight: 700;
-            font-size: 18px;
-            color: var(--zf-blue);
-            margin-bottom: 8px;
-        }
-
-        .info-row {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-tag {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 10px;
-            font-weight: 800;
-            padding: 4px 8px;
-            border-radius: 4px;
+        .btn-assign { 
+            background: var(--zf-blue); color: white; border: none; 
+            padding: 12px 25px; border-radius: 6px; font-weight: 800; 
+            cursor: pointer; font-size: 13px; align-self: center;
             text-transform: uppercase;
+            transition: background 0.2s;
         }
+        .btn-assign:hover { background: var(--zf-dark); }
 
-        .tag-waiting { background: #fff3e0; color: #e65100; }
-        .tag-ramp { background: #dcfce7; color: #15803d; }
-
-        .action-area {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 10px;
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.8); display: none;
+            justify-content: center; align-items: center; z-index: 1000;
+            backdrop-filter: blur(2px);
         }
-
-        .btn-warehouse {
-            flex: 1;
-            padding: 10px;
-            border-radius: 6px;
-            border: none;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: 'Inter';
-            font-size: 13px;
-            transition: opacity 0.2s;
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; position: relative; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        
+        .close-x {
+            position: absolute; top: 15px; right: 15px; background: none; border: none;
+            font-size: 22px; color: var(--text-muted); cursor: pointer; line-height: 1; padding: 5px; transition: color 0.2s;
         }
+        .close-x:hover { color: #be123c; }
 
-        .btn-assign { background: #eab308; color: white; }
-        .btn-finish { background: #15803d; color: white; }
-
-        .ramp-select {
-            flex: 1;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
+        .ramp-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+        .ramp-btn { background: var(--zf-blue); color: white; border: none; padding: 15px 10px; font-weight: 800; cursor: pointer; border-radius: 6px; font-size: 12px; transition: background 0.2s; }
+        .ramp-btn:hover:not(:disabled) { background: var(--zf-dark); }
+        
+        .pallet-input {
+            width: 100%; padding: 15px; border: 2px solid var(--border-color);
+            border-radius: 6px; font-size: 24px; font-weight: 800; text-align: center; margin: 20px 0;
+            box-sizing: border-box; font-family: 'Inter', sans-serif;
         }
+        .btn-finalize {
+            background: var(--success-green); color: white; border: none;
+            width: 100%; padding: 15px; border-radius: 6px; font-weight: 800; cursor: pointer;
+            text-transform: uppercase; font-size: 14px; transition: background 0.2s;
+        }
+        .btn-finalize:hover:not(:disabled) { background: #059669; }
 
-        footer {
-            width: 100%;
-            text-align: center;
-            padding: 20px 0;
-            font-size: 12px;
-            color: var(--text-muted);
+        .footer {
             background: white;
-            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 40px;
         }
+        .footer p { margin: 0; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .footer b { color: var(--zf-blue); }
 
-        @media (max-width: 600px) {
-            .warehouse-grid { grid-template-columns: 1fr; }
+        @media (max-width: 1250px) {
+            .ramp-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 768px) {
+            header { height: 80px; }
+            .header-content { flex-direction: row !important; justify-content: space-between; padding: 0 15px; }
+            .header-left { gap: 10px; }
+            .zf-logo-square { width: 36px; height: 36px; font-size: 18px; }
+            .header-title-wrapper h1 { font-size: 16px; }
+            .page-description { font-size: 10px; }
+            .btn-logout { padding: 6px 10px; font-size: 12px; gap: 5px; }
+            .ramp-grid { grid-template-columns: 1fr; }
+            .waiting-card { flex-direction: column; gap: 15px; }
+            .btn-assign { width: 100%; }
+            .modal-content { width: 90%; }
+            #waitingContainer { height: 400px; }
         }
     </style>
 </head>
 <body>
-
     <header>
         <div class="header-content">
             <div class="header-left">
                 <div class="zf-logo-square"><i class="fas fa-warehouse"></i></div>
                 <div class="header-title-wrapper">
                     <h1>MAGACIN</h1>
-                    <div class="user-info">Upravljanje rampama i istovarom</div>
+                    <div class="page-description">Operativni panel rampi</div>
                 </div>
             </div>
-            <div class="header-right">
-                <button class="btn-logout" onclick="window.location.href='index.html'"><i class="fas fa-sign-out-alt"></i> Odjava</button>
-            </div>
+            <button class="btn-logout" onclick="window.location.href='login.html'">
+                <i class="fas fa-sign-out-alt"></i> Odjava
+            </button>
         </div>
     </header>
 
-    <main class="main-layout">
-        <section class="card">
-            <div class="card-header">
-                <h2><i class="fas fa-list-check"></i> AKTIVNI TRANSPORTI</h2>
-                <div id="loader" style="font-size: 12px; color: var(--zf-blue); display: none;">Osvežavanje...</div>
-            </div>
-            <div id="warehouseGrid" class="warehouse-grid">
-                </div>
-        </section>
-    </main>
+    <div class="container">
+        <div class="section-title" style="margin-bottom: 20px;"><i class="fas fa-truck-loading" style="color:var(--zf-blue)"></i> Status Rampi</div>
+        <div id="rampsContainer" class="ramp-grid"></div>
 
-    <footer>
-        ZF Logistics &copy; 2026. Operativni panel Magacin.
+        <div class="section-header-flex">
+            <div class="section-title">
+                <i class="far fa-clock" style="color:#f97316"></i> Kamioni na čekanju 
+                <span id="waitingCount" style="background:#ffedd5; color:#9a3412; padding:2px 8px; border-radius:4px; font-size:11px; margin-left:10px;">0</span>
+            </div>
+            <button class="refresh-btn" onclick="handleRefresh(this)" title="Osveži">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+        
+        <div id="waitingContainer"></div>
+    </div>
+
+    <div id="rampModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 style="margin:0; font-size:18px; color:var(--zf-blue); font-weight: 800;">IZABERITE RAMPU</h2>
+            <div id="modalRampGrid" class="ramp-selection-grid"></div>
+            <button onclick="closeModals()" style="margin-top:15px; width:100%; padding:10px; border:none; background:#f1f5f9; cursor:pointer; border-radius:6px; font-weight: 600;">Odustani</button>
+        </div>
+    </div>
+
+    <div id="palletModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-x" onclick="closeModals()">&times;</button>
+            <h2 style="margin:0; font-size:18px; color:var(--zf-blue); font-weight: 800;">UNESITE BROJ PALETA</h2>
+            <p id="palletTruckInfo" style="font-size: 13px; color: var(--text-muted); margin-top: 5px; font-weight: 500;"></p>
+            <input type="number" id="palletInput" class="pallet-input" placeholder="0" oninput="validatePallets()">
+            <button id="finalizeBtn" class="btn-finalize" onclick="finalizeUnload()" disabled>ZAVRŠI ISTOVAR</button>
+            <button onclick="closeModals()" style="margin-top:10px; width:100%; padding:8px; border:none; background:transparent; color:var(--text-muted); cursor:pointer; font-weight: 500;">Poništi</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Aplikaciju razvio <b>Dušan Kostić</b> © 2026. Ver 1.2</p>
     </footer>
 
     <script>
-        const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
-        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+        // --- SUPABASE KONFIGURACIJA ---
+        const SUPABASE_URL = 'TVOJ_URL_OVDE';
+        const SUPABASE_KEY = 'TVOJ_KEY_OVDE';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function loadWarehouseData() {
-            document.getElementById('loader').style.display = 'block';
-            const { data, error } = await _supabase
+        let currentTruckId = null;
+        let lastWaitingCount = -1; 
+        const rampList = ["RAMPA 1", "RAMPA 2", "RAMPA 3", "RAMPA 4", "TEHNIČKA RAMPA", "ROLO RAMPA"];
+
+        function playNotification() {
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, context.currentTime); 
+                gainNode.gain.setValueAtTime(0.1, context.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+                oscillator.start();
+                oscillator.stop(context.currentTime + 0.2);
+            } catch (e) { console.log("Audio blocked"); }
+        }
+
+        async function render() {
+            const { data: trucks, error } = await supabase
                 .from('trucks')
                 .select('*')
-                .in('status', ['NA ČEKANJU', 'NA RAMPI'])
                 .order('created_at', { ascending: true });
 
-            if (error) {
-                console.error("Error:", error);
-                return;
-            }
+            if (error) return;
 
-            const grid = document.getElementById('warehouseGrid');
-            grid.innerHTML = '';
+            const rContainer = document.getElementById('rampsContainer');
+            const wContainer = document.getElementById('waitingContainer');
+            rContainer.innerHTML = ''; 
+            wContainer.innerHTML = '';
+            let currentWaitingCount = 0;
 
-            data.forEach(truck => {
-                const isWaiting = truck.status === 'NA ČEKANJU';
+            // Render rampi
+            rampList.forEach(name => {
+                const truck = trucks.find(t => t.status === 'NA RAMPI' && t.ramp === name);
                 const card = document.createElement('div');
-                card.className = 'truck-card';
+                card.className = `ramp-card ${truck ? 'occupied' : ''}`;
                 
-                card.innerHTML = `
-                    <span class="status-tag ${isWaiting ? 'tag-waiting' : 'tag-ramp'}">
-                        ${truck.status}
-                    </span>
-                    <span class="plate-badge">${truck.plate}</span>
-                    <span class="company-name">${truck.company}</span>
-                    <div class="info-row"><i class="fas fa-truck"></i> ${truck.vehicle || '/'}</div>
-                    <div class="info-row"><i class="fas fa-box"></i> ${truck.goods || '/'}</div>
-                    <div class="info-row"><i class="fas fa-phone"></i> ${truck.phone || '/'}</div>
-                    
-                    <div class="action-area">
-                        ${isWaiting ? `
-                            <select id="ramp-${truck.id}" class="ramp-select">
-                                <option value="">Izaberi rampu</option>
-                                <option value="Rampa 1">Rampa 1</option>
-                                <option value="Rampa 2">Rampa 2</option>
-                                <option value="Rampa 3">Rampa 3</option>
-                                <option value="Rampa 4">Rampa 4</option>
-                                <option value="Rampa 5">Rampa 5</option>
-                            </select>
-                            <button class="btn-warehouse btn-assign" onclick="assignRamp('${truck.id}')">POZOVI</button>
-                        ` : `
-                            <div style="flex:1; font-weight:800; color:#15803d; display:flex; align-items:center;">
-                                <i class="fas fa-sign-in-alt" style="margin-right:8px;"></i> NA RAMPI: ${truck.gate}
+                if (truck) {
+                    card.innerHTML = `
+                        <div class="ramp-top"><span>${name}</span><span style="color:var(--success-green)">ZAUZETO</span></div>
+                        <div class="info-container">
+                            <span class="company-name">${truck.company}</span>
+                            <span class="plate-number">${truck.plate}</span>
+                            <div class="info-list">
+                                <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${truck.vehicle || '/'}</span></div>
+                                <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${truck.goods || '/'}</span></div>
+                                <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${truck.phone || '/'}</span></div>
+                                <div class="info-item" style="margin-top:3px;">
+                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Na rampi od:</b> ${truck.ramp_start_time || '/'}</span>
+                                </div>
                             </div>
-                            <button class="btn-warehouse btn-finish" onclick="finishUnloading('${truck.id}')">ZAVRŠI</button>
-                        `}
-                    </div>
-                `;
-                grid.appendChild(card);
+                        </div>
+                        <button class="btn-unload" onclick="openPalletModal('${truck.id}', '${truck.plate}', '${truck.company}')"><i class="fas fa-check"></i> ISTOVAR ZAVRŠEN</button>`;
+                } else {
+                    card.innerHTML = `<div class="ramp-top">${name} <span style="color:var(--text-muted); font-weight:500">SLOBODNO</span></div>
+                                      <div style="margin:auto; color:#cbd5e1; text-align:center; font-size: 13px; font-weight:500;">Dostupno za dodelu</div>`;
+                }
+                rContainer.appendChild(card);
             });
-            document.getElementById('loader').style.display = 'none';
+
+            // Render liste čekanja
+            trucks.filter(t => t.status === 'NA ČEKANJU').forEach(t => {
+                currentWaitingCount++;
+                const card = document.createElement('div');
+                card.className = 'waiting-card';
+                card.innerHTML = `
+                    <div class="info-container" style="margin:0;">
+                        <span class="company-name">${t.company}</span>
+                        <span class="plate-number">${t.plate}</span>
+                        <div class="info-list">
+                            <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${t.vehicle || '/'}</span></div>
+                            <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${t.goods || '/'}</span></div>
+                            <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${t.phone || '/'}</span></div>
+                            <div class="info-item" style="margin-top:3px;">
+                                <span class="info-value" style="font-size:12px; color:var(--text-muted);"><b>Najavljen:</b> ${t.arrival_time || ''}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-assign" onclick="openRampModal('${t.id}')">DODELI RAMPU</button>`;
+                wContainer.appendChild(card);
+            });
+
+            if (lastWaitingCount !== -1 && currentWaitingCount > lastWaitingCount) playNotification();
+            lastWaitingCount = currentWaitingCount;
+            document.getElementById('waitingCount').textContent = currentWaitingCount;
         }
 
-        async function assignRamp(id) {
-            const rampVal = document.getElementById(`ramp-${id}`).value;
-            if(!rampVal) { alert("Moraš izabrati rampu!"); return; }
+        async function openRampModal(id) {
+            currentTruckId = id;
+            const { data: occupied } = await supabase.from('trucks').select('ramp').eq('status', 'NA RAMPI');
+            const occupiedRamps = occupied.map(o => o.ramp);
 
-            const { error } = await _supabase
-                .from('trucks')
-                .update({ status: 'NA RAMPI', gate: rampVal })
-                .eq('id', id);
-
-            if(!error) loadWarehouseData();
+            const grid = document.getElementById('modalRampGrid');
+            grid.innerHTML = ''; 
+            rampList.forEach(rampName => {
+                const isOccupied = occupiedRamps.includes(rampName);
+                const btn = document.createElement('button');
+                btn.className = isOccupied ? 'ramp-btn occupied-btn' : 'ramp-btn';
+                btn.innerHTML = rampName;
+                if (!isOccupied) {
+                    btn.onclick = async () => {
+                        const now = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        await supabase.from('trucks').update({
+                            status: 'NA RAMPI',
+                            ramp: rampName,
+                            ramp_start_time: now
+                        }).eq('id', currentTruckId);
+                        closeModals(); render();
+                    };
+                } else { btn.disabled = true; btn.style.background = "#e2e8f0"; btn.style.color = "#94a3b8"; }
+                grid.appendChild(btn);
+            });
+            document.getElementById('rampModal').style.display = 'flex';
         }
 
-        async function finishUnloading(id) {
-            const { error } = await _supabase
-                .from('trucks')
-                .update({ status: 'ISTOVAREN' })
-                .eq('id', id);
-
-            if(!error) loadWarehouseData();
+        function openPalletModal(id, plate, company) {
+            currentTruckId = id;
+            document.getElementById('palletTruckInfo').textContent = `${plate} | ${company}`;
+            document.getElementById('palletInput').value = '';
+            document.getElementById('palletModal').style.display = 'flex';
         }
 
-        loadWarehouseData();
-        setInterval(loadWarehouseData, 5000);
+        async function finalizeUnload() {
+            const pallets = document.getElementById('palletInput').value;
+            const now = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            await supabase.from('trucks').update({
+                status: 'ISTOVAREN',
+                pallets: pallets,
+                unload_finish_time: now
+            }).eq('id', currentTruckId);
+            closeModals(); render();
+        }
+
+        function validatePallets() {
+            const val = parseInt(document.getElementById('palletInput').value);
+            document.getElementById('finalizeBtn').disabled = (isNaN(val) || val <= 0);
+        }
+
+        function handleRefresh(btn) {
+            btn.classList.add('active');
+            render();
+            setTimeout(() => btn.classList.remove('active'), 800);
+        }
+
+        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+
+        // Početno učitavanje i real-time osvežavanje
+        render();
+        setInterval(render, 5000);
     </script>
 </body>
 </html>
