@@ -405,7 +405,7 @@
                                 </div>
                             </div>
                         </div>
-                        <button class="btn-unload" onclick="openPalletModal('${truck.id}')"><i class="fas fa-check"></i> ISTOVAR ZAVRŠEN</button>`;
+                        <button class="btn-unload" onclick="openPalletModal(${truck.id})"><i class="fas fa-check"></i> ISTOVAR ZAVRŠEN</button>`;
                 } else {
                     card.innerHTML = `<div class="ramp-top">${name} <span style="color:var(--text-muted); font-weight:500">SLOBODNO</span></div>
                                       <div style="margin:auto; color:#cbd5e1; text-align:center; font-size: 13px; font-weight:500;">Dostupno za dodelu</div>`;
@@ -431,7 +431,7 @@
                                 </div>
                             </div>
                         </div>
-                        <button class="btn-assign" onclick="openRampModal('${t.id}')">DODELI RAMPU</button>`;
+                        <button class="btn-assign" onclick="openRampModal(${t.id})">DODELI RAMPU</button>`;
                     wContainer.appendChild(card);
                 }
             });
@@ -455,13 +455,16 @@
                 if (!isOccupied) {
                     btn.onclick = async () => {
                         const now = new Date();
-                        await _supabase.from('zf_trucks').update({
+                        const { error } = await _supabase.from('zf_trucks').update({
                             status: 'NA RAMPI',
                             ramp: rampName,
                             rampStartDate: now.toLocaleDateString('de-DE'),
                             rampStartTime: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
                         }).eq('id', currentTruckId);
+                        
+                        if(error) console.error(error);
                         closeModals();
+                        fetchTrucks(); // Odmah osveži
                     };
                 } else { btn.disabled = true; btn.style.background = "#e2e8f0"; btn.style.color = "#94a3b8"; }
                 grid.appendChild(btn);
@@ -485,12 +488,15 @@
         window.finalizeUnload = async () => {
             const pallets = document.getElementById('palletInput').value;
             const now = new Date();
-            await _supabase.from('zf_trucks').update({
+            const { error } = await _supabase.from('zf_trucks').update({
                 status: 'ISTOVAREN',
                 pallets: pallets,
                 unloadedTime: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             }).eq('id', currentTruckId);
+            
+            if(error) console.error(error);
             closeModals();
+            fetchTrucks();
         };
 
         window.closeModals = () => { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); };
@@ -501,7 +507,6 @@
             setTimeout(() => { btn.classList.remove('active'); }, 800);
         }
 
-        // REALTIME SUBSCRIPTION
         _supabase.channel('custom-all-channel')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'zf_trucks' }, () => {
             fetchTrucks();
