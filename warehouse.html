@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="sr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Magacin - ZF Logistics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap
+    https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css
+    https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2</script>
     <style>
         :root {
             --zf-blue: #00549f;
@@ -20,160 +20,36 @@
             --container-width: 1250px;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            color: var(--text-main);
-            -webkit-font-smoothing: antialiased;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; color: var(--text-main); -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; min-height: 100vh; }
+        header { background: white; border-bottom: 1px solid var(--border-color); height: 90px; display: flex; justify-content: center; position: sticky; top: 0; z-index: 100; }
 
-        header {
-            background: white;
-            border-bottom: 1px solid var(--border-color);
-            height: 90px;
-            display: flex;
-            justify-content: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-content {
-            width: var(--container-width);
-            max-width: 100%;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
-        }
-
+        .header-content { width: var(--container-width); max-width: 100%; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
         .header-left { display: flex; align-items: center; gap: 15px; }
-        
-        .zf-logo-square {
-            background: var(--zf-blue); 
-            color: white;
-            width: 44px; 
-            height: 44px;
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-            border-radius: 4px;
-            font-size: 22px;
-        }
+        .zf-logo-square { background: var(--zf-blue); color: white; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border-radius: 4px; font-size: 22px; }
 
-        .header-title-wrapper {
-            display: flex;
-            flex-direction: column;
-        }
+        .header-title-wrapper { display: flex; flex-direction: column; }
+        .header-title-wrapper h1 { margin: 0; font-size: 22px; text-transform: uppercase; font-weight: 800; color: var(--zf-dark); line-height: 1; letter-spacing: -0.02em; }
+        .page-description { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
 
-        .header-title-wrapper h1 { 
-            margin: 0; 
-            font-size: 22px; 
-            text-transform: uppercase; 
-            font-weight: 800; 
-            color: var(--zf-dark);
-            line-height: 1;
-            letter-spacing: -0.02em;
-        }
-
-        .page-description { 
-            font-size: 13px; 
-            color: var(--text-muted); 
-            margin-top: 4px; 
-            font-weight: 500;
-        }
-
-        .btn-logout {
-            background: white;
-            border: 1px solid var(--border-color);
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #be123c;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
+        .btn-logout { background: white; border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: #be123c; transition: all 0.2s; white-space: nowrap; }
         .btn-logout:hover { background-color: #fff1f2; border-color: #fda4af; }
 
-        .container { 
-            width: var(--container-width);
-            max-width: 100%;
-            margin: 30px auto; 
-            padding: 0 20px; 
-            box-sizing: border-box;
-            flex: 1;
-        }
-        
-        .section-header-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-            margin-bottom: 15px;
-        }
+        .container { width: var(--container-width); max-width: 100%; margin: 30px auto; padding: 0 20px; box-sizing: border-box; flex: 1; }
 
-        .section-title { 
-            font-size: 14px; 
-            font-weight: 800; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            text-transform: uppercase; 
-            margin: 0; 
-            color: var(--zf-dark);
-        }
+        .section-header-flex { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 15px; }
+        .section-title { font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 8px; text-transform: uppercase; margin: 0; color: var(--zf-dark); }
 
-        .refresh-btn { 
-            cursor: pointer; 
-            font-size: 20px; 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            border: none; 
-            background: none; 
-            padding: 5px; 
-            outline: none; 
-        }
+        .refresh-btn { cursor: pointer; font-size: 20px; display: inline-flex; align-items: center; justify-content: center; border: none; background: none; padding: 5px; outline: none; }
         .refresh-btn i { color: #94a3b8; transition: color 0.2s ease; }
         .refresh-btn:hover i, .refresh-btn.active i { color: var(--zf-blue); }
         .refresh-btn.active i { animation: spin 0.8s linear; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .ramp-grid {
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 15px;
-            margin-bottom: 35px;
-        }
-
-        .ramp-card {
-            background: white; 
-            border: 1px solid #cbd5e1;
-            border-style: dashed;
-            border-radius: 6px; 
-            padding: 12px;
-            min-height: 250px;
-            display: flex; 
-            flex-direction: column;
-            transition: all 0.2s;
-        }
+        .ramp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 35px; }
+        .ramp-card { background: white; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 12px; min-height: 250px; display: flex; flex-direction: column; transition: all 0.2s; }
         .ramp-card.occupied { border: 2px solid var(--success-green); background: var(--success-bg); border-style: solid; }
 
-        .ramp-top { 
-            display: flex; justify-content: space-between; 
-            margin-bottom: 12px; font-weight: 800; font-size: 13px; 
-            border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; 
-        }
+        .ramp-top { display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 800; font-size: 13px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; }
 
         .info-container { margin: 5px 0; }
         .company-name { font-size: 16px; font-weight: 700; color: #334155; margin-bottom: 2px; display: block; }
@@ -184,81 +60,35 @@
         .info-item i { width: 22px; color: var(--zf-blue); font-size: 13px; margin-right: 6px; text-align: center; }
         .info-value { color: var(--text-main); font-weight: 600; }
 
-        #waitingContainer {
-            height: 500px;
-            overflow-y: auto;
-            padding: 15px;
-            background: #f1f5f9;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            box-sizing: border-box;
-        }
-
+        #waitingContainer { height: 500px; overflow-y: auto; padding: 15px; background: #f1f5f9; border: 2px solid var(--border-color); border-radius: 8px; box-sizing: border-box; }
         #waitingContainer::-webkit-scrollbar { width: 8px; }
         #waitingContainer::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         #waitingContainer::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f1f5f9; }
         #waitingContainer::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        .waiting-card {
-            background: white; border: 1px solid var(--border-color);
-            padding: 15px 20px; border-radius: 8px; 
-            display: flex; justify-content: space-between; align-items: flex-start;
-            margin-bottom: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
+        .waiting-card { background: white; border: 1px solid var(--border-color); padding: 15px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 
-        .btn-unload {
-            background: var(--success-green); color: white; border: none;
-            width: 100%; padding: 12px; border-radius: 4px; font-weight: 800;
-            cursor: pointer; margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px;
-            font-size: 13px; text-transform: uppercase;
-            transition: background 0.2s;
-        }
+        .btn-unload { background: var(--success-green); color: white; border: none; width: 100%; padding: 12px; border-radius: 4px; font-weight: 800; cursor: pointer; margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; text-transform: uppercase; transition: background 0.2s; }
         .btn-unload:hover { background: #059669; }
 
-        .btn-assign { 
-            background: var(--zf-blue); color: white; border: none; 
-            padding: 12px 25px; border-radius: 6px; font-weight: 800; 
-            cursor: pointer; font-size: 13px; align-self: center;
-            text-transform: uppercase;
-            transition: background 0.2s;
-        }
+        .btn-assign { background: var(--zf-blue); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: 13px; align-self: center; text-transform: uppercase; transition: background 0.2s; }
         .btn-assign:hover { background: var(--zf-dark); }
 
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.8); display: none;
-            justify-content: center; align-items: center; z-index: 1000;
-            backdrop-filter: blur(2px);
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
         .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; position: relative; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        
-        .close-x {
-            position: absolute; top: 15px; right: 15px; background: none; border: none;
-            font-size: 22px; color: var(--text-muted); cursor: pointer; line-height: 1; padding: 5px; transition: color 0.2s;
-        }
+
+        .close-x { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 22px; color: var(--text-muted); cursor: pointer; line-height: 1; padding: 5px; transition: color 0.2s; }
         .close-x:hover { color: #be123c; }
 
         .ramp-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
         .ramp-btn { background: var(--zf-blue); color: white; border: none; padding: 15px 10px; font-weight: 800; cursor: pointer; border-radius: 6px; font-size: 12px; transition: background 0.2s; }
         .ramp-btn:hover:not(:disabled) { background: var(--zf-dark); }
-        
-        .pallet-input {
-            width: 100%; padding: 15px; border: 2px solid var(--border-color);
-            border-radius: 6px; font-size: 24px; font-weight: 800; text-align: center; margin: 20px 0;
-            box-sizing: border-box; font-family: 'Inter', sans-serif;
-        }
-        .btn-finalize {
-            background: var(--success-green); color: white; border: none;
-            width: 100%; padding: 15px; border-radius: 6px; font-weight: 800; cursor: pointer;
-            text-transform: uppercase; font-size: 14px; transition: background 0.2s;
-        }
+
+        .pallet-input { width: 100%; padding: 15px; border: 2px solid var(--border-color); border-radius: 6px; font-size: 24px; font-weight: 800; text-align: center; margin: 20px 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        .btn-finalize { background: var(--success-green); color: white; border: none; width: 100%; padding: 15px; border-radius: 6px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 14px; transition: background 0.2s; }
         .btn-finalize:hover:not(:disabled) { background: #059669; }
 
-        .footer {
-            background: white; border-top: 1px solid var(--border-color);
-            padding: 20px 0; text-align: center; margin-top: 40px;
-        }
+        .footer { background: white; border-top: 1px solid var(--border-color); padding: 20px 0; text-align: center; margin-top: 40px; }
         .footer p { margin: 0; font-size: 13px; color: var(--text-muted); font-weight: 500; }
         .footer b { color: var(--zf-blue); }
 
@@ -276,240 +106,280 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <div class="header-left">
-                <div class="zf-logo-square"><i class="fas fa-warehouse"></i></div>
-                <div class="header-title-wrapper">
-                    <h1>MAGACIN</h1>
-                    <div class="page-description">Operativni panel rampi</div>
-                </div>
+<header>
+    <div class="header-content">
+        <div class="header-left">
+            <div class="zf-logo-square"><i class="fas fa-warehouse"></i></div>
+            <div class="header-title-wrapper">
+                <h1>MAGACIN</h1>
+                <div class="page-description">Operativni panel rampi</div>
             </div>
-            <button class="btn-logout" onclick="window.location.href='login.html'">
-                <i class="fas fa-sign-out-alt"></i> Odjava
-            </button>
         </div>
-    </header>
+        login.html
+            <i class="fas fa-sign-out-alt"></i> Odjava
+        </button>
+    </div>
+</header>
 
-    <div class="container">
-        <div class="section-title" style="margin-bottom: 20px;"><i class="fas fa-truck-loading" style="color:var(--zf-blue)"></i> Status Rampi</div>
-        <div id="rampsContainer" class="ramp-grid"></div>
+<div class="container">
+    <div class="section-title" style="margin-bottom: 20px;"><i class="fas fa-truck-loading" style="color:var(--zf-blue)"></i> Status Rampi</div>
+    <div id="rampsContainer" class="ramp-grid"></div>
 
-        <div class="section-header-flex">
-            <div class="section-title">
-                <i class="far fa-clock" style="color:#f97316"></i> Kamioni na čekanju 
-                <span id="waitingCount" style="background:#ffedd5; color:#9a3412; padding:2px 8px; border-radius:4px; font-size:11px; margin-left:10px;">0</span>
-            </div>
-            <button class="refresh-btn" onclick="handleRefresh(this)" title="Osveži">
-                <i class="fas fa-sync-alt"></i>
-            </button>
+    <div class="section-header-flex">
+        <div class="section-title">
+            <i class="far fa-clock" style="color:#f97316"></i> Kamioni na čekanju
+            <span id="waitingCount" style="background:#ffedd5; color:#9a3412; padding:2px 8px; border-radius:4px; font-size:11px; margin-left:10px;">0</span>
         </div>
-        
-        <div id="waitingContainer"></div>
+        <button class="refresh-btn" onclick="handleRefresh(this)" title="Osveži">
+            <i class="fas fa-sync-alt"></i>
+        </button>
     </div>
 
-    <div id="rampModal" class="modal-overlay">
-        <div class="modal-content">
-            <h2 style="margin:0; font-size:18px; color:var(--zf-blue); font-weight: 800;">IZABERITE RAMPU</h2>
-            <div id="modalRampGrid" class="ramp-selection-grid"></div>
-            <button onclick="closeModals()" style="margin-top:15px; width:100%; padding:10px; border:none; background:#f1f5f9; cursor:pointer; border-radius:6px; font-weight: 600;">Odustani</button>
-        </div>
+    <div id="waitingContainer"></div>
+</div>
+
+<div id="rampModal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="margin:0; font-size:18px; color:var(--zf-blue); font-weight: 800;">IZABERITE RAMPU</h2>
+        <div id="modalRampGrid" class="ramp-selection-grid"></div>
+        <button onclick="closeModals()" style="margin-top:15px; width:100%; padding:10px; border:none; background:#f1f5f9; cursor:pointer; border-radius:6px; font-weight: 600;">Odustani</button>
     </div>
+</div>
 
-    <div id="palletModal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="close-x" onclick="closeModals()">&times;</button>
-            <h2 style="margin:0; font-size:18px; color:var(--zf-blue); font-weight: 800;">UNESITE BROJ PALETA</h2>
-            <p id="palletTruckInfo" style="font-size: 13px; color: var(--text-muted); margin-top: 5px; font-weight: 500;"></p>
-            <input type="number" id="palletInput" class="pallet-input" placeholder="0" oninput="validatePallets()">
-            <button id="finalizeBtn" class="btn-finalize" onclick="finalizeUnload()" disabled>ZAVRŠI ISTOVAR</button>
-        </div>
+<div id="palletModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="close-x" onclick="closeModals()">&times;</button>
+        <h2 style="margin:0; font-size:18px; color:var(--zf-blue); font-weight: 800;">UNESITE BROJ PALETA</h2>
+        <p id="palletTruckInfo" style="font-size: 13px; color: var(--text-muted); margin-top: 5px; font-weight: 500;"></p>
+        <input type="number" id="palletInput" class="pallet-input" placeholder="0" oninput="validatePallets()">
+        <button id="finalizeBtn" class="btn-finalize" onclick="finalizeUnload()" disabled>ZAVRŠI ISTOVAR</button>
     </div>
+</div>
 
-    <footer class="footer">
-        <p>Aplikaciju razvio <b>Dušan Kostić</b> © 2026. Ver 1.2</p>
-    </footer>
+<footer class="footer">
+    <p>Aplikaciju razvio <b>Dušan Kostić</b> © 2026. Ver 1.2</p>
+</footer>
 
-    <script>
-        const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
-        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+<script>
+    // === SUPABASE INICIJALIZACIJA ===
+    const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
+    const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        let selectedTruckId = null;
-        let lastWaitingCount = -1; 
-        const rampList = ["RAMPA 1", "RAMPA 2", "RAMPA 3", "RAMPA 4", "TEHNIČKA RAMPA", "ROLO RAMPA"];
+    let selectedTruckId = null;
+    let lastWaitingCount = -1;
+    const rampList = ["RAMPA 1", "RAMPA 2", "RAMPA 3", "RAMPA 4", "TEHNIČKA RAMPA", "ROLO RAMPA"];
 
-        function playNotification() {
-            try {
-                const context = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = context.createOscillator();
-                const gainNode = context.createGain();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(880, context.currentTime); 
-                gainNode.gain.setValueAtTime(0.1, context.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
-                oscillator.connect(gainNode);
-                gainNode.connect(context.destination);
-                oscillator.start();
-                oscillator.stop(context.currentTime + 0.2);
-            } catch (e) { console.log("Audio blocked"); }
+    function playNotification() {
+        try {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, context.currentTime);
+            gainNode.gain.setValueAtTime(0.1, context.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+            oscillator.start();
+            oscillator.stop(context.currentTime + 0.2);
+        } catch (e) { console.log("Audio blocked"); }
+    }
+
+    function handleRefresh(btn) {
+        btn.classList.add('active');
+        fetchData();
+        setTimeout(() => { btn.classList.remove('active'); }, 800);
+    }
+
+    async function fetchData() {
+        const { data: trucks, error } = await _supabase
+            .from('zf_trucks')
+            .select('*')
+            .not('status', 'in', ['IZAŠAO', 'ZA IZLAZ']); // NOVO: array sintaksa
+
+        if (error) {
+            console.error("Greška pri čitanju:", error);
+            return;
         }
+        render(trucks || []);
+    }
 
-        function handleRefresh(btn) {
-            btn.classList.add('active');
-            fetchData();
-            setTimeout(() => { btn.classList.remove('active'); }, 800);
-        }
+    function render(trucks) {
+        const rContainer = document.getElementById('rampsContainer');
+        const wContainer = document.getElementById('waitingContainer');
 
-        async function fetchData() {
-            const { data: trucks, error } = await _supabase
-                .from('zf_trucks')
-                .select('*')
-                .not('status', 'in', '("IZAŠAO", "ZA IZLAZ")');
+        rContainer.innerHTML = '';
+        wContainer.innerHTML = '';
 
-            if (error) return;
-            render(trucks);
-        }
+        const waitingTrucks = trucks.filter(t => t.status === 'NA ČEKANJU');
 
-        function render(trucks) {
-            const rContainer = document.getElementById('rampsContainer');
-            const wContainer = document.getElementById('waitingContainer');
-            
-            rContainer.innerHTML = ''; 
-            wContainer.innerHTML = '';
-            
-            const waitingTrucks = trucks.filter(t => t.status === 'NA ČEKANJU');
-            
-            // Render Rampi
-            rampList.forEach(name => {
-                const truck = trucks.find(t => t.status === 'NA RAMPI' && t.ramp === name);
-                const card = document.createElement('div');
-                card.className = `ramp-card ${truck ? 'occupied' : ''}`;
-                
-                if (truck) {
-                    card.innerHTML = `
-                        <div class="ramp-top"><span>${name}</span><span style="color:var(--success-green)">ZAUZETO</span></div>
-                        <div class="info-container">
-                            <span class="company-name">${truck.company}</span>
-                            <span class="plate-number">${truck.plate}</span>
-                            <div class="info-list">
-                                <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${truck.vehicle || '/'}</span></div>
-                                <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${truck.goods || '/'}</span></div>
-                                <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${truck.phone || '/'}</span></div>
-                                <div class="info-item" style="margin-top:3px;">
-                                    <span class="info-value" style="font-size:12px; color:var(--text-muted);">
-                                        <b>Na rampi od:</b> ${truck.ramp_start_date || ''} ${truck.ramp_start_time || ''}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="btn-unload" onclick="openPalletModal(${truck.id}, '${truck.plate}', '${truck.company}')"><i class="fas fa-check"></i> ISTOVAR ZAVRŠEN</button>`;
-                } else {
-                    card.innerHTML = `<div class="ramp-top">${name} <span style="color:var(--text-muted); font-weight:500">SLOBODNO</span></div>
-                                      <div style="margin:auto; color:#cbd5e1; text-align:center; font-size: 13px; font-weight:500;">Dostupno za dodelu</div>`;
-                }
-                rContainer.appendChild(card);
-            });
+        // Rampi
+        rampList.forEach(name => {
+            const truck = trucks.find(t => t.status === 'NA RAMPI' && t.ramp === name);
+            const card = document.createElement('div');
+            card.className = `ramp-card ${truck ? 'occupied' : ''}`;
 
-            // Render Čekanja
-            waitingTrucks.forEach(t => {
-                const card = document.createElement('div');
-                card.className = 'waiting-card';
+            if (truck) {
                 card.innerHTML = `
-                    <div class="info-container" style="margin:0;">
-                        <span class="company-name">${t.company}</span>
-                        <span class="plate-number">${t.plate}</span>
+                    <div class="ramp-top"><span>${name}</span><span style="color:var(--success-green)">ZAUZETO</span></div>
+                    <div class="info-container">
+                        <span class="company-name">${truck.company || ''}</span>
+                        <span class="plate-number">${truck.plate || ''}</span>
                         <div class="info-list">
-                            <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${t.vehicle || '/'}</span></div>
-                            <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${t.goods || '/'}</span></div>
-                            <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${t.phone || '/'}</span></div>
+                            <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${truck.vehicle || '/'}</span></div>
+                            <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${truck.goods || '/'}</span></div>
+                            <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${truck.phone || '/'}</span></div>
                             <div class="info-item" style="margin-top:3px;">
                                 <span class="info-value" style="font-size:12px; color:var(--text-muted);">
-                                    <b>Najavljen:</b> ${t.date || ''} ${t.time || ''}
+                                    <b>Na rampi od:</b> ${truck.ramp_start_date || ''} ${truck.ramp_start_time || ''}
                                 </span>
                             </div>
                         </div>
                     </div>
-                    <button class="btn-assign" onclick="openRampModal(${t.id})">DODELI RAMPU</button>`;
-                wContainer.appendChild(card);
-            });
+                    <button class="btn-unload" onclick="openPalletModal(${truck.id}, '${(truck.plate||'').replace(/'/g, "\\'")}', '${(truck.company||'').replace(/'/g, "\\'")}')"><i class="fas fa-check"></i> ISTOVAR ZAVRŠEN</button>`;
+            } else {
+                card.innerHTML = `
+                    <div class="ramp-top">${name} <span style="color:var(--text-muted); font-weight:500">SLOBODNO</span></div>
+                    <div style="margin:auto; color:#cbd5e1; text-align:center; font-size:13px; font-weight:500;">Dostupno za dodelu</div>`;
+            }
+            rContainer.appendChild(card);
+        });
 
-            if (lastWaitingCount !== -1 && waitingTrucks.length > lastWaitingCount) playNotification();
-            lastWaitingCount = waitingTrucks.length;
-            document.getElementById('waitingCount').textContent = waitingTrucks.length;
-        }
+        // Čekanje
+        waitingTrucks.forEach(t => {
+            const card = document.createElement('div');
+            card.className = 'waiting-card';
+            card.innerHTML = `
+                <div class="info-container" style="margin:0;">
+                    <span class="company-name">${t.company || ''}</span>
+                    <span class="plate-number">${t.plate || ''}</span>
+                    <div class="info-list">
+                        <div class="info-item"><i class="fas fa-truck"></i> <span class="info-value">${t.vehicle || '/'}</span></div>
+                        <div class="info-item"><i class="fas fa-boxes"></i> <span class="info-value">${t.goods || '/'}</span></div>
+                        <div class="info-item"><i class="fas fa-phone"></i> <span class="info-value">${t.phone || '/'}</span></div>
+                        <div class="info-item" style="margin-top:3px;">
+                            <span class="info-value" style="font-size:12px; color:var(--text-muted);">
+                                <b>Najavljen:</b> ${t.date || ''} ${t.time || ''}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-assign" onclick="openRampModal(${t.id})">DODELI RAMPU</button>`;
+            wContainer.appendChild(card);
+        });
 
-        async function openRampModal(id) {
-            selectedTruckId = id;
-            const { data: busy } = await _supabase.from('zf_trucks').select('ramp').eq('status', 'NA RAMPI');
-            const busyRamps = busy ? busy.map(b => b.ramp) : [];
+        if (lastWaitingCount !== -1 && waitingTrucks.length > lastWaitingCount) playNotification();
+        lastWaitingCount = waitingTrucks.length;
+        document.getElementById('waitingCount').textContent = waitingTrucks.length;
+    }
 
-            const grid = document.getElementById('modalRampGrid');
-            grid.innerHTML = ''; 
-            rampList.forEach(r => {
-                const btn = document.createElement('button');
-                btn.className = 'ramp-btn';
-                btn.innerText = r;
-                btn.disabled = busyRamps.includes(r);
-                if (btn.disabled) { btn.style.background = "#e2e8f0"; btn.style.color = "#94a3b8"; }
-                btn.onclick = () => assignRamp(r);
-                grid.appendChild(btn);
-            });
-            document.getElementById('rampModal').style.display = 'flex';
-        }
+    async function openRampModal(id) {
+        selectedTruckId = id;
+        const { data: busy } = await _supabase.from('zf_trucks').select('ramp').eq('status', 'NA RAMPI');
+        const busyRamps = (busy || []).map(b => b.ramp);
 
-        async function assignRamp(rampName) {
-            // GENERISANJE TRENUTNOG DATUMA I VREMENA
-            const sada = new Date();
-            const datum = sada.toLocaleDateString('sr-RS') + '.';
-            const vreme = sada.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' });
+        const grid = document.getElementById('modalRampGrid');
+        grid.innerHTML = '';
+        rampList.forEach(r => {
+            const btn = document.createElement('button');
+            btn.className = 'ramp-btn';
+            btn.innerText = r;
+            btn.disabled = busyRamps.includes(r);
+            if (btn.disabled) { btn.style.background = "#e2e8f0"; btn.style.color = "#94a3b8"; }
+            btn.onclick = () => assignRamp(r);
+            grid.appendChild(btn);
+        });
+        document.getElementById('rampModal').style.display = 'flex';
+    }
 
-            const { error } = await _supabase.from('zf_trucks').update({
+    async function assignRamp(rampName) {
+        // trenutni datum/vreme u formatu kao u tvojoj šemi
+        const sada = new Date();
+        const datum = sada.toLocaleDateString('sr-RS') + '.';
+        const vreme = sada.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' });
+
+        const { error } = await _supabase
+            .from('zf_trucks')
+            .update({
                 status: 'NA RAMPI',
                 ramp: rampName,
                 ramp_start_date: datum,
                 ramp_start_time: vreme
-            }).eq('id', selectedTruckId);
+            })
+            .eq('id', selectedTruckId);
 
-            if (error) {
-                console.error("Greška pri upisu:", error);
+        if (error) {
+            // NOVO: detekcija konflikta (npr. jedinstveni indeks za rampu)
+            if (String(error.code) === '23505') {
+                alert('Rampe je upravo zauzeta. Osveži listu i pokušaj ponovo.');
             } else {
-                closeModals(); 
-                fetchData();
+                console.error("Greška pri dodeli rampe:", error);
+                alert('Došlo je do greške pri dodeli rampe.');
             }
+        } else {
+            closeModals();
+            fetchData();
         }
+    }
 
-        function openPalletModal(id, plate, company) {
-            selectedTruckId = id;
-            document.getElementById('palletTruckInfo').textContent = `${plate} | ${company}`;
-            document.getElementById('palletInput').value = '';
-            document.getElementById('finalizeBtn').disabled = true;
-            document.getElementById('palletModal').style.display = 'flex';
-        }
+    function openPalletModal(id, plate, company) {
+        selectedTruckId = id;
+        document.getElementById('palletTruckInfo').textContent = `${plate} | ${company}`;
+        document.getElementById('palletInput').value = '';
+        document.getElementById('finalizeBtn').disabled = true;
+        document.getElementById('palletModal').style.display = 'flex';
+    }
 
-        function validatePallets() {
-            const val = parseInt(document.getElementById('palletInput').value);
-            document.getElementById('finalizeBtn').disabled = (isNaN(val) || val <= 0);
-        }
+    function validatePallets() {
+        const val = parseInt(document.getElementById('palletInput').value);
+        document.getElementById('finalizeBtn').disabled = (isNaN(val) || val <= 0);
+    }
 
-        async function finalizeUnload() {
-            const p = document.getElementById('palletInput').value;
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('sr-RS', {hour: '2-digit', minute:'2-digit'});
+    async function finalizeUnload() {
+        const p = parseInt(document.getElementById('palletInput').value) || null;
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('sr-RS', {hour: '2-digit', minute:'2-digit'});
 
-            await _supabase.from('zf_trucks').update({
+        const { error } = await _supabase
+            .from('zf_trucks')
+            .update({
                 status: 'ISTOVAREN',
                 pallets: p,
                 unloaded_time: timeStr
-            }).eq('id', selectedTruckId);
+            })
+            .eq('id', selectedTruckId);
 
-            closeModals(); fetchData();
+        if (error) {
+            console.error("Greška pri završetku istovara:", error);
+            alert('Došlo je do greške pri završetku istovara.');
+            return;
         }
 
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
-
+        closeModals();
         fetchData();
-        setInterval(fetchData, 4000); 
-    </script>
+    }
+
+    function closeModals() {
+        document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+    }
+
+    // === START: Inicijalno čitanje ===
+    fetchData();
+
+    // === NOVO: Realtime pretplata – odmah osvežava bez pollinga ===
+    const channel = _supabase
+        .channel('zf_trucks_changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'zf_trucks' }, (_payload) => {
+            // Opcija: fino granularno reagovanje po eventu
+            fetchData();
+        })
+        .subscribe((status) => {
+            // console.log('Realtime status:', status);
+        });
+
+    // Fallback (može da se ukloni kad si zadovoljan Realtime-om)
+    setInterval(fetchData, 4000);
+</script>
 </body>
 </html>
