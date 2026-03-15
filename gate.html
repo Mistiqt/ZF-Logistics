@@ -211,7 +211,7 @@
             background-color: var(--zf-dark);
             color: white;
             width: 100%; 
-            border: none;                     
+            border: none;                       
             padding: 18px; 
             border-radius: 6px; 
             font-size: 16px; 
@@ -423,18 +423,19 @@
 
             trucks.forEach(t => {
                 let statusTag = `<span class="tag status-announced">Na čekanju</span>`;
-                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Rampa: ${t.ramp}</span>`;
+                // PAŽNJA: Proveri da li su ovi statusi identični onima u bazi (Case sensitive)
+                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Rampa: ${t.ramp || '?'}</span>`;
                 else if (t.status === 'ISTOVAREN') statusTag = `<span class="tag status-exit">Spreman za izlaz</span>`;
                 else if (t.status === 'IZAŠAO') statusTag = `<span class="tag status-exited-final">Izašao</span>`;
 
-                const canEdit = t.status === 'NA ČEKANJU';
+                const canEdit = t.status === 'NA ČEKANJU' || !t.status;
 
                 const item = document.createElement('div');
                 item.className = 'truck-item';
                 item.innerHTML = `
                     <div>
-                        <span class="plate-box">${t.plate}</span> ${statusTag}
-                        <span class="company-name-text">${t.company}</span>
+                        <span class="plate-box">${t.plate_number}</span> ${statusTag}
+                        <span class="company-name-text">${t.company_name}</span>
                         <small style="color:#64748b; display: block; margin-top: 6px;">
                             ${t.vehicle_type} • ${t.goods_type}<br>
                             <i class="fas fa-phone-alt"></i> ${t.driver_phone || 'Nema telefona'}
@@ -461,9 +462,10 @@
             e.preventDefault();
             const editId = document.getElementById('editId').value;
             
+            // MAPIRANJE: Nazivi polja ovde MORAJU biti isti kao u Supabase tabeli
             const truckData = {
-                company: document.getElementById('companyName').value,
-                plate: document.getElementById('plateNumber').value.toUpperCase(),
+                company_name: document.getElementById('companyName').value,
+                plate_number: document.getElementById('plateNumber').value.toUpperCase(),
                 vehicle_type: document.getElementById('vehicleType').value,
                 goods_type: document.getElementById('goodsType').value,
                 driver_phone: document.getElementById('driverPhone').value
@@ -471,11 +473,17 @@
 
             if (editId) {
                 const { error } = await supabaseClient.from('trucks').update(truckData).eq('id', editId);
-                if (error) alert("Greška pri ažuriranju!");
+                if (error) {
+                    console.error(error);
+                    alert("Greška pri ažuriranju!");
+                }
             } else {
                 truckData.status = 'NA ČEKANJU';
                 const { error } = await supabaseClient.from('trucks').insert([truckData]);
-                if (error) alert("Greška pri unosu!");
+                if (error) {
+                    console.error(error);
+                    alert("Greška pri upisu u bazu! Proverite konzolu.");
+                }
             }
 
             resetForm();
@@ -487,8 +495,8 @@
             const { data, error } = await supabaseClient.from('trucks').select('*').eq('id', id).single();
             if (data) {
                 document.getElementById('editId').value = data.id;
-                document.getElementById('companyName').value = data.company;
-                document.getElementById('plateNumber').value = data.plate;
+                document.getElementById('companyName').value = data.company_name;
+                document.getElementById('plateNumber').value = data.plate_number;
                 document.getElementById('vehicleType').value = data.vehicle_type;
                 document.getElementById('goodsType').value = data.goods_type;
                 document.getElementById('driverPhone').value = data.driver_phone;
