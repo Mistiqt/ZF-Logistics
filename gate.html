@@ -398,7 +398,7 @@
     </footer>
 
     <script>
-        // Postavke klijenta prema slikama koje si poslao
+        // SUPABASE KONFIGURACIJA
         const SB_URL = "https://ljbqiavcibdlgmkkytkv.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnFpYXZjaWJkbGdta2t5dGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MjI1MjksImV4cCI6MjA4OTA5ODUyOX0.YduSzl6hw4blu__CHbt4g7mrkjjaUUwbEY-HuFTEGIE";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
@@ -434,14 +434,13 @@
             el.addEventListener('change', checkFormValidity);
         });
 
-        // Korišćenje naziva tabele 'trucks' iz baze
         async function renderGateList() {
             const { data: trucks, error } = await _supabase
                 .from('trucks')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            if (error) { console.error("Greška pri čitanju:", error); return; }
+            if (error) return;
 
             const gateList = document.getElementById('gateTruckList');
             if(!gateList) return;
@@ -449,7 +448,6 @@
 
             trucks.forEach((t) => {
                 let statusTag = `<span class="tag status-announced">Na čekanju</span>`;
-                // Korišćenje kolone 'status' i 'gate' iz baze
                 if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Rampa: ${t.gate || ''}</span>`;
                 else if (t.status === 'ISTOVAREN') statusTag = `<span class="tag status-exit">Spreman za izlaz</span>`;
                 else if (t.status === 'IZAŠAO') statusTag = `<span class="tag status-exited-final">Izašao</span>`;
@@ -467,21 +465,43 @@
                         <span class="plate-box">${t.plate}</span> ${statusTag}
                         <span class="company-name-text">${t.company}</span>
                         <small style="color:#64748b; display: block; margin-top: 6px;">
+                            ${t.vehicle || ''} • ${t.goods || ''}<br>
                             <i class="fas fa-phone-alt"></i> ${t.phone || 'Nije unet'}
                         </small>
                     </div>
                     <div class="item-right-content">
                         <div class="timestamp-box">${displayDate}<br>${displayTime}</div>
-                        ${showActions ? `<div class="action-btns"><button class="btn-action-small btn-delete" onclick="deleteTruck('${t.id}')"><i class="fas fa-trash"></i></button></div>` : ''}
+                        ${showActions ? `
+                        <div class="action-btns">
+                            <button class="btn-action-small btn-edit" onclick="editTruck('${t.id}')"><i class="fas fa-pen"></i></button>
+                            <button class="btn-action-small btn-delete" onclick="deleteTruck('${t.id}')"><i class="fas fa-trash"></i></button>
+                        </div>` : ''}
                     </div>`;
                 gateList.appendChild(item);
             });
         }
 
+        async function editTruck(id) {
+            const { data: truck, error } = await _supabase.from('trucks').select('*').eq('id', id).single();
+            if(truck) {
+                document.getElementById('editId').value = truck.id;
+                document.getElementById('companyName').value = truck.company;
+                document.getElementById('plateNumber').value = truck.plate;
+                document.getElementById('vehicleType').value = truck.vehicle || '';
+                document.getElementById('goodsType').value = truck.goods || '';
+                document.getElementById('driverPhone').value = truck.phone || '';
+                document.getElementById('formTitle').innerHTML = '<i class="fas fa-pen"></i> IZMENI NAJAVU';
+                document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> SAČUVAJ IZMENE';
+                document.getElementById('cancelBtn').style.display = 'block';
+                checkFormValidity();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
         async function deleteTruck(id) { 
             if(confirm("Obrisati najavu?")) { 
-                const { error } = await _supabase.from('trucks').delete().eq('id', id);
-                if(!error) renderGateList();
+                await _supabase.from('trucks').delete().eq('id', id);
+                renderGateList();
             } 
         }
 
@@ -494,25 +514,25 @@
             checkFormValidity(); 
         }
 
-        // Korišćenje ispravnih naziva kolona 'plate' i 'company'
         form.onsubmit = async (e) => {
             e.preventDefault();
+            const editId = document.getElementById('editId').value;
             const truckData = { 
                 company: document.getElementById('companyName').value, 
-                plate: document.getElementById('plateNumber').value.toUpperCase(), 
+                plate: document.getElementById('plateNumber').value.toUpperCase(),
+                vehicle: document.getElementById('vehicleType').value,
+                goods: document.getElementById('goodsType').value,
+                phone: document.getElementById('driverPhone').value,
                 status: 'NA ČEKANJU'
             };
 
-            const { error } = await _supabase.from('trucks').insert([truckData]);
-
-            if(!error) {
-                playNotification();
-                resetForm(); 
-                renderGateList();
+            if(editId) {
+                await _supabase.from('trucks').update(truckData).eq('id', editId);
             } else {
-                alert("Greška pri čuvanju u bazu!");
-                console.error(error);
+                await _supabase.from('trucks').insert([truckData]);
+                playNotification();
             }
+            resetForm(); renderGateList();
         };
 
         function manualRefresh(btn) { 
