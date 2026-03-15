@@ -348,7 +348,7 @@
                 </div>
                 <div class="input-group">
                     <label><i class="fas fa-id-card"></i> REGISTARSKA OZNAKA</label>
-                    <input type="text" id="plateNumber" placeholder="AA-1234-BB" required>
+                    <input type="text" id="plateNumber" placeholder="AA-1234-BB" required style="text-transform: uppercase;">
                 </div>
                 <div class="input-group">
                     <label><i class="fas fa-truck"></i> TIP VOZILA</label>
@@ -424,7 +424,10 @@
         const requiredInputs = ['companyName', 'plateNumber', 'vehicleType', 'goodsType'];
 
         function checkFormValidity() {
-            const allFilled = requiredInputs.every(id => document.getElementById(id).value.trim() !== "");
+            const allFilled = requiredInputs.every(id => {
+                const val = document.getElementById(id).value;
+                return val && val.trim() !== "";
+            });
             submitBtn.disabled = !allFilled;
         }
 
@@ -464,7 +467,7 @@
                 const displayTime = dateObj.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' });
 
                 item.innerHTML = `
-                    <div>
+                    <div style="flex:1">
                         <span class="plate-box">${t.plate}</span> ${statusTag}
                         <span class="company-name-text">${t.company}</span>
                         <small style="color:#64748b; display: block; margin-top: 6px;">
@@ -521,26 +524,26 @@
             e.preventDefault();
             const editId = document.getElementById('editId').value;
             
-            // Proveri da li su ovi nazivi ključeva IDENTIČNI onima u SQL editoru
             const truckData = { 
-                company: document.getElementById('companyName').value, 
-                plate: document.getElementById('plateNumber').value.toUpperCase(),
+                company: document.getElementById('companyName').value.trim(), 
+                plate: document.getElementById('plateNumber').value.toUpperCase().trim(),
                 vehicle: document.getElementById('vehicleType').value,
                 goods: document.getElementById('goodsType').value,
-                phone: document.getElementById('driverPhone').value,
+                phone: document.getElementById('driverPhone').value.trim(),
                 status: 'NA ČEKANJU'
             };
 
-            let response;
+            let error;
             if(editId) {
-                response = await _supabase.from('trucks').update(truckData).eq('id', editId);
+                const res = await _supabase.from('trucks').update(truckData).eq('id', editId);
+                error = res.error;
             } else {
-                response = await _supabase.from('trucks').insert([truckData]);
+                const res = await _supabase.from('trucks').insert([truckData]);
+                error = res.error;
             }
 
-            if (response.error) {
-                console.error("Supabase greška:", response.error);
-                alert("Greška pri čuvanju podataka: " + response.error.message);
+            if (error) {
+                alert("Greška pri čuvanju podataka: " + error.message);
             } else {
                 if(!editId) playNotification();
                 resetForm(); 
@@ -556,6 +559,7 @@
 
         function handleLogout() { if(confirm("Odjava?")) window.location.href = 'index.html'; }
         
+        // Inicijalizacija
         renderGateList(); 
         checkFormValidity(); 
         setInterval(renderGateList, 5000); 
