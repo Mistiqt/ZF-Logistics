@@ -194,13 +194,15 @@
         function createCard(truck, isReady) {
             const timeLabel = isReady ? 'Istovaren' : 'Ulaz';
             
-            // Logika: Ako je istovaren traži ramp_end_time, ako je na rampi traži ramp_start_time. 
-            // Ako su oba NULL, koristi osnovni 'time'.
             let displayTime = "-";
+            
+            // FOKUSIRANA LOGIKA PREMA TVOJOJ TABELI:
             if (isReady) {
-                displayTime = truck.ramp_end_time || truck.time || "-";
-            } else {
+                // Ako je završen, tražimo ramp_start_time (gde aplikacija upisuje kraj) ili bar osnovni time
                 displayTime = truck.ramp_start_time || truck.time || "-";
+            } else {
+                // Ako je još na rampi/prijavi, pokazujemo osnovno vreme ulaza
+                displayTime = truck.time || "-";
             }
 
             return `
