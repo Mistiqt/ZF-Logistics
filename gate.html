@@ -300,20 +300,6 @@
             color: var(--zf-blue);
             font-weight: 700;
         }
-
-        @media (max-width: 1000px) {
-            .main-layout { grid-template-columns: 1fr; }
-            .card { height: auto; max-height: 655px; }
-        }
-
-        @media (max-width: 600px) {
-            .header-content { padding: 10px 15px; }
-            .header-title-wrapper h1 { font-size: 18px; }
-            .user-info { font-size: 12px; }
-            .btn-logout { padding: 6px 12px; font-size: 12px; }
-            .truck-item { flex-direction: column; gap: 15px; }
-            .item-right-content { text-align: left; align-items: flex-start; width: 100%; border-top: 1px dashed #e2e8f0; padding-top: 10px; }
-        }
     </style>
 </head>
 <body>
@@ -383,7 +369,7 @@
         <section class="card">
             <div class="card-header">
                 <h2><i class="far fa-clock"></i> NAJAVLJENI KAMIONI</h2>
-                <button class="refresh-btn" onclick="manualRefresh(this)" title="Osveži listu">
+                <button class="refresh-btn" onclick="fetchTrucks()" title="Osveži listu">
                     <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
@@ -392,170 +378,129 @@
     </main>
 
     <footer>
-        Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.2 (Cloud Connected)
+        Aplikaciju razvio <strong>Dušan Kostić</strong> &copy; 2026. Ver 1.2 (Supabase Live)
     </footer>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // KREDENCIJALI (Povučeni iz login.html podešavanja)
+        const SUPABASE_URL = 'TVOJ_SUPABASE_URL';
+        const SUPABASE_KEY = 'TVOJ_SUPABASE_KEY';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const firebaseConfig = {
-            databaseURL: "https://zf-logistika-default-rtdb.europe-west1.firebasedatabase.app/"
-        };
+        const form = document.getElementById('announceForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const requiredFields = ['companyName', 'plateNumber', 'vehicleType', 'goodsType'];
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const trucksRef = ref(db, 'trucks');
-
-        // Globalne funkcije za HTML dugmiće (moraju biti na window objektu jer je ovo modul)
-        window.editTruck = editTruck;
-        window.deleteTruck = deleteTruck;
-        window.manualRefresh = manualRefresh;
-        window.handleLogout = handleLogout;
-        window.resetForm = resetForm;
-
-        let localTrucks = []; // Lokalna kopija podataka
-
-        function playNotification() {
-            try {
-                const context = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = context.createOscillator();
-                const gainNode = context.createGain();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(880, context.currentTime); 
-                gainNode.gain.setValueAtTime(0.1, context.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
-                oscillator.connect(gainNode);
-                gainNode.connect(context.destination);
-                oscillator.start();
-                oscillator.stop(context.currentTime + 0.2);
-            } catch (e) { console.log("Audio blocked"); }
+        // --- VALIDACIJA FORME ---
+        function checkFormValidity() {
+            const allFilled = requiredFields.every(id => document.getElementById(id).value.trim() !== "");
+            submitBtn.disabled = !allFilled;
         }
-
-        function getNumericDate() {
-            const now = new Date();
-            return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}.`;
-        }
-
-        // --- REALTIME SLUŠALAC (Glavna stvar: Automatski osvežava listu čim neko promeni bazu) ---
-        onValue(trucksRef, (snapshot) => {
-            const data = snapshot.val();
-            localTrucks = [];
-            if (data) {
-                // Konvertujemo Firebase objekat u niz sa kojim lakše radimo
-                for (let id in data) {
-                    localTrucks.push({ id, ...data[id] });
-                }
-            }
-            renderGateList();
+        requiredFields.forEach(id => {
+            document.getElementById(id).addEventListener('input', checkFormValidity);
         });
 
-        function renderGateList() {
-            const gateList = document.getElementById('gateTruckList');
-            if(!gateList) return;
-            gateList.innerHTML = '';
-            
-            // Sortiranje: Najnoviji na vrhu
-            const sorted = [...localTrucks].sort((a, b) => b.timestamp - a.timestamp);
+        // --- DOBAVLJANJE PODATAKA ---
+        async function fetchTrucks() {
+            const btn = document.querySelector('.refresh-btn');
+            btn.classList.add('active');
 
-            sorted.forEach((t) => {
+            const { data, error } = await supabase
+                .from('trucks')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (!error) renderList(data);
+            setTimeout(() => btn.classList.remove('active'), 800);
+        }
+
+        // --- RENDER LISTE ---
+        function renderList(trucks) {
+            const listContainer = document.getElementById('gateTruckList');
+            listContainer.innerHTML = '';
+
+            trucks.forEach(t => {
                 let statusTag = `<span class="tag status-announced">Na čekanju</span>`;
-                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Rampa: ${t.ramp || ''}</span>`;
+                if (t.status === 'NA RAMPI') statusTag = `<span class="tag status-ramp">Rampa: ${t.ramp}</span>`;
                 else if (t.status === 'ISTOVAREN') statusTag = `<span class="tag status-exit">Spreman za izlaz</span>`;
                 else if (t.status === 'IZAŠAO') statusTag = `<span class="tag status-exited-final">Izašao</span>`;
-                
+
+                const canEdit = t.status === 'NA ČEKANJU';
+
                 const item = document.createElement('div');
                 item.className = 'truck-item';
-                const canEdit = (t.status === 'NA ČEKANJU');
-
                 item.innerHTML = `
                     <div>
                         <span class="plate-box">${t.plate}</span> ${statusTag}
                         <span class="company-name-text">${t.company}</span>
                         <small style="color:#64748b; display: block; margin-top: 6px;">
-                            ${t.vehicle} • ${t.goods}<br>
-                            <i class="fas fa-phone-alt"></i> ${t.phone || 'Nije unet'}
+                            ${t.vehicle_type} • ${t.goods_type}<br>
+                            <i class="fas fa-phone-alt"></i> ${t.driver_phone || 'Nema telefona'}
                         </small>
                     </div>
                     <div class="item-right-content">
-                        <div class="timestamp-box">${t.date}<br>${t.time}</div>
+                        <div class="timestamp-box">${new Date(t.created_at).toLocaleDateString('sr-RS')}<br>${new Date(t.created_at).toLocaleTimeString('sr-RS', {hour:'2-digit', minute:'2-digit'})}</div>
                         ${canEdit ? `
                         <div class="action-btns">
                             <button class="btn-action-small btn-edit" onclick="editTruck('${t.id}')"><i class="fas fa-pen"></i></button>
                             <button class="btn-action-small btn-delete" onclick="deleteTruck('${t.id}')"><i class="fas fa-trash"></i></button>
                         </div>` : ''}
-                    </div>`;
-                gateList.appendChild(item);
+                    </div>
+                `;
+                listContainer.appendChild(item);
             });
         }
 
-        const form = document.getElementById('announceForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const fields = ['companyName', 'plateNumber', 'vehicleType', 'goodsType'];
-
-        function checkFormValidity() {
-            const allFilled = fields.every(id => document.getElementById(id).value.trim() !== "");
-            submitBtn.disabled = !allFilled;
-        }
-
-        fields.forEach(id => {
-            const el = document.getElementById(id);
-            el.addEventListener('input', checkFormValidity);
-            el.addEventListener('change', checkFormValidity);
-        });
-
+        // --- SLANJE / IZMENA ---
         form.onsubmit = async (e) => {
             e.preventDefault();
             const editId = document.getElementById('editId').value;
-            const now = new Date();
             
-            const truckData = {
+            const payload = {
                 company: document.getElementById('companyName').value,
                 plate: document.getElementById('plateNumber').value.toUpperCase(),
-                vehicle: document.getElementById('vehicleType').value,
-                goods: document.getElementById('goodsType').value,
-                phone: document.getElementById('driverPhone').value,
-                date: getNumericDate(),
-                time: now.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' }),
-                timestamp: Date.now()
+                vehicle_type: document.getElementById('vehicleType').value,
+                goods_type: document.getElementById('goodsType').value,
+                driver_phone: document.getElementById('driverPhone').value
             };
 
-            try {
-                if(editId) {
-                    await update(ref(db, `trucks/${editId}`), truckData);
-                } else {
-                    truckData.status = 'NA ČEKANJU';
-                    await push(trucksRef, truckData);
-                    playNotification();
-                }
-                resetForm();
-            } catch (err) {
-                alert("Greška pri slanju podataka!");
+            if (editId) {
+                await supabase.from('trucks').update(payload).eq('id', editId);
+            } else {
+                payload.status = 'NA ČEKANJU';
+                await supabase.from('trucks').insert([payload]);
             }
+
+            resetForm();
+            fetchTrucks();
         };
 
-        function editTruck(id) {
-            const truck = localTrucks.find(t => t.id === id);
-            if(truck) {
-                document.getElementById('editId').value = id;
-                document.getElementById('companyName').value = truck.company;
-                document.getElementById('plateNumber').value = truck.plate;
-                document.getElementById('vehicleType').value = truck.vehicle;
-                document.getElementById('goodsType').value = truck.goods;
-                document.getElementById('driverPhone').value = truck.phone;
+        // --- POMOĆNE FUNKCIJE ---
+        window.editTruck = async (id) => {
+            const { data } = await supabase.from('trucks').select('*').eq('id', id).single();
+            if (data) {
+                document.getElementById('editId').value = data.id;
+                document.getElementById('companyName').value = data.company;
+                document.getElementById('plateNumber').value = data.plate;
+                document.getElementById('vehicleType').value = data.vehicle_type;
+                document.getElementById('goodsType').value = data.goods_type;
+                document.getElementById('driverPhone').value = data.driver_phone;
+                
                 document.getElementById('formTitle').innerHTML = '<i class="fas fa-pen"></i> IZMENI NAJAVU';
                 document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> SAČUVAJ IZMENE';
                 document.getElementById('cancelBtn').style.display = 'block';
                 checkFormValidity();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
-        }
+        };
 
-        async function deleteTruck(id) {
-            if(confirm("Obrisati najavu?")) {
-                await remove(ref(db, `trucks/${id}`));
+        window.deleteTruck = async (id) => {
+            if (confirm("Obriši najavu?")) {
+                await supabase.from('trucks').delete().eq('id', id);
+                fetchTrucks();
             }
-        }
+        };
 
         function resetForm() {
             form.reset();
@@ -566,14 +511,18 @@
             checkFormValidity();
         }
 
-        function manualRefresh(btn) {
-            btn.classList.add('active');
-            setTimeout(() => btn.classList.remove('active'), 800);
+        function handleLogout() {
+            if (confirm("Odjava?")) window.location.href = 'login.html';
         }
 
-        function handleLogout() {
-            if(confirm("Odjava?")) window.location.href = 'login.html';
-        }
+        // Real-time osluškivanje promena (da se lista sama ažurira kad magacin promeni status)
+        supabase
+            .channel('schema-db-changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'trucks' }, () => fetchTrucks())
+            .subscribe();
+
+        // Inicijalno učitavanje
+        fetchTrucks();
     </script>
 </body>
 </html>
